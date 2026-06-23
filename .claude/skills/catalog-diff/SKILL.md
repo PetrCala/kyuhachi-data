@@ -37,6 +37,25 @@ output is a changelog the operator acts on deliberately.
    for removals (onsen docs are never deleted). The reseed/backfill is a
    separate, explicit step in the publish pipeline.
 
+## Normalization (low-noise diffs)
+
+Before comparing, both sides are NFKC-folded (full-width → half-width),
+whitespace/`<br>` collapsed, and the source's site-wide **"as-of" date footer**
+(`（2025.3現在）` → `【2026年 4月現在】`) is stripped — that stamp alone flips on
+~100% of pages with no real change. Fields split into:
+
+- **material** — `prefecture, address, phone, business_hours, admission_fee,
+  spring_quality, website_url`: drive the headline, shown with old → new.
+- **muted** — `image_url, covid_measures, efficacy, recommendation,
+  senjin_benefits, access_info`: tracked but low-signal (stale notes, rotating
+  filenames); shown collapsed.
+
+The report separates **material movers**, **low-signal only**, and
+**suppressedDateStampOnly** (changes that were nothing but a refreshed stamp).
+An onsen with ≥4 changed material fields is likely a replaced/relocated facility
+— **adjudicate identity** (update in place vs. retire + mint a new kyuhachiId)
+rather than blind-overwriting, since the upstream `hid` can be reused.
+
 ## Arguments
 
 | Flag | Effect |

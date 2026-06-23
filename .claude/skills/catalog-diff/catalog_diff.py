@@ -41,6 +41,13 @@ MATERIAL = {
     "admission_fee", "spring_quality", "website_url",
 }
 URL_FIELDS = {"website_url", "image_url"}
+# Low-signal fields: real but rarely actionable (stale covid notes, rotating
+# image filenames, committee blurbs). Tracked, but never drive "material"
+# severity; shown collapsed in the report.
+MUTED = {
+    "image_url", "covid_measures", "efficacy",
+    "recommendation", "senjin_benefits", "access_info",
+}
 
 DATA = REPO_ROOT / "data"
 SNAPSHOT_DB = DATA / "snapshot.db"
@@ -48,14 +55,21 @@ ID_MAP = DATA / "onsen-id-map.json"
 
 _WS = re.compile(r"[ \t]+")
 _BLANK = re.compile(r"\n\s*\n+")
+# Site-wide "as-of" date footers the source refreshes en masse — e.g.
+# （2025.3現在） → 【2026年 4月現在】, (…時点), 【…以降】. These flip on ~every
+# page without any substantive change, so strip them before comparing.
+_ASOF = re.compile(r"[（(【\[][^（()）【】\[\]]*(?:現在|時点|以降)[^（()）【】\[\]]*[)）】\]]")
 
 
-def norm(field: str, value) -> str:
-    """Normalize so cosmetic diffs (full-width chars, <br>, spacing) don't fire."""
+def norm(field: str, value, *, strip_dates: bool = True) -> str:
+    """Normalize so cosmetic diffs (full-width chars, <br>, spacing, as-of date
+    stamps) don't fire. strip_dates=False yields the raw (pre-destamp) form."""
     if value is None:
         return ""
     v = unicodedata.normalize("NFKC", str(value))  # 全角 → 半角 (１０：００ → 10:00)
     v = v.replace("\r\n", "\n").replace("<br>", "\n").replace("<br/>", "\n")
+    if strip_dates:
+        v = _ASOF.sub("", v)
     v = _BLANK.sub("\n", _WS.sub(" ", v)).strip()
     return v.rstrip("/").lower() if field in URL_FIELDS else v
 
@@ -95,6 +109,7 @@ def scrape_live(ids: list[int]) -> dict[int, dict | None]:
 
 def diff(baseline: dict, live: dict, idmap: dict) -> dict:
     modified, removed, fetch_failed = [], [], []
+    suppressed = 0  # onsens whose ONLY change was an as-of date-stamp refresh
     for hid, base in baseline.items():
         cur = live.get(hid)
         if cur is None:
@@ -107,21 +122,30 @@ def diff(baseline: dict, live: dict, idmap: dict) -> dict:
             if norm(f, base.get(f)) != norm(f, cur.get(f))
         }
         if changed:
+            material = sorted(MATERIAL & changed.keys())
             modified.append({
                 "hid": hid,
                 "kyuhachiId": idmap.get(str(hid)),
-                "severity": "material" if MATERIAL & changed.keys() else "volatile",
+                "severity": "material" if material else "volatile",
+                "materialFields": material,
+                "mutedFields": sorted(MUTED & changed.keys()),
                 "fields": changed,
             })
+        elif any(
+            norm(f, base.get(f), strip_dates=False) != norm(f, cur.get(f), strip_dates=False)
+            for f in FIELDS
+        ):
+            suppressed += 1
     # `added` is only meaningful once an index/listing crawl feeds in new ids.
     added = [{"hid": h} for h in live if h not in baseline]
-    return {"modified": modified, "removed": removed,
-            "fetchFailed": fetch_failed, "added": added}
+    return {"modified": modified, "removed": removed, "fetchFailed": fetch_failed,
+            "added": added, "suppressedDateStampOnly": suppressed}
 
 
 def write_report(changelog: dict, label: str, outdir: Path) -> dict:
     outdir.mkdir(parents=True, exist_ok=True)
-    counts = {k: len(v) for k, v in changelog.items()}
+    counts = {k: len(v) for k, v in changelog.items() if isinstance(v, list)}
+    counts["suppressedDateStampOnly"] = changelog.get("suppressedDateStampOnly", 0)
     (outdir / "changelog.json").write_text(json.dumps({
         "scrapedAt": datetime.now(timezone.utc).isoformat(),
         "baseline": label,
@@ -129,18 +153,31 @@ def write_report(changelog: dict, label: str, outdir: Path) -> dict:
         **changelog,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    material = [m for m in changelog["modified"] if m["severity"] == "material"]
+    volatile = [m for m in changelog["modified"] if m["severity"] == "volatile"]
+
     lines = [f"# Catalog diff vs {label}", "", "| change | n |", "|---|---|"]
     lines += [f"| {k} | {v} |" for k, v in counts.items()]
+    lines += [f"| material movers | {len(material)} |",
+              f"| low-signal only | {len(volatile)} |"]
 
-    material = [m for m in changelog["modified"] if m["severity"] == "material"]
     lines += ["", f"## Material changes ({len(material)})"]
     for m in material:
         lines.append(f"\n**hid {m['hid']}** ({m['kyuhachiId']})")
-        lines += [f"- `{f}`: {d['old']!r} → {d['new']!r}" for f, d in m["fields"].items()]
+        lines += [f"- `{f}`: {m['fields'][f]['old']!r} → {m['fields'][f]['new']!r}"
+                  for f in m["materialFields"]]
+        if m["mutedFields"]:
+            lines.append(f"- _(+{len(m['mutedFields'])} low-signal: {', '.join(m['mutedFields'])})_")
 
     if changelog["removed"]:
         lines += ["", "## Removed (live page 404s — mark isActive:false, do not delete)"]
         lines += [f"- hid {r['hid']} ({r['kyuhachiId']})" for r in changelog["removed"]]
+
+    if volatile:
+        lines += ["", f"## Low-signal only ({len(volatile)})",
+                  "Only muted fields changed (image / covid / efficacy / "
+                  "recommendation / benefits / access):",
+                  "- " + ", ".join(f"hid {m['hid']}" for m in volatile)]
 
     (outdir / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return counts
