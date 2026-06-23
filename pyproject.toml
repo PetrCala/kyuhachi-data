@@ -1,0 +1,19 @@
+[project]
+name = "kyuhachi-data"
+version = "0.1.0"
+description = "Private data pipeline for the Kyushu 88 onsen catalog: scrape 88onsen.com, maintain stable kyuhachiIds, and publish the catalog to Firestore."
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.32",
+    "beautifulsoup4>=4.13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["onsen_scraper"]
