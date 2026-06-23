@@ -55,11 +55,27 @@ def ival(n):
     return {"nullValue": None} if n is None else {"integerValue": str(n)}
 
 
+def _open(req, timeout=30, retries=3):
+    """urlopen with a timeout, retrying transient network errors / 429 / 5xx.
+    Without this a single hung connection stalls the 148-doc loop forever."""
+    for attempt in range(retries + 1):
+        try:
+            return urllib.request.urlopen(req, timeout=timeout)
+        except urllib.error.HTTPError as e:
+            if attempt < retries and e.code in (429, 500, 502, 503):
+                continue
+            raise
+        except (urllib.error.URLError, TimeoutError):
+            if attempt < retries:
+                continue
+            raise
+
+
 def get_fields(path: str, tok: str):
     """Return the doc's `fields` dict, or None on 404."""
     req = urllib.request.Request(f"{BASE}/{path}", headers={"Authorization": f"Bearer {tok}"})
     try:
-        with urllib.request.urlopen(req) as r:
+        with _open(req) as r:
             return json.load(r).get("fields", {})
     except urllib.error.HTTPError as e:
         if e.code == 404:
@@ -74,7 +90,7 @@ def patch(path: str, fields: dict, mask: list, tok: str) -> int:
         headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
     )
     try:
-        with urllib.request.urlopen(req) as r:
+        with _open(req) as r:
             return r.status
     except urllib.error.HTTPError as e:
         print(f"    HTTP {e.code}: {e.read().decode()[:300]}")

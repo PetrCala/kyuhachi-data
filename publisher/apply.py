@@ -32,7 +32,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
-from onsen_scraper import fetch_detail_page, parse_detail_page  # noqa: E402
+from onsen_scraper import fee_for, fetch_detail_page, parse_detail_page  # noqa: E402
 import catalog_diff as cd  # noqa: E402
 
 PROJECT = "kyuhachi-fddcc"
@@ -63,6 +63,26 @@ def sval(v):
     return {"stringValue": v} if v else {"nullValue": None}
 
 
+def ival(n):
+    return {"nullValue": None} if n is None else {"integerValue": str(n)}
+
+
+def _open(req, timeout=30, retries=3):
+    """urlopen with a timeout, retrying transient network errors / 429 / 5xx.
+    A single hung connection must not stall a 100+ doc publish loop forever."""
+    for attempt in range(retries + 1):
+        try:
+            return urllib.request.urlopen(req, timeout=timeout)
+        except urllib.error.HTTPError as e:
+            if attempt < retries and e.code in (429, 500, 502, 503):
+                continue
+            raise
+        except (urllib.error.URLError, TimeoutError):
+            if attempt < retries:
+                continue
+            raise
+
+
 def patch(kid: str, fields: dict, mask: list[str], tok: str) -> int:
     qs = "&".join(f"updateMask.fieldPaths={m}" for m in mask)
     req = urllib.request.Request(
@@ -71,7 +91,7 @@ def patch(kid: str, fields: dict, mask: list[str], tok: str) -> int:
         headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
     )
     try:
-        with urllib.request.urlopen(req) as r:
+        with _open(req) as r:
             return r.status
     except urllib.error.HTTPError as e:
         print(f"    HTTP {e.code}: {e.read().decode()[:300]}")
@@ -94,6 +114,12 @@ def build_update(hid: int):
         else:
             fields[path] = sval(val)
         mask.append(path)
+    # Keep numeric adultFee in sync whenever the fee text changes, so the app's
+    # cost stats never go stale — derived via the shared fees parser (one source
+    # of truth, same as the cost-analysis skill + backfill).
+    if "admissionFee" in mask:
+        fields["adultFee"] = ival(fee_for(hid, live.get("admission_fee"))[0])
+        mask.append("adultFee")
     return fields, mask, summary
 
 
