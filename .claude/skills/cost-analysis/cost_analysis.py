@@ -12,8 +12,9 @@ Reads the adult single-visit admission fee out of each onsen's free-text
 
 Read-only: opens the snapshot DB `mode=ro`, writes nothing to it or Firestore.
 The fee is heuristically parsed from messy Japanese text — see CAVEATS in
-SKILL.md. The durable fix is a numeric `adultFee` published on the catalog;
-until that exists, this skill is the source of the parse.
+SKILL.md. The parse itself lives in the shared `onsen_scraper.fees` module (also
+used by the catalog publisher); the durable fix is a numeric `adultFee` published
+on the catalog.
 
 Usage:
   python cost_analysis.py                         # JPY, 88 picks, 30 trials, seed 88
@@ -25,65 +26,18 @@ Usage:
 import argparse
 import json
 import random
-import re
 import sqlite3
 import statistics
 import sys
-import unicodedata
 from pathlib import Path
 
 # This file lives at <repo>/.claude/skills/cost-analysis/cost_analysis.py.
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SNAPSHOT_DB = REPO_ROOT / "data" / "snapshot.db"
 
-# Manual corrections: ids where the free-text fee defeats the heuristic or where
-# there is no standard individual adult walk-in price. Validated by hand against
-# the source. value = adult single-visit price in yen.
-CORRECTIONS = {
-    151: 700,   # parser grabs the 70才以上 (senior) 500; adult (13才以上) is 700
-    192: 1200,  # private-bath-only; "一人湯 ￥1,200" is the solo individual rate
-    239: 600,   # parser grabs a 貸切 (private-bath) 1,200; adult walk-in is 中学生以上 600
-}
-
-YEN = re.compile(r"([0-9][0-9,]*)\s*円")
-ADULT = re.compile(r"大\s*人|おとな")          # 大人 / 大　人 / おとな
-JHS = re.compile(r"中学生以上")                # junior-high-and-up == adult when no 大人
-
-
-def norm(text: str) -> str:
-    """NFKC fold so full-width digits/commas/spaces parse (１，０２０ → 1,020)."""
-    return unicodedata.normalize("NFKC", text or "")
-
-
-def _first_yen_after(text: str, idx: int):
-    m = YEN.search(text, idx)
-    return int(m.group(1).replace(",", "")) if m else None
-
-
-def extract_adult_fee(raw: str):
-    """Best-effort adult single-visit admission in yen, plus the method used.
-
-    Priority: an explicit 大人/おとな price, else a 中学生以上 (adult-equivalent)
-    price, else free, else the first yen figure on the page (covers age-gated and
-    private-bath-only facilities, where the first figure is the entry price).
-    """
-    t = norm(raw)
-    m = ADULT.search(t)
-    if m:
-        v = _first_yen_after(t, m.start())
-        if v is not None:
-            return v, "adult"
-    m = JHS.search(t)
-    if m:
-        v = _first_yen_after(t, m.start())
-        if v is not None:
-            return v, "jhs+"
-    if "無料" in t and not YEN.search(t):
-        return 0, "free"
-    m = YEN.search(t)
-    if m:
-        return int(m.group(1).replace(",", "")), "fallback"
-    return None, "none"
+# The fee parser + per-id corrections are shared with the catalog publisher.
+sys.path.insert(0, str(REPO_ROOT))
+from onsen_scraper.fees import fee_for  # noqa: E402
 
 
 def load_prices(db_path: Path):
@@ -95,14 +49,7 @@ def load_prices(db_path: Path):
         ).fetchall()
     finally:
         con.close()
-    out = []
-    for oid, name, fee in rows:
-        if oid in CORRECTIONS:
-            out.append((oid, name, CORRECTIONS[oid], "corrected"))
-        else:
-            v, how = extract_adult_fee(fee)
-            out.append((oid, name, v, how))
-    return out
+    return [(oid, name, *fee_for(oid, fee)) for oid, name, fee in rows]
 
 
 def monte_carlo(values, pick, trials, seed):
