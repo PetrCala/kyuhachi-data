@@ -12,3 +12,6 @@ venv/
 # Generated diff reports (regenerable; the snapshot DB is the tracked baseline)
 .claude/skills/catalog-diff/reports/
 reports/
+
+# Transient git worktrees created for isolated background agents
+.claude/worktrees/
