@@ -95,13 +95,38 @@ def load_catalog() -> dict[int, dict]:
     raise NotImplementedError("catalog baseline adapter not implemented yet")
 
 
+def is_soft_removed(parsed: dict) -> bool:
+    """True for a delisted ("soft-removed") page: fetched HTTP-200 fine but carries
+    no detail at all.
+
+    A delisted onsen (real example: hid 248, 神の湯 / 紫尾温泉) still returns 200
+    with the normal site chrome, so the fetcher passes it through, but its
+    `#spot_detail dl.tableview` table is gone — `parse_detail_page` then yields
+    all-None. Without this check that page reads as a wholesale "every populated
+    field → None" *material modification* instead of a *removal*.
+
+    Conservative on purpose: a genuine onsen always carries at least one MATERIAL
+    detail (address / business_hours / admission_fee / spring_quality / …). We
+    treat a page as gone only when EVERY material field is None/empty, so a merely
+    sparse-but-live page is never mistaken for a delisting.
+    """
+    return all(norm(f, parsed.get(f)) == "" for f in MATERIAL)
+
+
 def scrape_live(ids: list[int]) -> dict[int, dict | None]:
-    """In-memory scrape. Never writes the canonical DB. None = fetch failed/gone."""
+    """In-memory scrape. Never writes the canonical DB. None = fetch failed/gone.
+
+    `None` covers both ways an onsen disappears: a hard FetchError (404 / network
+    failure after the fetcher's retries) and a *soft* delisting — an HTTP-200 page
+    whose detail table is missing, so every material field is empty (see
+    `is_soft_removed`). Both route to `removed` in `diff()`.
+    """
     out: dict[int, dict | None] = {}
     for hid in ids:
         try:
             parsed = parse_detail_page(fetch_detail_page(hid), hid)
-            out[hid] = {f: parsed.get(f) for f in FIELDS}
+            fields = {f: parsed.get(f) for f in FIELDS}
+            out[hid] = None if is_soft_removed(fields) else fields
         except FetchError:
             out[hid] = None
     return out
@@ -113,6 +138,9 @@ def diff(baseline: dict, live: dict, idmap: dict) -> dict:
     for hid, base in baseline.items():
         cur = live.get(hid)
         if cur is None:
+            # None with the hid present = gone (404 or HTTP-200 empty/delisted,
+            # both collapsed to None by scrape_live) → removed; hid absent
+            # entirely = the page was never reached this run → transient failure.
             target = removed if hid in live else fetch_failed
             target.append({"hid": hid, "kyuhachiId": idmap.get(str(hid))})
             continue
@@ -170,7 +198,8 @@ def write_report(changelog: dict, label: str, outdir: Path) -> dict:
             lines.append(f"- _(+{len(m['mutedFields'])} low-signal: {', '.join(m['mutedFields'])})_")
 
     if changelog["removed"]:
-        lines += ["", "## Removed (live page 404s — mark isActive:false, do not delete)"]
+        lines += ["", "## Removed (live page 404s or HTTP-200 empty/delisted — "
+                  "mark isActive:false, do not delete)"]
         lines += [f"- hid {r['hid']} ({r['kyuhachiId']})" for r in changelog["removed"]]
 
     if volatile:

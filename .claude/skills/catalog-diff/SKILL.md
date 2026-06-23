@@ -68,6 +68,10 @@ rather than blind-overwriting, since the upstream `hid` can be reused.
 ## Scope
 
 - MVP detects **MODIFIED** + **REMOVED** over the known ids — reliable today.
+  REMOVED covers both a hard 404 and a **soft delisting** — an HTTP-200 page that
+  still serves the site chrome but has dropped its detail table (every material
+  field parses empty). Both surface as retire/`isActive:false` candidates, never
+  as an "update everything to null" modification.
 - **ADDED** (brand-new onsens) needs an index/listing crawl plus a kyuhachiId
   assignment step; not implemented yet.
 - The `catalog` baseline adapter (`load_catalog()`) is a TODO: authed REST read
