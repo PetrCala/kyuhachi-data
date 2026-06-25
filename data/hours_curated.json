@@ -120,12 +120,12 @@
       "status": "structured",
       "window": [
         "06:30",
-        "24:00"
+        "23:45"
       ],
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "元湯（武雄）。12月中旬に1日休館予定のみ — 週休なし。open-all-week候補（方針保留）",
+      "note": "6:30-23:45（最終受付23:00）; 12月中旬に1日休館",
       "exceptions": [
         {
           "en": "Open year-round (one maintenance day in mid-December)",
@@ -182,21 +182,21 @@
         ]
       },
       "confidence": "medium",
-      "note": "無休。水曜はメンテで15:00開始。12/31-1/2は11-15",
+      "note": "年末年始は変更あり（旧: 12/31-1/2 11-15）",
       "exceptions": [
         {
           "en": "Wednesday opens at 15:00 (maintenance)",
           "ja": "水曜はメンテナンスのため15:00開店"
         },
         {
-          "en": "Special hours Dec 31–Jan 2 (11:00–15:00)",
-          "ja": "12/31〜1/2は11:00〜15:00"
+          "en": "Year-end / New-Year hours vary",
+          "ja": "年末年始は営業時間変更あり"
         }
       ]
     },
     "21": {
-      "publish": true,
-      "status": "structured",
+      "publish": false,
+      "status": "irregular",
       "window": [
         "05:00",
         "21:00"
@@ -204,11 +204,11 @@
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "1/1休のみ — 週休なし。open-all-week候補（方針保留）",
+      "note": "旧1/1休→不定休",
       "exceptions": [
         {
-          "en": "Open year-round (closed only Jan 1)",
-          "ja": "通年営業（1/1のみ休）"
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
         }
       ]
     },
@@ -217,26 +217,18 @@
       "status": "structured",
       "window": [
         "09:30",
-        "20:00"
+        "19:00"
       ],
       "closed": [
         "wed"
       ],
       "overrides": {},
-      "confidence": "medium",
-      "note": "水曜休（祝日営業）。冬期11-4月は19:00まで、年末1日休",
+      "confidence": "high",
+      "note": "2026/4改正: 通年19:00（冬期短縮・年末1日休は撤回）",
       "exceptions": [
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
-        },
-        {
-          "en": "Winter (Nov–Apr) until 19:00",
-          "ja": "冬期（11〜4月）は19:00まで"
-        },
-        {
-          "en": "Closed about one day at year-end",
-          "ja": "年末に1日休館"
         }
       ]
     },
@@ -260,8 +252,8 @@
       ]
     },
     "31": {
-      "publish": true,
-      "status": "structured",
+      "publish": false,
+      "status": "irregular",
       "window": [
         "09:00",
         "25:00"
@@ -269,8 +261,13 @@
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "無休。大浴場は24:00まで、臨時休業有",
-      "exceptions": []
+      "note": "旧無休→不定休; 大浴場~24:00",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
     },
     "32": {
       "publish": false,
@@ -432,12 +429,12 @@
         "18:30"
       ],
       "closed": [
-        "tue",
-        "wed"
+        "wed",
+        "thu"
       ],
       "overrides": {},
       "confidence": "high",
-      "note": "火・水曜休",
+      "note": "定休 火水→水木",
       "exceptions": []
     },
     "48": {
@@ -492,20 +489,20 @@
       ]
     },
     "60": {
-      "publish": false,
-      "status": "irregular",
+      "publish": true,
+      "status": "structured",
       "window": [
         "09:00",
-        "22:00"
+        "21:00"
       ],
       "closed": [],
       "overrides": {},
-      "confidence": "high",
-      "note": "不定休",
+      "confidence": "medium",
+      "note": "旧不定休表記消滅; 9-21（最終20:00）",
       "exceptions": [
         {
-          "en": "Irregular closing days — confirm before visiting",
-          "ja": "不定休 — 事前にご確認ください"
+          "en": "May occasionally close mornings for cleaning",
+          "ja": "不定期で午前中に清掃のため休む場合あり"
         }
       ]
     },
@@ -514,7 +511,7 @@
       "status": "structured",
       "window": [
         "09:00",
-        "18:00"
+        "17:00"
       ],
       "closed": [
         "tue",
@@ -522,7 +519,7 @@
       ],
       "overrides": {},
       "confidence": "high",
-      "note": "火・水曜休（祝日営業）",
+      "note": "閉店18:00→17:00",
       "exceptions": [
         {
           "en": "Open on public holidays",
@@ -578,11 +575,11 @@
         "21:00"
       ],
       "closed": [
-        "tue"
+        "wed"
       ],
       "overrides": {},
       "confidence": "medium",
-      "note": "火曜休。1-3月は20:00まで",
+      "note": "定休 火→水",
       "exceptions": [
         {
           "en": "January–March until 20:00",
@@ -800,12 +797,16 @@
         "tue"
       ],
       "overrides": {},
-      "confidence": "high",
-      "note": "火曜休（祝日は営業）",
+      "confidence": "medium",
+      "note": "不定休あり追加",
       "exceptions": [
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
+        },
+        {
+          "en": "Other irregular closures may apply — confirm",
+          "ja": "その他不定休あり — 要確認"
         }
       ]
     },
@@ -814,20 +815,16 @@
       "status": "irregular",
       "window": [
         "15:00",
-        "21:00"
+        "20:00"
       ],
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "不定休（日曜は20:00まで）",
+      "note": "日曜~20:00 override消滅; 全日~20:00",
       "exceptions": [
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
-        },
-        {
-          "en": "Sunday until 20:00",
-          "ja": "日曜は20:00まで"
         }
       ]
     },
@@ -860,21 +857,14 @@
       "publish": true,
       "status": "structured",
       "window": [
-        "09:00",
-        "21:00"
+        "07:00",
+        "22:00"
       ],
-      "closed": [
-        "thu"
-      ],
+      "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "木曜休（祝日除く）",
-      "exceptions": [
-        {
-          "en": "Open when Thursday falls on a public holiday",
-          "ja": "木曜が祝日の場合は営業"
-        }
-      ]
+      "note": "木曜休→無休; 7-22（最終21:00）",
+      "exceptions": []
     },
     "96": {
       "publish": false,
@@ -914,14 +904,14 @@
       "status": "structured",
       "window": [
         "10:00",
-        "22:00"
+        "21:00"
       ],
       "closed": [
         "wed"
       ],
       "overrides": {},
       "confidence": "medium",
-      "note": "水曜休。時期により時間変更あり",
+      "note": "閉店22:00→21:00",
       "exceptions": [
         {
           "en": "Hours vary by season — see original text",
@@ -962,15 +952,19 @@
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "不定休（7/7-10休、水曜16:00開始）",
+      "note": "不定休; 水曜16:00開店; 休館翌日15:00開店",
       "exceptions": [
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         },
         {
-          "en": "Closed July 7–10",
-          "ja": "7/7〜10休"
+          "en": "Wednesday opens at 16:00",
+          "ja": "水曜は16:00開店"
+        },
+        {
+          "en": "Closed Jun 29–Jul 2 and Feb 24–26",
+          "ja": "6/29〜7/2・2/24〜2/26休"
         }
       ]
     },
@@ -1575,7 +1569,7 @@
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "不定休（火金は14:30開始）",
+      "note": "12-2月の時短追加",
       "exceptions": [
         {
           "en": "Irregular closing days — confirm before visiting",
@@ -1584,6 +1578,10 @@
         {
           "en": "Tue & Fri open from 14:30",
           "ja": "火・金は14:30開店"
+        },
+        {
+          "en": "December–February until 18:00",
+          "ja": "12〜2月は18:00まで"
         }
       ]
     },
@@ -1664,11 +1662,11 @@
       "closed": [],
       "overrides": {},
       "confidence": "medium",
-      "note": "無休（メンテ日除く）。内湯は20:00まで",
+      "note": "内湯 土日祝~14:00 追加",
       "exceptions": [
         {
-          "en": "Indoor bath until 20:00",
-          "ja": "内湯は20:00まで"
+          "en": "Indoor bath until 20:00 (Sat/Sun/holidays until 14:00)",
+          "ja": "内湯は20:00まで（土日祝は14:00まで）"
         },
         {
           "en": "Closed on maintenance days",
@@ -1768,15 +1766,15 @@
       ],
       "overrides": {},
       "confidence": "medium",
-      "note": "月・火曜休（祝日営業）。※施設名に臨時休業中の掲示あり",
+      "note": "土日祝10:00開店追加; 臨時休業表記消滅",
       "exceptions": [
-        {
-          "en": "May be temporarily closed — confirm before visiting",
-          "ja": "臨時休業の場合あり — 要確認"
-        },
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
+        },
+        {
+          "en": "Sat, Sun & holidays: 10:00–21:45",
+          "ja": "土日祝は10:00〜21:45"
         }
       ]
     },
@@ -1807,14 +1805,14 @@
       "status": "structured",
       "window": [
         "10:00",
-        "20:30"
+        "19:00"
       ],
       "closed": [
         "tue"
       ],
       "overrides": {},
       "confidence": "high",
-      "note": "火曜休",
+      "note": "閉店20:30→19:00",
       "exceptions": []
     },
     "184": {
@@ -2010,11 +2008,15 @@
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "不定休",
+      "note": "土日祝7:00開店追加",
       "exceptions": [
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Sat, Sun & holidays open from 7:00",
+          "ja": "土日祝は7:00開店"
         }
       ]
     },
@@ -2227,13 +2229,13 @@
       "publish": true,
       "status": "structured",
       "window": [
-        "12:00",
+        "10:00",
         "21:00"
       ],
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "無休",
+      "note": "開店12:00→10:00",
       "exceptions": []
     },
     "221": {
@@ -2256,16 +2258,19 @@
     },
     "222": {
       "publish": false,
-      "status": "multi-window",
-      "window": null,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "16:00"
+      ],
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "2部制(11-16,18-20)＋不定休",
+      "note": "夜の部(18-20)消滅; 11-16のみ; 不定休",
       "exceptions": [
         {
-          "en": "Open 11:00–16:00 and 18:00–20:00",
-          "ja": "11:00〜16:00 と 18:00〜20:00"
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
         }
       ]
     },
@@ -2440,29 +2445,24 @@
       "closed": [],
       "overrides": {},
       "confidence": "high",
-      "note": "1/1休のみ — 週休なし。open-all-week候補（方針保留）",
-      "exceptions": [
-        {
-          "en": "Open year-round (closed only Jan 1)",
-          "ja": "通年営業（1/1のみ休）"
-        }
-      ]
+      "note": "1/1休→無休",
+      "exceptions": []
     },
     "235": {
-      "publish": false,
-      "status": "monthly",
+      "publish": true,
+      "status": "structured",
       "window": [
         "10:00",
         "21:00"
       ],
       "closed": [],
       "overrides": {},
-      "confidence": "high",
-      "note": "第2・4水曜休（月次）",
+      "confidence": "medium",
+      "note": "第2・4水曜休→7〜10月の水曜休（季節）",
       "exceptions": [
         {
-          "en": "Closed the 2nd & 4th Wednesday each month",
-          "ja": "毎月第2・第4水曜休"
+          "en": "Closed Wednesdays, July–October",
+          "ja": "7〜10月は水曜休"
         }
       ]
     },
@@ -2636,16 +2636,23 @@
       "publish": true,
       "status": "structured",
       "window": [
-        "11:00",
+        "15:00",
         "21:30"
       ],
       "closed": [
+        "mon",
+        "tue",
         "wed"
       ],
       "overrides": {},
       "confidence": "high",
-      "note": "毎週水曜休",
-      "exceptions": []
+      "note": "水曜休→月火水休; 開店11:00→15:00",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
     },
     "245": {
       "publish": false,
@@ -2751,6 +2758,230 @@
       "confidence": "high",
       "note": "無休",
       "exceptions": []
+    },
+    "253": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "12:00",
+        "19:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "旅館とよとみ; 水曜休（不定休あり）",
+      "exceptions": [
+        {
+          "en": "Other irregular closures may apply — confirm",
+          "ja": "その他不定休あり — 要確認"
+        }
+      ]
+    },
+    "254": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "12:00",
+        "14:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "雲仙福田屋/山照別邸; 不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "255": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "きんこんかん; 定休なし",
+      "exceptions": []
+    },
+    "256": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "09:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "下田温泉センター白鷺館; むら湯13:00〜",
+      "exceptions": [
+        {
+          "en": "Closed the 4th Thursday each month",
+          "ja": "毎月第4木曜休"
+        },
+        {
+          "en": "Murayu bath opens at 13:00",
+          "ja": "むら湯は13:00から"
+        }
+      ]
+    },
+    "257": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "14:00",
+        "18:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "福田共同浴場; 休なし",
+      "exceptions": []
+    },
+    "258": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "23:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "大分キャセイホテル; 年末年始休",
+      "exceptions": [
+        {
+          "en": "Closed over the New Year holidays",
+          "ja": "年末年始休"
+        }
+      ]
+    },
+    "259": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "24:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "まるた屋温泉西方の湯; 休なし",
+      "exceptions": []
+    },
+    "260": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "06:30",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "乙丸温泉館; 第3木曜休",
+      "exceptions": [
+        {
+          "en": "Closed the 3rd Thursday each month",
+          "ja": "毎月第3木曜休"
+        }
+      ]
+    },
+    "261": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "18:00"
+      ],
+      "closed": [
+        "tue",
+        "wed",
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "赤川荘; 火〜木休（最終受付17:00）",
+      "exceptions": []
+    },
+    "262": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "11:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "サンチェリーきたごう; 第2・4月曜休",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Monday each month",
+          "ja": "毎月第2・第4月曜休"
+        },
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "263": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "12:00",
+        "21:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "紫尾湯の宿くすのき; 水曜休",
+      "exceptions": []
+    },
+    "264": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:30",
+        "19:30"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "たまて箱温泉ヘルシーランド; 木曜休",
+      "exceptions": []
+    },
+    "265": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "07:00",
+        "20:00"
+      ],
+      "closed": [
+        "fri"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "二月田温泉 殿様湯; 金曜・元日休",
+      "exceptions": [
+        {
+          "en": "Open year-round (closed only Jan 1)",
+          "ja": "通年営業（1/1のみ休）"
+        }
+      ]
     }
   }
 }
