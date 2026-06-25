@@ -175,12 +175,28 @@ def parse_hours(raw: str | None) -> HoursParse:
     return HoursParse(raw, schedule, window, tuple(closed), "high", reason, note)
 
 
+# Publish policy (NOT a parse fact): an onsen with no business-hours text at all
+# is treated as open 24/7. `parse_hours` stays honest — it reports `empty`/None;
+# this default is applied only in the published projection below.
+_ALL_DAY = {"opens": "00:00", "closes": "24:00"}
+
+
 def parsed_hours_doc(raw: str | None) -> dict:
     """Project to the app's published `ParsedHours`: {"raw", "schedule"}.
 
-    `raw` is the verbatim source text (the app shows it under the grid); the
-    schedule is the app-shaped WeeklySchedule or None. This is what the catalog
-    publisher would write to `businessHours` on /onsens/{kyuhachiId}.
+    `raw` is the verbatim source text (the app shows it under the grid). The
+    schedule is:
+      - the parsed app-shaped WeeklySchedule (null day = closed), when the text
+        is unambiguous (single window + 無休/explicit weekday closure);
+      - a **24/7** schedule (every day 00:00–24:00) when there is NO hours text
+        at all — per the catalog policy that an onsen with no posted hours is
+        always open;
+      - None otherwise (hours present but irregular/multi-window/partial) — the
+        app falls back to showing `raw`.
+
+    This is what the catalog publisher writes to `businessHours` on
+    /onsens/{kyuhachiId} (see publisher/apply.py + backfill_schedule.py).
     """
-    p = parse_hours(raw)
-    return {"raw": raw if raw is not None else "", "schedule": p.schedule}
+    if raw is None or not raw.strip():
+        return {"raw": "", "schedule": {d: dict(_ALL_DAY) for d in DAYS}}
+    return {"raw": raw, "schedule": parse_hours(raw).schedule}
