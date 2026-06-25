@@ -116,8 +116,8 @@
       ]
     },
     "11": {
-      "publish": false,
-      "status": "deferred-annual",
+      "publish": true,
+      "status": "structured",
       "window": [
         "06:30",
         "24:00"
@@ -195,8 +195,8 @@
       ]
     },
     "21": {
-      "publish": false,
-      "status": "deferred-annual",
+      "publish": true,
+      "status": "structured",
       "window": [
         "05:00",
         "21:00"
@@ -653,8 +653,8 @@
       ]
     },
     "74": {
-      "publish": false,
-      "status": "deferred-annual",
+      "publish": true,
+      "status": "structured",
       "window": [
         "06:00",
         "22:00"
@@ -1901,8 +1901,8 @@
       ]
     },
     "192": {
-      "publish": false,
-      "status": "deferred-annual",
+      "publish": true,
+      "status": "structured",
       "window": [
         "10:00",
         "27:00"
@@ -2431,8 +2431,8 @@
       ]
     },
     "234": {
-      "publish": false,
-      "status": "deferred-annual",
+      "publish": true,
+      "status": "structured",
       "window": [
         "07:00",
         "21:30"

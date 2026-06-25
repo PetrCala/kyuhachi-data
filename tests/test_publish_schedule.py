@@ -130,5 +130,7 @@ def test_curated_fixes_known_bugs():
     assert s151["sunday"] is not None and s151["tuesday"] is None
     s224 = bf.expand_curated(CURATED["224"])
     assert s224["sunday"] is not None and s224["thursday"] is None
-    # 元湯 (11) stays deferred (no grid for now).
-    assert CURATED["11"]["publish"] is False and CURATED["11"]["status"] == "deferred-annual"
+    # 元湯 (11): annual-only closure → now published open-all-week (no weekly closed day).
+    s11 = bf.expand_curated(CURATED["11"])
+    assert CURATED["11"]["publish"] is True
+    assert all(v is not None for v in s11.values())
