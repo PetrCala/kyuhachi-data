@@ -1,0 +1,7 @@
+{
+  "_comment": "Reviewed decisions for publisher/apply.py. Scaffold one with --from-changelog, then edit each action to one of: update | retire | skip. The two below are the historical 2026-06-23 adjudications (already applied to kyuhachi-fddcc).",
+  "decisions": [
+    {"hid": 57, "action": "update", "note": "same onsen 源泉屋; official site → Instagram, address formalized"},
+    {"hid": 248, "action": "retire", "note": "神の湯 (紫尾温泉) removed from source — detail page delisted"}
+  ]
+}

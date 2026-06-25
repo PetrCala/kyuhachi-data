@@ -16,6 +16,7 @@ from onsen_scraper.fees import CORRECTIONS, adult_fee, fee_for
 _LAZY = {
     "FetchError": "onsen_scraper.fetcher",
     "fetch_detail_page": "onsen_scraper.fetcher",
+    "fetch_url": "onsen_scraper.fetcher",
     "get_detail_url": "onsen_scraper.fetcher",
     "parse_detail_page": "onsen_scraper.parser",
 }
@@ -26,6 +27,7 @@ __all__ = [
     "CORRECTIONS",
     "FetchError",
     "fetch_detail_page",
+    "fetch_url",
     "get_detail_url",
     "parse_detail_page",
 ]

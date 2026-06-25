@@ -26,7 +26,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
-from onsen_scraper import FetchError, fetch_detail_page, parse_detail_page  # noqa: E402
+from onsen_scraper import FetchError, fetch_detail_page, fetch_url, parse_detail_page  # noqa: E402
 
 # Detail-page fields the parser produces. name/areaName/lat/lng come from the
 # map seed (not the detail page) — out of scope for this diff.
@@ -52,6 +52,12 @@ MUTED = {
 DATA = REPO_ROOT / "data"
 SNAPSHOT_DB = DATA / "snapshot.db"
 ID_MAP = DATA / "onsen-id-map.json"
+
+# Source listing index — the authoritative set of currently-listed onsens.
+# Paginated 10/page: /spot/index/mode/paging/page/{n}/t//category/
+INDEX_URL = "https://www.88onsen.com/spot/index/mode/paging/page/{n}/t//category/"
+_HID_RE = re.compile(r"/spot/detail/hid/(\d+)")
+_PAGE_RE = re.compile(r"/spot/index/mode/paging/page/(\d+)/")
 
 _WS = re.compile(r"[ \t]+")
 _BLANK = re.compile(r"\n\s*\n+")
@@ -114,35 +120,62 @@ def is_soft_removed(parsed: dict) -> bool:
 
 
 def scrape_live(ids: list[int]) -> dict[int, dict | None]:
-    """In-memory scrape. Never writes the canonical DB. None = fetch failed/gone.
-
-    `None` covers both ways an onsen disappears: a hard FetchError (404 / network
-    failure after the fetcher's retries) and a *soft* delisting — an HTTP-200 page
-    whose detail table is missing, so every material field is empty (see
-    `is_soft_removed`). Both route to `removed` in `diff()`.
+    """In-memory scrape. Never writes the canonical DB. Per id, returns one of:
+      None  — fetch failed (network / non-200 after retries); retry or inspect.
+      {}    — page served (HTTP 200) but carries no onsen detail. The source
+              soft-removes by serving generic chrome, not a 404, so an all-empty
+              MATERIAL parse means delisted, not a content change (see
+              `is_soft_removed`) → a removal candidate.
+      {..}  — the parsed FIELDS.
     """
     out: dict[int, dict | None] = {}
     for hid in ids:
         try:
-            parsed = parse_detail_page(fetch_detail_page(hid), hid)
-            fields = {f: parsed.get(f) for f in FIELDS}
-            out[hid] = None if is_soft_removed(fields) else fields
+            html = fetch_detail_page(hid)
         except FetchError:
             out[hid] = None
+            continue
+        parsed = parse_detail_page(html, hid)
+        fields = {f: parsed.get(f) for f in FIELDS}
+        out[hid] = {} if is_soft_removed(fields) else fields
     return out
 
 
-def diff(baseline: dict, live: dict, idmap: dict) -> dict:
+def crawl_index(hard_cap: int = 60) -> set[int]:
+    """Return the set of hids currently listed on the source index — the
+    authoritative membership set. Follows pagination (polite, via fetch_url).
+    Network: needs egress to www.88onsen.com."""
+    ids: set[int] = set()
+    last_hint, n = 1, 1
+    while n <= hard_cap:
+        html = fetch_url(INDEX_URL.format(n=n))
+        if n == 1:
+            last_hint = max((int(m) for m in _PAGE_RE.findall(html)), default=1)
+        page_ids = {int(x) for x in _HID_RE.findall(html)}
+        if not page_ids:                       # empty listing page → past the end
+            break
+        new = page_ids - ids
+        ids |= page_ids
+        if n >= last_hint and not new:         # past hinted end, nothing new → stop
+            break
+        n += 1
+    return ids
+
+
+def diff(baseline: dict, live: dict, idmap: dict, index_ids: set[int] | None = None) -> dict:
     modified, removed, fetch_failed = [], [], []
     suppressed = 0  # onsens whose ONLY change was an as-of date-stamp refresh
     for hid, base in baseline.items():
         cur = live.get(hid)
-        if cur is None:
-            # None with the hid present = gone (404 or HTTP-200 empty/delisted,
-            # both collapsed to None by scrape_live) → removed; hid absent
-            # entirely = the page was never reached this run → transient failure.
-            target = removed if hid in live else fetch_failed
-            target.append({"hid": hid, "kyuhachiId": idmap.get(str(hid))})
+        ref = {"hid": hid, "kyuhachiId": idmap.get(str(hid))}
+        if index_ids is not None and hid not in index_ids:  # authoritative delist
+            removed.append({**ref, "reason": "not on source index"})
+            continue
+        if cur is None:          # couldn't fetch — not a clean removal signal
+            fetch_failed.append(ref)
+            continue
+        if not cur:              # {} → served (HTTP 200) but no detail → delisted
+            removed.append({**ref, "reason": "empty detail page"})
             continue
         changed = {
             f: {"old": base.get(f), "new": cur.get(f)}
@@ -164,8 +197,11 @@ def diff(baseline: dict, live: dict, idmap: dict) -> dict:
             for f in FIELDS
         ):
             suppressed += 1
-    # `added` is only meaningful once an index/listing crawl feeds in new ids.
-    added = [{"hid": h} for h in live if h not in baseline]
+    # `added` = ids on the source (live) but not in baseline, with real content.
+    # New onsens have no kyuhachiId yet — surface prefecture/address to identify them.
+    added = [{"hid": h, "kyuhachiId": idmap.get(str(h)),
+              "prefecture": live[h].get("prefecture"), "address": live[h].get("address")}
+             for h in live if h not in baseline and live[h]]
     return {"modified": modified, "removed": removed, "fetchFailed": fetch_failed,
             "added": added, "suppressedDateStampOnly": suppressed}
 
@@ -197,10 +233,22 @@ def write_report(changelog: dict, label: str, outdir: Path) -> dict:
         if m["mutedFields"]:
             lines.append(f"- _(+{len(m['mutedFields'])} low-signal: {', '.join(m['mutedFields'])})_")
 
+    if changelog.get("added"):
+        lines += ["", f"## Added — NEW onsens ({len(changelog['added'])})",
+                  "Listed on the source but not in baseline. Assign a kyuhachiId, "
+                  "then add to the relevant challenge_types pool:"]
+        lines += [f"- hid {a['hid']}  {a.get('prefecture') or '?'}  {a.get('address') or ''}".rstrip()
+                  for a in changelog["added"]]
+
     if changelog["removed"]:
-        lines += ["", "## Removed (live page 404s or HTTP-200 empty/delisted — "
+        lines += ["", "## Removed (404 / HTTP-200 empty / off the source index — "
                   "mark isActive:false, do not delete)"]
-        lines += [f"- hid {r['hid']} ({r['kyuhachiId']})" for r in changelog["removed"]]
+        lines += [f"- hid {r['hid']} ({r['kyuhachiId']})  — {r.get('reason', 'removed')}"
+                  for r in changelog["removed"]]
+
+    if changelog.get("fetchFailed"):
+        lines += ["", f"## Fetch failed ({len(changelog['fetchFailed'])}) — re-run before deciding",
+                  "- " + ", ".join(f"hid {r['hid']}" for r in changelog["fetchFailed"])]
 
     if volatile:
         lines += ["", f"## Low-signal only ({len(volatile)})",
@@ -217,6 +265,9 @@ def main() -> None:
     ap.add_argument("--baseline", choices=["snapshot", "catalog"], default="snapshot")
     ap.add_argument("--sample", type=int, help="spot-check N pages, then stop")
     ap.add_argument("--limit", type=int, help="diff only the first N ids")
+    ap.add_argument("--discover", action="store_true",
+                    help="crawl the source index first: detect ADDED onsens and use index "
+                         "membership as the authoritative REMOVED signal")
     ap.add_argument("--out", type=Path, default=Path(__file__).resolve().parent / "reports")
     args = ap.parse_args()
 
@@ -232,9 +283,19 @@ def main() -> None:
         print(f"sample {ok}/{args.sample} parsed ≥1 field — {verdict}")
         return
 
+    index_ids = None
+    if args.discover:
+        index_ids = crawl_index()
+        # Scrape the union: index ids (for field diffs + ADDED content) plus any
+        # baseline ids still listed. Baseline ids absent from the index are flagged
+        # REMOVED by membership without needing a fetch.
+        ids = sorted(index_ids | set(baseline))
+        print(f"index: {len(index_ids)} listed; baseline {len(baseline)}; "
+              f"+{len(index_ids - set(baseline))} new / -{len(set(baseline) - index_ids)} delisted")
+
     if args.limit:
         ids = ids[:args.limit]
-    changelog = diff(baseline, scrape_live(ids), idmap)
+    changelog = diff(baseline, scrape_live(ids), idmap, index_ids=index_ids)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     counts = write_report(changelog, args.baseline, args.out / stamp)
     print(f"report → {args.out / stamp}\n{counts}")

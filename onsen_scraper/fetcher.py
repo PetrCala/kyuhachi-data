@@ -30,20 +30,16 @@ class FetchError(Exception):
     """Raised when a page cannot be fetched after all retries."""
 
 
-def fetch_detail_page(
-    onsen_id: int,
+def fetch_url(
+    url: str,
     *,
     delay: float = DEFAULT_DELAY_SECONDS,
     max_retries: int = DEFAULT_MAX_RETRIES,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
 ) -> str:
-    """Fetch the HTML of an onsen detail page.
+    """Fetch a page politely (pre-request delay + browser UA + exponential backoff).
 
-    Args:
-        onsen_id: The onsen ID (hid parameter on the website).
-        delay: Seconds to wait before making the request (respectful scraping).
-        max_retries: Maximum number of retry attempts on failure.
-        timeout: Request timeout in seconds.
+    Used for both detail pages and the listing index.
 
     Returns:
         Raw HTML string of the page.
@@ -51,7 +47,6 @@ def fetch_detail_page(
     Raises:
         FetchError: If the page cannot be fetched after all retries.
     """
-    url = DETAIL_URL_TEMPLATE.format(id=onsen_id)
     headers = {"User-Agent": _USER_AGENT}
 
     if delay > 0:
@@ -68,7 +63,7 @@ def fetch_detail_page(
             html = response.content.decode("utf-8", errors="ignore")
 
             if not html.strip():
-                raise FetchError(f"Empty response for onsen {onsen_id}")
+                raise FetchError(f"Empty response for {url}")
 
             return html
 
@@ -77,19 +72,19 @@ def fetch_detail_page(
             if attempt < max_retries:
                 wait = 2**attempt  # Exponential backoff: 2, 4, 8 seconds.
                 logger.warning(
-                    "Attempt %d/%d failed for onsen %d: %s. Retrying in %ds...",
-                    attempt, max_retries, onsen_id, e, wait,
+                    "Attempt %d/%d failed for %s: %s. Retrying in %ds...",
+                    attempt, max_retries, url, e, wait,
                 )
                 time.sleep(wait)
             else:
-                logger.error(
-                    "All %d attempts failed for onsen %d: %s",
-                    max_retries, onsen_id, e,
-                )
+                logger.error("All %d attempts failed for %s: %s", max_retries, url, e)
 
-    raise FetchError(
-        f"Failed to fetch onsen {onsen_id} after {max_retries} attempts: {last_error}"
-    )
+    raise FetchError(f"Failed to fetch {url} after {max_retries} attempts: {last_error}")
+
+
+def fetch_detail_page(onsen_id: int, **kwargs) -> str:
+    """Fetch the HTML of an onsen detail page by hid. See fetch_url for kwargs."""
+    return fetch_url(DETAIL_URL_TEMPLATE.format(id=onsen_id), **kwargs)
 
 
 def get_detail_url(onsen_id: int) -> str:
