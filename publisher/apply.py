@@ -41,6 +41,7 @@ sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
 from onsen_scraper import fee_for, fetch_detail_page, parse_detail_page  # noqa: E402
 import catalog_diff as cd  # noqa: E402
+import image_processor as ip  # noqa: E402  (publisher/image_processor.py — photo rehosting)
 
 PROJECT = "kyuhachi-fddcc"
 BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
@@ -106,8 +107,9 @@ def patch(kid: str, fields: dict, mask: list[str], tok: str) -> int:
         raise
 
 
-def build_update(hid: int):
-    """Fetch live, diff vs baseline, return (fields, mask, summary) for changed material fields."""
+def build_update(hid: int, tok: str | None = None):
+    """Fetch live, diff vs baseline, return (fields, mask, summary) for changed material fields.
+    On --commit (tok set) a genuinely changed source photo is also rehosted (see below)."""
     base = cd.load_snapshot()[hid]
     live = parse_detail_page(fetch_detail_page(hid), hid)
     fields, mask, summary = {}, [], []
@@ -128,6 +130,25 @@ def build_update(hid: int):
     if "admissionFee" in mask:
         fields["adultFee"] = ival(fee_for(hid, live.get("admission_fee"))[0])
         mask.append("adultFee")
+    # Photo: image_url is MUTED for diffing (the source churns cosmetic URLs), so an
+    # image-only change never reaches here — but when we're already writing a material
+    # update and the source photo genuinely changed, rehost it too so the app's fast
+    # Storage copy + blurhash stay current. The published URL is deterministic (uuid5 of
+    # the kyuhachiId), so this never churns imageUrl on its own. Done only on --commit
+    # (tok set); a dry-run just surfaces the change in the summary.
+    if cd.norm("image_url", base.get("image_url")) != cd.norm("image_url", live.get("image_url")):
+        summary.append(("image_url", base.get("image_url"), live.get("image_url")))
+        if tok:
+            kid = IDMAP[str(hid)]
+            new_img = live.get("image_url")
+            if new_img:
+                raw = ip.download(new_img)
+                fields["imageUrl"] = sval(ip.upload(ip.to_webp(raw), kid, ip.DEFAULT_BUCKET, tok))
+                fields["blurhash"] = sval(ip.blurhash_of(raw))
+            else:  # photo removed at source
+                fields["imageUrl"] = sval(None)
+                fields["blurhash"] = sval(None)
+            mask += ["imageUrl", "blurhash"]
     # NOTE: businessHours.schedule (+ exceptions/confidence) is NOT written here.
     # It is owned solely by data/hours_curated.json (the LLM parse) via
     # backfill_schedule.py --from-curated — the regex parser (onsen_scraper/hours.py)
@@ -190,7 +211,7 @@ def apply_decision(d: dict, now: str, tok: str | None, commit: bool) -> None:
         mask = ["isActive", "updatedAt"]
         print(f"hid {hid} → /onsens/{kid}  RETIRE isActive:false   # {note}")
     else:  # update
-        fields, mask, summary = build_update(hid)
+        fields, mask, summary = build_update(hid, tok)
         if not summary:
             print(f"hid {hid} → UPDATE: no material changes vs source; nothing to write\n")
             return
