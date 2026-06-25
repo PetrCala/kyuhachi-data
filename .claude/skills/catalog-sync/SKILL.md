@@ -146,6 +146,27 @@ the changelog.
 (coverage stays exact: id-map + curated cover the baseline). Optionally sanity-check
 fees with the `cost-analysis` skill.
 
+## Derived fields published outside the diff loop
+
+Some published fields are *generated* from a stable field rather than re-scraped,
+so they have their own idempotent backfill instead of riding the detect→apply loop:
+
+- **`nameKana`** — the hiragana reading (yomi) of `name`, the app's within-prefecture
+  gojūon sort key. Readings don't exist upstream and `name` isn't a detail-page field
+  (it comes from the map seed, so `apply.py` never sees it change), so it's published
+  by [`publisher/backfill_name_kana.py`](../../../publisher/backfill_name_kana.py)
+  (generated via `onsen_scraper.readings.name_kana`, folded to hiragana):
+  ```bash
+  python publisher/backfill_name_kana.py            # DRY-RUN: plan + sample readings
+  python publisher/backfill_name_kana.py --show     # also list all 148 readings
+  python publisher/backfill_name_kana.py --commit   # writes nameKana; bumps version
+  ```
+  Idempotent, so re-run it after a new onsen's name lands (or a name correction) to
+  republish only what changed. A future `apply.py` `add` action should call
+  `name_kana()` when it mints a new doc. Auto-generated, no hand-correction — some
+  proper-noun readings will be imperfect (the agreed tradeoff). Consumed by app PR
+  PetrCala/kyuhachi#143.
+
 ## Ordering rules (the things you'd otherwise rediscover the hard way)
 
 1. **Publish before promote.** The changelog/staging are derived from the diff vs the

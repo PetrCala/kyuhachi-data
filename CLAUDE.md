@@ -55,8 +55,10 @@ its phases.
 | `onsen_scraper/parser.py` | DOM → 13 raw fields (`_FIELD_MAP` over `dl.tableview`). |
 | `onsen_scraper/mapseed.py` | One fetch of `/map` → `hid → {name, areaName, lat, lng, address}` (the fields the detail page lacks; also the authoritative membership set). |
 | `onsen_scraper/{fees,hours}.py` | Free-text → numeric `adultFee` / regex `WeeklySchedule` (the regex is NOT the hours source of truth). |
+| `onsen_scraper/readings.py` | Generate the hiragana reading (`nameKana`) of a `name` via pykakasi, folded to hiragana (`name_kana`). Readings don't exist upstream — they're generated, auto, no hand-correction. |
 | `publisher/apply.py` | Surgical, decisions-driven Firestore publisher: `update`/`retire`/`skip` (writes text fields + `adultFee`; **not** the schedule). |
 | `publisher/backfill_schedule.py` | `--from-curated`: expand `hours_curated.json` → `businessHours.schedule`+`exceptions`+`confidence`. Sole owner of the published grid. |
+| `publisher/backfill_name_kana.py` | Generate + publish `nameKana` (hiragana reading) onto every onsen doc. Idempotent; the within-prefecture gojūon sort key the app reads. |
 | `data/snapshot.db` | Diff baseline (148 onsens, raw fields + `raw_html`). Advanced only by `catalog-sync promote`. |
 | `data/onsen-id-map.json` | `hid` → `kyuhachiId`. Minted by `catalog-sync mint`. |
 | `data/hours_curated.json` | LLM-curated hours, the source of truth for the published schedule. |
@@ -81,6 +83,7 @@ Done (the end-to-end loop now exists behind `catalog-sync`):
 - ✅ `営業時間` → `WeeklySchedule` (LLM-curated `hours_curated.json` + `backfill_schedule --from-curated`).
 - ✅ Versioned backfill/merge publisher (`publisher/apply.py` + the backfills) — never a clean-slate wipe.
 - ✅ Baseline advance after publish (`catalog-sync promote`) — `snapshot.db` is no longer frozen.
+- ✅ Generated `nameKana` (hiragana reading, gojūon sort key) — `onsen_scraper/readings.py` + `publisher/backfill_name_kana.py`; consumed by app PR kyuhachi#143.
 
 Still open:
 - **`apply.py` `add` action** — create the live Firestore doc for a new onsen from

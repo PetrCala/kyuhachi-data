@@ -9,12 +9,14 @@ import from the app repo's _archive/.
 `requests`/`beautifulsoup4`, so they are imported lazily (PEP 562) — importing
 `onsen_scraper.fees` / `onsen_scraper.hours` (used by the cost-analysis skill,
 the publisher backfill, and the hours adapter) never requires the network stack
-to be installed.
+to be installed. `readings` is eager too: it imports its analyzer (pykakasi)
+lazily inside `name_kana`, so the module import alone stays dependency-free.
 """
 
 from onsen_scraper.fees import CORRECTIONS, adult_fee, fee_for
 from onsen_scraper.hours import HoursParse, parse_hours, parsed_hours_doc
 from onsen_scraper.mapseed import MAP_URL, fetch_map_seed, parse_map_seed
+from onsen_scraper.readings import name_kana, to_hiragana
 
 _LAZY = {
     "FetchError": "onsen_scraper.fetcher",
@@ -34,6 +36,8 @@ __all__ = [
     "MAP_URL",
     "fetch_map_seed",
     "parse_map_seed",
+    "name_kana",
+    "to_hiragana",
     "FetchError",
     "fetch_detail_page",
     "fetch_url",
