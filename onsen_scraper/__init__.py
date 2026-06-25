@@ -5,13 +5,15 @@ selectors are the canonical reference documented in the app repo's
 docs/onsen-source-field-audit.md. Reuse the fetcher + parser here; do NOT
 import from the app repo's _archive/.
 
-`fees` is pure stdlib and eager-imported. The fetcher/parser pull in
+`fees` and `hours` are pure stdlib and eager-imported. The fetcher/parser pull in
 `requests`/`beautifulsoup4`, so they are imported lazily (PEP 562) — importing
-`onsen_scraper.fees` (used by the cost-analysis skill and the publisher backfill)
-never requires the network stack to be installed.
+`onsen_scraper.fees` / `onsen_scraper.hours` (used by the cost-analysis skill,
+the publisher backfill, and the hours adapter) never requires the network stack
+to be installed.
 """
 
 from onsen_scraper.fees import CORRECTIONS, adult_fee, fee_for
+from onsen_scraper.hours import HoursParse, parse_hours, parsed_hours_doc
 
 _LAZY = {
     "FetchError": "onsen_scraper.fetcher",
@@ -25,6 +27,9 @@ __all__ = [
     "adult_fee",
     "fee_for",
     "CORRECTIONS",
+    "parse_hours",
+    "parsed_hours_doc",
+    "HoursParse",
     "FetchError",
     "fetch_detail_page",
     "fetch_url",
