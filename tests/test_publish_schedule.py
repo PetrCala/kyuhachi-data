@@ -101,6 +101,29 @@ def test_expand_curated_open_all_and_weekday():
                               "closed": [], "overrides": {}}) is None
 
 
+def test_curated_exceptions_wellformed():
+    for hid, e in CURATED.items():
+        assert isinstance(e["exceptions"], list), hid
+        for x in e["exceptions"]:
+            assert set(x) == {"en", "ja"}, hid
+            assert x["en"].strip() and x["ja"].strip(), hid
+
+
+def test_exc_and_conf_encoders():
+    val = bf.exc_val([{"en": "Open on public holidays", "ja": "祝日は営業"}])
+    vals = val["arrayValue"]["values"]
+    assert vals[0]["mapValue"]["fields"]["en"]["stringValue"] == "Open on public holidays"
+    assert vals[0]["mapValue"]["fields"]["ja"]["stringValue"] == "祝日は営業"
+    assert bf.exc_val([])["arrayValue"]["values"] == []
+    assert bf.conf_val("medium") == {"stringValue": "medium"}
+
+
+def test_irregular_onsen_carries_confirm_exception():
+    # raw/irregular onsens get an honest "confirm" caption (no grid).
+    assert CURATED["10"]["publish"] is False
+    assert any("不定休" in x["ja"] for x in CURATED["10"]["exceptions"])
+
+
 def test_curated_fixes_known_bugs():
     # 151/224: the 翌日休 spurious-Sunday cases must be Tue-only / Thu-only now.
     s151 = bf.expand_curated(CURATED["151"])

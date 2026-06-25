@@ -5,153 +5,2752 @@
     "policy": "無休/explicit weekly closure → structured. 第N曜/毎月N日/不定休 → monthly/irregular (null). multi-window or seasonal hours → null. annual-only closure (1/1, 元旦, dec maintenance) → deferred-annual (null for now; open-all-week candidate pending policy decision)."
   },
   "onsens": {
-    "1":   {"publish": true,  "status": "structured",      "window": ["10:00","21:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "5":   {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "水曜休（祝日は営業）"},
-    "7":   {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "毎週火曜休（祝日・26日は営業）"},
-    "8":   {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": [],              "overrides": {"tue": ["16:00","22:00"]}, "confidence": "medium", "note": "火曜は16:00以降のみ入浴可"},
-    "9":   {"publish": true,  "status": "structured",      "window": ["13:00","18:00"], "closed": ["thu","sun"],   "overrides": {}, "confidence": "high",   "note": "木・日曜休"},
-    "10":  {"publish": false, "status": "irregular",       "window": ["11:00","15:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "11":  {"publish": false, "status": "deferred-annual", "window": ["06:30","24:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "元湯（武雄）。12月中旬に1日休館予定のみ — 週休なし。open-all-week候補（方針保留）"},
-    "12":  {"publish": false, "status": "irregular",       "window": ["10:30","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "15":  {"publish": true,  "status": "structured",      "window": ["09:00","20:30"], "closed": ["tue","fri"],   "overrides": {}, "confidence": "high",   "note": "火・金曜休"},
-    "19":  {"publish": true,  "status": "structured",      "window": ["11:00","23:00"], "closed": [],              "overrides": {"wed": ["15:00","23:00"]}, "confidence": "medium", "note": "無休。水曜はメンテで15:00開始。12/31-1/2は11-15"},
-    "21":  {"publish": false, "status": "deferred-annual", "window": ["05:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "1/1休のみ — 週休なし。open-all-week候補（方針保留）"},
-    "24":  {"publish": true,  "status": "structured",      "window": ["09:30","20:00"], "closed": ["wed"],         "overrides": {}, "confidence": "medium", "note": "水曜休（祝日営業）。冬期11-4月は19:00まで、年末1日休"},
-    "29":  {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "普通浴/砂湯で時間別＋第3水曜休（月次）"},
-    "31":  {"publish": true,  "status": "structured",      "window": ["09:00","25:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休。大浴場は24:00まで、臨時休業有"},
-    "32":  {"publish": false, "status": "monthly",         "window": ["07:30","19:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第4木曜休（月次）"},
-    "34":  {"publish": true,  "status": "structured",      "window": ["09:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "36":  {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休（天候で変更あり）"},
-    "38":  {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "2部制(7-10:30,14:30-22)＋毎月5,15,25日休"},
-    "41":  {"publish": true,  "status": "structured",      "window": ["10:00","15:30"], "closed": ["tue","wed","thu"], "overrides": {}, "confidence": "high", "note": "火・水・木曜休"},
-    "42":  {"publish": false, "status": "seasonal",        "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "季節で営業時間が大きく変動＋年末年始休"},
-    "43":  {"publish": false, "status": "monthly",         "window": ["10:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第1水曜休（月次）"},
-    "44":  {"publish": false, "status": "irregular",       "window": ["10:00","17:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "47":  {"publish": true,  "status": "structured",      "window": ["09:30","18:30"], "closed": ["tue","wed"],   "overrides": {}, "confidence": "high",   "note": "火・水曜休"},
-    "48":  {"publish": false, "status": "irregular",       "window": ["10:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "57":  {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休"},
-    "59":  {"publish": false, "status": "irregular",       "window": ["06:00","21:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "60":  {"publish": false, "status": "irregular",       "window": ["09:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "61":  {"publish": true,  "status": "structured",      "window": ["09:00","18:00"], "closed": ["tue","wed"],   "overrides": {}, "confidence": "high",   "note": "火・水曜休（祝日営業）"},
-    "62":  {"publish": false, "status": "monthly",         "window": ["09:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2火曜休（月次）"},
-    "64":  {"publish": false, "status": "monthly",         "window": ["10:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・第4月曜休（月次）"},
-    "65":  {"publish": true,  "status": "structured",      "window": ["10:00","21:00"], "closed": ["tue"],         "overrides": {}, "confidence": "medium", "note": "火曜休。1-3月は20:00まで"},
-    "66":  {"publish": true,  "status": "structured",      "window": ["05:00","23:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休（祝日営業）"},
-    "68":  {"publish": false, "status": "irregular",       "window": ["06:00","21:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "72":  {"publish": true,  "status": "structured",      "window": ["11:00","22:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休（祝日営業）。家族湯は13:00から"},
-    "74":  {"publish": false, "status": "deferred-annual", "window": ["06:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "元旦休のみ — 週休なし。open-all-week候補（方針保留）"},
-    "76":  {"publish": false, "status": "irregular",       "window": ["08:30","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（立寄りは露天のみ）"},
-    "80":  {"publish": true,  "status": "structured",      "window": ["08:00","19:00"], "closed": ["wed"],         "overrides": {"tue": ["08:00","16:00"]}, "confidence": "high", "note": "水曜休。火曜は16:00まで"},
-    "81":  {"publish": true,  "status": "structured",      "window": ["13:00","21:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休"},
-    "83":  {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "84":  {"publish": false, "status": "irregular",       "window": ["08:00","19:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（宿泊優先）"},
-    "86":  {"publish": false, "status": "irregular",       "window": ["10:00","16:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "88":  {"publish": true,  "status": "structured",      "window": ["10:00","17:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休（祝日は営業）"},
-    "89":  {"publish": false, "status": "irregular",       "window": ["15:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（日曜は20:00まで）"},
-    "90":  {"publish": false, "status": "multi-window",    "window": null,              "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "2部制(10-14,18:30-20)＋水曜休"},
-    "95":  {"publish": true,  "status": "structured",      "window": ["09:00","21:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休（祝日除く）"},
-    "96":  {"publish": false, "status": "irregular",       "window": ["11:00","19:50"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "97":  {"publish": true,  "status": "structured",      "window": ["10:00","16:00"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "水曜休"},
-    "99":  {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": ["wed"],         "overrides": {}, "confidence": "medium", "note": "水曜休。時期により時間変更あり"},
-    "100": {"publish": true,  "status": "structured",      "window": ["11:00","20:00"], "closed": ["mon","tue","wed","thu"], "overrides": {}, "confidence": "high", "note": "月～木曜休（金土日祝のみ営業）"},
-    "104": {"publish": false, "status": "irregular",       "window": ["11:00","17:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（7/7-10休、水曜16:00開始）"},
-    "105": {"publish": true,  "status": "structured",      "window": ["10:00","15:00"], "closed": ["wed"],         "overrides": {}, "confidence": "medium", "note": "水曜休（その他不定休あり、要確認）"},
-    "106": {"publish": true,  "status": "structured",      "window": ["08:00","18:00"], "closed": ["tue"],         "overrides": {}, "confidence": "medium", "note": "火曜休（その他不定休あり、要確認）"},
-    "107": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "月水金は11-13入浴不可（昼休み）＋12/28-1/3休"},
-    "108": {"publish": true,  "status": "structured",      "window": ["11:30","15:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "110": {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休"},
-    "111": {"publish": false, "status": "monthly",         "window": ["06:30","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第1火曜休（月次）"},
-    "115": {"publish": true,  "status": "structured",      "window": ["09:30","21:30"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休（『休み：木曜日』— 旧regexは取りこぼし）"},
-    "116": {"publish": true,  "status": "structured",      "window": ["11:30","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休（メンテ年2-3日）"},
-    "117": {"publish": true,  "status": "structured",      "window": ["06:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "119": {"publish": true,  "status": "structured",      "window": ["08:00","21:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休"},
-    "122": {"publish": true,  "status": "structured",      "window": ["11:00","19:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "124": {"publish": true,  "status": "structured",      "window": ["06:00","20:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "125": {"publish": false, "status": "irregular",       "window": ["10:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "127": {"publish": true,  "status": "structured",      "window": ["09:00","22:00"], "closed": ["mon"],         "overrides": {}, "confidence": "high",   "note": "月曜休（祝日は翌日）"},
-    "128": {"publish": false, "status": "irregular",       "window": ["09:30","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "130": {"publish": true,  "status": "structured",      "window": ["06:30","19:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休（家族風呂は7:00-20:00）"},
-    "132": {"publish": false, "status": "irregular",       "window": ["10:00","16:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "133": {"publish": false, "status": "monthly",         "window": ["06:00","24:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第3水曜休（月次）"},
-    "135": {"publish": true,  "status": "structured",      "window": ["10:00","21:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休"},
-    "137": {"publish": false, "status": "monthly",         "window": ["07:00","20:00"], "closed": [],              "overrides": {}, "confidence": "medium", "note": "第1火曜休（月次）。閉店は最終受付20:00基準"},
-    "138": {"publish": false, "status": "monthly",         "window": ["07:00","20:00"], "closed": [],              "overrides": {}, "confidence": "medium", "note": "第3火曜休（月次）。閉店は最終受付20:00基準"},
-    "140": {"publish": false, "status": "irregular",       "window": ["08:30","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "142": {"publish": false, "status": "monthly",         "window": ["06:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・4火曜休（月次）"},
-    "143": {"publish": true,  "status": "structured",      "window": ["11:00","14:00"], "closed": ["tue","fri"],   "overrides": {}, "confidence": "high",   "note": "火・金曜休（メンテ臨時休あり）"},
-    "148": {"publish": false, "status": "irregular",       "window": ["10:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "150": {"publish": true,  "status": "structured",      "window": ["10:00","25:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休（翌1:00まで）"},
-    "151": {"publish": true,  "status": "structured",      "window": ["10:00","21:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休のみ（祝日が火曜→翌日休）。旧regexの誤『日曜休』を修正"},
-    "152": {"publish": false, "status": "monthly",         "window": ["10:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・第4水曜休（月次）"},
-    "155": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休だが月・木は8:30-15:00入浴不可（昼の中断）"},
-    "157": {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": ["tue","wed"],   "overrides": {}, "confidence": "high",   "note": "火・水曜休（祝日営業）"},
-    "159": {"publish": true,  "status": "structured",      "window": ["08:00","20:30"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "水曜休"},
-    "160": {"publish": false, "status": "monthly",         "window": ["15:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・第4木曜休（月次）"},
-    "161": {"publish": false, "status": "monthly",         "window": ["12:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2水曜休（月次）"},
-    "162": {"publish": false, "status": "irregular",       "window": ["10:00","19:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（火金は14:30開始）"},
-    "164": {"publish": false, "status": "monthly",         "window": ["10:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・4火曜休（月次）"},
-    "165": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "新館/本館で時間別＋第4火曜休（隔月）"},
-    "167": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休だが2部制(6-10,13-22)"},
-    "169": {"publish": true,  "status": "structured",      "window": ["13:00","21:00"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "水曜休"},
-    "171": {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": [],              "overrides": {}, "confidence": "medium", "note": "無休（メンテ日除く）。内湯は20:00まで"},
-    "172": {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": ["mon"],         "overrides": {}, "confidence": "medium", "note": "月曜休（祝日営業→翌火曜休）。16-18は宿泊者のみ"},
-    "175": {"publish": false, "status": "irregular",       "window": ["12:00","19:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "176": {"publish": true,  "status": "structured",      "window": ["07:00","21:30"], "closed": ["mon"],         "overrides": {}, "confidence": "high",   "note": "月曜休"},
-    "177": {"publish": false, "status": "irregular",       "window": ["11:00","16:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "178": {"publish": true,  "status": "structured",      "window": ["13:00","20:30"], "closed": ["mon","tue"],   "overrides": {}, "confidence": "medium", "note": "月・火曜休（祝日営業）。※施設名に臨時休業中の掲示あり"},
-    "182": {"publish": false, "status": "irregular",       "window": ["11:00","14:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "183": {"publish": true,  "status": "structured",      "window": ["10:00","20:30"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休"},
-    "184": {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": ["tue","wed"],   "overrides": {}, "confidence": "high",   "note": "火・水曜休（要電話確認）"},
-    "188": {"publish": false, "status": "irregular",       "window": ["11:00","16:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "189": {"publish": false, "status": "monthly",         "window": ["10:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第3月曜休（月次）"},
-    "191": {"publish": false, "status": "irregular",       "window": ["10:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "192": {"publish": false, "status": "deferred-annual", "window": ["10:00","27:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "12/31・1/1休のみ（翌3:00まで）— 週休なし。open-all-week候補（方針保留）"},
-    "193": {"publish": false, "status": "irregular",       "window": ["13:00","17:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（12/28-1/3休）"},
-    "195": {"publish": false, "status": "irregular",       "window": ["14:00","19:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "196": {"publish": true,  "status": "structured",      "window": ["10:00","21:50"], "closed": ["mon"],         "overrides": {}, "confidence": "high",   "note": "月曜休（祝日営業）。入浴10:00-21:50"},
-    "200": {"publish": false, "status": "irregular",       "window": ["15:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（夏期は10:00開始）"},
-    "201": {"publish": false, "status": "irregular",       "window": ["11:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "202": {"publish": true,  "status": "structured",      "window": ["10:00","19:00"], "closed": ["wed"],         "overrides": {}, "confidence": "medium", "note": "水曜休（加えて第2・第4木曜も休＝月次）"},
-    "203": {"publish": false, "status": "irregular",       "window": ["10:00","16:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "204": {"publish": false, "status": "irregular",       "window": ["11:30","16:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "205": {"publish": true,  "status": "structured",      "window": ["10:00","23:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "206": {"publish": true,  "status": "structured",      "window": ["08:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "207": {"publish": true,  "status": "structured",      "window": ["00:00","24:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "24時間（無人）・無休"},
-    "208": {"publish": false, "status": "irregular",       "window": ["08:30","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "209": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "24時間だが10:30-12:00は除く（昼の中断）"},
-    "216": {"publish": true,  "status": "structured",      "window": ["14:00","23:00"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休"},
-    "217": {"publish": true,  "status": "structured",      "window": ["13:00","18:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休（祝日→翌金曜）。旧regexは取りこぼし"},
-    "218": {"publish": false, "status": "irregular",       "window": ["13:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "219": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "2部制(8-17,19-21)＋不定休"},
-    "220": {"publish": true,  "status": "structured",      "window": ["12:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "221": {"publish": false, "status": "irregular",       "window": ["05:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（年2回）"},
-    "222": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "2部制(11-16,18-20)＋不定休"},
-    "223": {"publish": true,  "status": "structured",      "window": ["11:00","20:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "224": {"publish": true,  "status": "structured",      "window": ["10:00","20:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休のみ（祝日→翌日休）。旧regexの誤『日曜休』を修正"},
-    "227": {"publish": true,  "status": "structured",      "window": ["13:00","20:00"], "closed": ["thu"],         "overrides": {}, "confidence": "high",   "note": "木曜休"},
-    "228": {"publish": true,  "status": "structured",      "window": ["10:30","22:00"], "closed": ["tue","thu"],   "overrides": {}, "confidence": "high",   "note": "火・木曜休（祝日営業）"},
-    "229": {"publish": false, "status": "multi-window",    "window": null,              "closed": [],              "overrides": {}, "confidence": "high",   "note": "2部制(6:30-14,15-22:30)＋第2火曜休（月次）"},
-    "230": {"publish": false, "status": "irregular",       "window": ["12:00","19:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休（要予約）"},
-    "231": {"publish": true,  "status": "structured",      "window": ["10:00","22:00"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "水曜休"},
-    "232": {"publish": false, "status": "monthly",         "window": ["11:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第4月曜休（月次）"},
-    "233": {"publish": false, "status": "irregular",       "window": ["06:00","21:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "234": {"publish": false, "status": "deferred-annual", "window": ["07:00","21:30"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "1/1休のみ — 週休なし。open-all-week候補（方針保留）"},
-    "235": {"publish": false, "status": "monthly",         "window": ["10:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・4水曜休（月次）"},
-    "236": {"publish": true,  "status": "structured",      "window": ["08:30","20:00"], "closed": [],              "overrides": {}, "confidence": "medium", "note": "無休（平日12-13は受付休止、7・12月メンテ）"},
-    "237": {"publish": true,  "status": "structured",      "window": ["06:00","23:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "238": {"publish": false, "status": "monthly",         "window": ["10:00","23:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第3水曜休（月次、3・8月なし）。金土祝前は24:00まで"},
-    "239": {"publish": true,  "status": "structured",      "window": ["11:00","22:00"], "closed": [],              "overrides": {"sat": ["10:00","22:00"], "sun": ["10:00","22:00"]}, "confidence": "high", "note": "無休。土日祝は10:00開店"},
-    "240": {"publish": true,  "status": "structured",      "window": ["11:00","22:00"], "closed": ["thu"],         "overrides": {"sat": ["10:00","22:00"], "sun": ["10:00","22:00"]}, "confidence": "medium", "note": "木曜休（加えて月末の金曜も休＝月次）。土日祝10:00開店"},
-    "241": {"publish": false, "status": "irregular",       "window": ["10:00","23:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "242": {"publish": true,  "status": "structured",      "window": ["11:00","17:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休（予約時要電話）"},
-    "243": {"publish": false, "status": "monthly",         "window": ["10:00","26:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2火・水曜休（月次）"},
-    "244": {"publish": true,  "status": "structured",      "window": ["11:00","21:30"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "毎週水曜休"},
-    "245": {"publish": false, "status": "irregular",       "window": ["10:00","17:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "不定休"},
-    "246": {"publish": true,  "status": "structured",      "window": ["06:00","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"},
-    "247": {"publish": true,  "status": "structured",      "window": ["09:00","19:30"], "closed": ["tue"],         "overrides": {}, "confidence": "high",   "note": "火曜休"},
-    "248": {"publish": true,  "status": "structured",      "window": ["05:00","21:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休（注: カタログ上はisActive:false／retired）"},
-    "249": {"publish": false, "status": "monthly",         "window": ["06:30","22:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "第2・3火曜休（月次）"},
-    "250": {"publish": true,  "status": "structured",      "window": ["08:30","17:00"], "closed": ["wed"],         "overrides": {}, "confidence": "high",   "note": "水曜休"},
-    "251": {"publish": true,  "status": "structured",      "window": ["10:00","26:00"], "closed": [],              "overrides": {}, "confidence": "high",   "note": "無休"}
+    "1": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "21:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "5": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "水曜休（祝日は営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "7": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "毎週火曜休（祝日・26日は営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays and the 26th of each month",
+          "ja": "祝日・毎月26日は営業"
+        }
+      ]
+    },
+    "8": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {
+        "tue": [
+          "16:00",
+          "22:00"
+        ]
+      },
+      "confidence": "medium",
+      "note": "火曜は16:00以降のみ入浴可",
+      "exceptions": [
+        {
+          "en": "Tuesday: bathing only after 16:00",
+          "ja": "火曜は16:00以降のみ入浴可"
+        }
+      ]
+    },
+    "9": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "13:00",
+        "18:00"
+      ],
+      "closed": [
+        "thu",
+        "sun"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木・日曜休",
+      "exceptions": []
+    },
+    "10": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "15:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "11": {
+      "publish": false,
+      "status": "deferred-annual",
+      "window": [
+        "06:30",
+        "24:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "元湯（武雄）。12月中旬に1日休館予定のみ — 週休なし。open-all-week候補（方針保留）",
+      "exceptions": [
+        {
+          "en": "Open year-round (one maintenance day in mid-December)",
+          "ja": "通年営業（12月中旬に1日休館）"
+        }
+      ]
+    },
+    "12": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:30",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "15": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "20:30"
+      ],
+      "closed": [
+        "tue",
+        "fri"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・金曜休",
+      "exceptions": []
+    },
+    "19": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "23:00"
+      ],
+      "closed": [],
+      "overrides": {
+        "wed": [
+          "15:00",
+          "23:00"
+        ]
+      },
+      "confidence": "medium",
+      "note": "無休。水曜はメンテで15:00開始。12/31-1/2は11-15",
+      "exceptions": [
+        {
+          "en": "Wednesday opens at 15:00 (maintenance)",
+          "ja": "水曜はメンテナンスのため15:00開店"
+        },
+        {
+          "en": "Special hours Dec 31–Jan 2 (11:00–15:00)",
+          "ja": "12/31〜1/2は11:00〜15:00"
+        }
+      ]
+    },
+    "21": {
+      "publish": false,
+      "status": "deferred-annual",
+      "window": [
+        "05:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "1/1休のみ — 週休なし。open-all-week候補（方針保留）",
+      "exceptions": [
+        {
+          "en": "Open year-round (closed only Jan 1)",
+          "ja": "通年営業（1/1のみ休）"
+        }
+      ]
+    },
+    "24": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:30",
+        "20:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "水曜休（祝日営業）。冬期11-4月は19:00まで、年末1日休",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        },
+        {
+          "en": "Winter (Nov–Apr) until 19:00",
+          "ja": "冬期（11〜4月）は19:00まで"
+        },
+        {
+          "en": "Closed about one day at year-end",
+          "ja": "年末に1日休館"
+        }
+      ]
+    },
+    "29": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "普通浴/砂湯で時間別＋第3水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Open in separate sessions — see original text",
+          "ja": "時間帯が分かれます — 元の表記をご確認ください"
+        },
+        {
+          "en": "Closed the 3rd Wednesday each month",
+          "ja": "毎月第3水曜休"
+        }
+      ]
+    },
+    "31": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "25:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休。大浴場は24:00まで、臨時休業有",
+      "exceptions": []
+    },
+    "32": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "07:30",
+        "19:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第4木曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 4th Thursday each month",
+          "ja": "毎月第4木曜休"
+        },
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "34": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "36": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休（天候で変更あり）",
+      "exceptions": [
+        {
+          "en": "Hours may change in bad weather",
+          "ja": "天候により営業時間が変わる場合あり"
+        }
+      ]
+    },
+    "38": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "2部制(7-10:30,14:30-22)＋毎月5,15,25日休",
+      "exceptions": [
+        {
+          "en": "Open in separate sessions — see original text",
+          "ja": "時間帯が分かれます — 元の表記をご確認ください"
+        },
+        {
+          "en": "Closed the 5th, 15th & 25th each month",
+          "ja": "毎月5・15・25日休"
+        }
+      ]
+    },
+    "41": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "15:30"
+      ],
+      "closed": [
+        "tue",
+        "wed",
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・水・木曜休",
+      "exceptions": []
+    },
+    "42": {
+      "publish": false,
+      "status": "seasonal",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "季節で営業時間が大きく変動＋年末年始休",
+      "exceptions": [
+        {
+          "en": "Hours vary by season: Apr–Nov 9:00–18:00, Dec–Mar 10:00–17:30",
+          "ja": "季節により変動：4〜11月 9:00〜18:00、12〜3月 10:00〜17:30"
+        },
+        {
+          "en": "Closed over the year-end/New Year",
+          "ja": "年末年始休"
+        },
+        {
+          "en": "May close in bad weather",
+          "ja": "悪天候時は休業の場合あり"
+        }
+      ]
+    },
+    "43": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第1水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 1st Wednesday each month (2nd Wed in Jan & May)",
+          "ja": "毎月第1水曜休（1・5月は第2水曜）"
+        }
+      ]
+    },
+    "44": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "17:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "47": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:30",
+        "18:30"
+      ],
+      "closed": [
+        "tue",
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・水曜休",
+      "exceptions": []
+    },
+    "48": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "57": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休",
+      "exceptions": []
+    },
+    "59": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "06:00",
+        "21:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "60": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "09:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "61": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "18:00"
+      ],
+      "closed": [
+        "tue",
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・水曜休（祝日営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "62": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "09:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2火曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd Tuesday each month",
+          "ja": "毎月第2火曜休"
+        }
+      ]
+    },
+    "64": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・第4月曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Monday each month",
+          "ja": "毎月第2・第4月曜休"
+        },
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "65": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "21:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "火曜休。1-3月は20:00まで",
+      "exceptions": [
+        {
+          "en": "January–March until 20:00",
+          "ja": "1〜3月は20:00まで"
+        }
+      ]
+    },
+    "66": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "05:00",
+        "23:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休（祝日営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "68": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "06:00",
+        "21:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "72": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "22:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休（祝日営業）。家族湯は13:00から",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        },
+        {
+          "en": "Family bath from 13:00",
+          "ja": "家族湯は13:00から"
+        }
+      ]
+    },
+    "74": {
+      "publish": false,
+      "status": "deferred-annual",
+      "window": [
+        "06:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "元旦休のみ — 週休なし。open-all-week候補（方針保留）",
+      "exceptions": [
+        {
+          "en": "Open year-round (closed only New Year's Day)",
+          "ja": "通年営業（元旦のみ休）"
+        },
+        {
+          "en": "Year-end/New Year hours may be shortened",
+          "ja": "年末年始は時間短縮の場合あり"
+        }
+      ]
+    },
+    "76": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "08:30",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（立寄りは露天のみ）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Walk-in bathing: open-air bath only",
+          "ja": "立寄り入浴は露天のみ"
+        }
+      ]
+    },
+    "80": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:00",
+        "19:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {
+        "tue": [
+          "08:00",
+          "16:00"
+        ]
+      },
+      "confidence": "high",
+      "note": "水曜休。火曜は16:00まで",
+      "exceptions": [
+        {
+          "en": "Tuesday until 16:00",
+          "ja": "火曜は16:00まで"
+        }
+      ]
+    },
+    "81": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "13:00",
+        "21:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休",
+      "exceptions": []
+    },
+    "83": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "84": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "08:00",
+        "19:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（宿泊優先）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Overnight guests have priority",
+          "ja": "宿泊者優先"
+        }
+      ]
+    },
+    "86": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "88": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "17:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休（祝日は営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "89": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "15:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（日曜は20:00まで）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Sunday until 20:00",
+          "ja": "日曜は20:00まで"
+        }
+      ]
+    },
+    "90": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "2部制(10-14,18:30-20)＋水曜休",
+      "exceptions": [
+        {
+          "en": "Open in separate sessions — see original text",
+          "ja": "時間帯が分かれます — 元の表記をご確認ください"
+        },
+        {
+          "en": "Closed Wednesday",
+          "ja": "水曜休"
+        },
+        {
+          "en": "Other closures announced on the official site",
+          "ja": "その他は公式サイトで告知"
+        }
+      ]
+    },
+    "95": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "21:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休（祝日除く）",
+      "exceptions": [
+        {
+          "en": "Open when Thursday falls on a public holiday",
+          "ja": "木曜が祝日の場合は営業"
+        }
+      ]
+    },
+    "96": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "19:50"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "97": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "16:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "水曜休",
+      "exceptions": []
+    },
+    "99": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "水曜休。時期により時間変更あり",
+      "exceptions": [
+        {
+          "en": "Hours vary by season — see original text",
+          "ja": "季節により営業時間が変わります — 元の表記をご確認ください"
+        }
+      ]
+    },
+    "100": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "20:00"
+      ],
+      "closed": [
+        "mon",
+        "tue",
+        "wed",
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "月～木曜休（金土日祝のみ営業）",
+      "exceptions": [
+        {
+          "en": "Also open on public holidays",
+          "ja": "祝日も営業"
+        }
+      ]
+    },
+    "104": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "17:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（7/7-10休、水曜16:00開始）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Closed July 7–10",
+          "ja": "7/7〜10休"
+        }
+      ]
+    },
+    "105": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "15:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "水曜休（その他不定休あり、要確認）",
+      "exceptions": [
+        {
+          "en": "Other irregular closures may apply — confirm",
+          "ja": "その他不定休あり — 要確認"
+        }
+      ]
+    },
+    "106": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:00",
+        "18:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "火曜休（その他不定休あり、要確認）",
+      "exceptions": [
+        {
+          "en": "Other irregular closures may apply — confirm",
+          "ja": "その他不定休あり — 要確認"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "107": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "月水金は11-13入浴不可（昼休み）＋12/28-1/3休",
+      "exceptions": [
+        {
+          "en": "Mon/Wed/Fri: no bathing 11:00–13:00",
+          "ja": "月・水・金は11:00〜13:00入浴不可"
+        },
+        {
+          "en": "Closed Dec 28–Jan 3",
+          "ja": "12/28〜1/3休"
+        }
+      ]
+    },
+    "108": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:30",
+        "15:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "110": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休",
+      "exceptions": []
+    },
+    "111": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "06:30",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第1火曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 1st Tuesday each month",
+          "ja": "毎月第1火曜休"
+        }
+      ]
+    },
+    "115": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:30",
+        "21:30"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休（『休み：木曜日』— 旧regexは取りこぼし）",
+      "exceptions": []
+    },
+    "116": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:30",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休（メンテ年2-3日）",
+      "exceptions": [
+        {
+          "en": "A few maintenance closures per year",
+          "ja": "年に2〜3日のメンテナンス休あり"
+        }
+      ]
+    },
+    "117": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "06:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "119": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:00",
+        "21:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休",
+      "exceptions": []
+    },
+    "122": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "19:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "124": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "06:00",
+        "20:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "125": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "127": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "22:00"
+      ],
+      "closed": [
+        "mon"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "月曜休（祝日は翌日）",
+      "exceptions": [
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "128": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "09:30",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "130": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "06:30",
+        "19:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休（家族風呂は7:00-20:00）",
+      "exceptions": [
+        {
+          "en": "Family bath 7:00–20:00",
+          "ja": "家族風呂は7:00〜20:00"
+        }
+      ]
+    },
+    "132": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "133": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "06:00",
+        "24:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第3水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 3rd Wednesday each month",
+          "ja": "毎月第3水曜休"
+        },
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "135": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "21:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休",
+      "exceptions": []
+    },
+    "137": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "07:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "第1火曜休（月次）。閉店は最終受付20:00基準",
+      "exceptions": [
+        {
+          "en": "Closed the 1st Tuesday each month",
+          "ja": "毎月第1火曜休"
+        }
+      ]
+    },
+    "138": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "07:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "第3火曜休（月次）。閉店は最終受付20:00基準",
+      "exceptions": [
+        {
+          "en": "Closed the 3rd Tuesday each month",
+          "ja": "毎月第3火曜休"
+        }
+      ]
+    },
+    "140": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "08:30",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "142": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "06:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・4火曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Tuesday each month",
+          "ja": "毎月第2・第4火曜休"
+        }
+      ]
+    },
+    "143": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "14:00"
+      ],
+      "closed": [
+        "tue",
+        "fri"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・金曜休（メンテ臨時休あり）",
+      "exceptions": [
+        {
+          "en": "Occasional closures for maintenance",
+          "ja": "メンテナンス等で臨時休業あり"
+        }
+      ]
+    },
+    "148": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "150": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "25:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休（翌1:00まで）",
+      "exceptions": [
+        {
+          "en": "Open until 1:00 the next morning",
+          "ja": "翌1:00まで営業"
+        }
+      ]
+    },
+    "151": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "21:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休のみ（祝日が火曜→翌日休）。旧regexの誤『日曜休』を修正",
+      "exceptions": [
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "152": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・第4水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Wednesday each month",
+          "ja": "毎月第2・第4水曜休"
+        },
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "155": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休だが月・木は8:30-15:00入浴不可（昼の中断）",
+      "exceptions": [
+        {
+          "en": "Open daily, but Mon & Thu have no bathing 8:30–15:00",
+          "ja": "無休。月・木は8:30〜15:00入浴不可"
+        }
+      ]
+    },
+    "157": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [
+        "tue",
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・水曜休（祝日営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "159": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:00",
+        "20:30"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "水曜休",
+      "exceptions": []
+    },
+    "160": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "15:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・第4木曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Thursday each month",
+          "ja": "毎月第2・第4木曜休"
+        },
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "161": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "12:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd Wednesday each month",
+          "ja": "毎月第2水曜休"
+        }
+      ]
+    },
+    "162": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "19:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（火金は14:30開始）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Tue & Fri open from 14:30",
+          "ja": "火・金は14:30開店"
+        }
+      ]
+    },
+    "164": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・4火曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Tuesday each month",
+          "ja": "毎月第2・第4火曜休"
+        }
+      ]
+    },
+    "165": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "新館/本館で時間別＋第4火曜休（隔月）",
+      "exceptions": [
+        {
+          "en": "Open in separate sessions — see original text",
+          "ja": "時間帯が分かれます — 元の表記をご確認ください"
+        },
+        {
+          "en": "New & main buildings have different hours; closed the 4th Tuesday (alternating)",
+          "ja": "新館・本館で時間が異なり、第4火曜休（隔月）"
+        }
+      ]
+    },
+    "167": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休だが2部制(6-10,13-22)",
+      "exceptions": [
+        {
+          "en": "Open in two sessions: 6:00–10:00 and 13:00–22:00",
+          "ja": "2部制：6:00〜10:00 と 13:00〜22:00"
+        }
+      ]
+    },
+    "169": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "13:00",
+        "21:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "水曜休",
+      "exceptions": []
+    },
+    "171": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "無休（メンテ日除く）。内湯は20:00まで",
+      "exceptions": [
+        {
+          "en": "Indoor bath until 20:00",
+          "ja": "内湯は20:00まで"
+        },
+        {
+          "en": "Closed on maintenance days",
+          "ja": "メンテナンス日は休"
+        }
+      ]
+    },
+    "172": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [
+        "mon"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "月曜休（祝日営業→翌火曜休）。16-18は宿泊者のみ",
+      "exceptions": [
+        {
+          "en": "16:00–18:00 is for overnight guests only",
+          "ja": "16:00〜18:00は宿泊者のみ"
+        },
+        {
+          "en": "If Monday is a holiday it stays open and closes Tuesday instead",
+          "ja": "月曜が祝日の場合は営業し翌火曜休"
+        }
+      ]
+    },
+    "175": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "12:00",
+        "19:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "176": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "07:00",
+        "21:30"
+      ],
+      "closed": [
+        "mon"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "月曜休",
+      "exceptions": []
+    },
+    "177": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "178": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "13:00",
+        "20:30"
+      ],
+      "closed": [
+        "mon",
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "月・火曜休（祝日営業）。※施設名に臨時休業中の掲示あり",
+      "exceptions": [
+        {
+          "en": "May be temporarily closed — confirm before visiting",
+          "ja": "臨時休業の場合あり — 要確認"
+        },
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "182": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "14:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "183": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:30"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休",
+      "exceptions": []
+    },
+    "184": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [
+        "tue",
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・水曜休（要電話確認）",
+      "exceptions": [
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "188": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "189": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第3月曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 3rd Monday each month",
+          "ja": "毎月第3月曜休"
+        },
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "191": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "192": {
+      "publish": false,
+      "status": "deferred-annual",
+      "window": [
+        "10:00",
+        "27:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "12/31・1/1休のみ（翌3:00まで）— 週休なし。open-all-week候補（方針保留）",
+      "exceptions": [
+        {
+          "en": "Open year-round (closed only Dec 31 & Jan 1)",
+          "ja": "通年営業（12/31・1/1のみ休）"
+        },
+        {
+          "en": "Open until 3:00 the next morning",
+          "ja": "翌3:00まで営業"
+        }
+      ]
+    },
+    "193": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "13:00",
+        "17:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（12/28-1/3休）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Closed Dec 28–Jan 3",
+          "ja": "12/28〜1/3休"
+        }
+      ]
+    },
+    "195": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "14:00",
+        "19:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "196": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "21:50"
+      ],
+      "closed": [
+        "mon"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "月曜休（祝日営業）。入浴10:00-21:50",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "200": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "15:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（夏期は10:00開始）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "201": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "202": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "19:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "水曜休（加えて第2・第4木曜も休＝月次）",
+      "exceptions": [
+        {
+          "en": "Also closed the 2nd & 4th Thursday",
+          "ja": "第2・第4木曜も休"
+        }
+      ]
+    },
+    "203": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Call ahead to confirm",
+          "ja": "事前に電話でご確認ください"
+        }
+      ]
+    },
+    "204": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "11:30",
+        "16:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "205": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "23:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "206": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "207": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "00:00",
+        "24:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "24時間（無人）・無休",
+      "exceptions": [
+        {
+          "en": "Open 24 hours (unstaffed)",
+          "ja": "24時間営業（無人）"
+        }
+      ]
+    },
+    "208": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "08:30",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "209": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "24時間だが10:30-12:00は除く（昼の中断）",
+      "exceptions": [
+        {
+          "en": "Open 24 hours except 10:30–12:00",
+          "ja": "24時間営業（10:30〜12:00を除く）"
+        }
+      ]
+    },
+    "216": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "14:00",
+        "23:00"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休",
+      "exceptions": []
+    },
+    "217": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "13:00",
+        "18:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休（祝日→翌金曜）。旧regexは取りこぼし",
+      "exceptions": [
+        {
+          "en": "If Thursday is a holiday, closed the next Friday",
+          "ja": "木曜が祝日の場合は翌金曜休"
+        }
+      ]
+    },
+    "218": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "13:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "219": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "2部制(8-17,19-21)＋不定休",
+      "exceptions": [
+        {
+          "en": "Open 8:00–17:00 and 19:00–21:00",
+          "ja": "8:00〜17:00 と 19:00〜21:00"
+        }
+      ]
+    },
+    "220": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "12:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "221": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "05:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（年2回）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "222": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "2部制(11-16,18-20)＋不定休",
+      "exceptions": [
+        {
+          "en": "Open 11:00–16:00 and 18:00–20:00",
+          "ja": "11:00〜16:00 と 18:00〜20:00"
+        }
+      ]
+    },
+    "223": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "224": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "20:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休のみ（祝日→翌日休）。旧regexの誤『日曜休』を修正",
+      "exceptions": [
+        {
+          "en": "If the closing day is a public holiday, it closes the next day instead",
+          "ja": "定休日が祝日の場合は翌日休"
+        }
+      ]
+    },
+    "227": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "13:00",
+        "20:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "木曜休",
+      "exceptions": []
+    },
+    "228": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:30",
+        "22:00"
+      ],
+      "closed": [
+        "tue",
+        "thu"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火・木曜休（祝日営業）",
+      "exceptions": [
+        {
+          "en": "Open on public holidays",
+          "ja": "祝日は営業"
+        }
+      ]
+    },
+    "229": {
+      "publish": false,
+      "status": "multi-window",
+      "window": null,
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "2部制(6:30-14,15-22:30)＋第2火曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Open in separate sessions — see original text",
+          "ja": "時間帯が分かれます — 元の表記をご確認ください"
+        },
+        {
+          "en": "Closed the 2nd Tuesday each month",
+          "ja": "毎月第2火曜休"
+        }
+      ]
+    },
+    "230": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "12:00",
+        "19:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休（要予約）",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        },
+        {
+          "en": "Reservation required",
+          "ja": "要予約"
+        }
+      ]
+    },
+    "231": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "22:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "水曜休",
+      "exceptions": []
+    },
+    "232": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "11:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第4月曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 4th Monday each month",
+          "ja": "毎月第4月曜休"
+        }
+      ]
+    },
+    "233": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "06:00",
+        "21:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "234": {
+      "publish": false,
+      "status": "deferred-annual",
+      "window": [
+        "07:00",
+        "21:30"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "1/1休のみ — 週休なし。open-all-week候補（方針保留）",
+      "exceptions": [
+        {
+          "en": "Open year-round (closed only Jan 1)",
+          "ja": "通年営業（1/1のみ休）"
+        }
+      ]
+    },
+    "235": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・4水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 4th Wednesday each month",
+          "ja": "毎月第2・第4水曜休"
+        }
+      ]
+    },
+    "236": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:30",
+        "20:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "medium",
+      "note": "無休（平日12-13は受付休止、7・12月メンテ）",
+      "exceptions": [
+        {
+          "en": "Reception paused 12:00–13:00 on weekdays",
+          "ja": "平日は12:00〜13:00受付休止"
+        },
+        {
+          "en": "Maintenance closures in July & December",
+          "ja": "7・12月にメンテナンス休あり"
+        }
+      ]
+    },
+    "237": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "06:00",
+        "23:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "238": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "23:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第3水曜休（月次、3・8月なし）。金土祝前は24:00まで",
+      "exceptions": [
+        {
+          "en": "Closed the 3rd Wednesday each month (except Mar & Aug)",
+          "ja": "毎月第3水曜休（3・8月は除く）"
+        },
+        {
+          "en": "Fri, Sat & pre-holidays until 24:00",
+          "ja": "金・土・祝前日は24:00まで"
+        }
+      ]
+    },
+    "239": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {
+        "sat": [
+          "10:00",
+          "22:00"
+        ],
+        "sun": [
+          "10:00",
+          "22:00"
+        ]
+      },
+      "confidence": "high",
+      "note": "無休。土日祝は10:00開店",
+      "exceptions": [
+        {
+          "en": "Sat, Sun & holidays open from 10:00",
+          "ja": "土日祝は10:00開店"
+        }
+      ]
+    },
+    "240": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "22:00"
+      ],
+      "closed": [
+        "thu"
+      ],
+      "overrides": {
+        "sat": [
+          "10:00",
+          "22:00"
+        ],
+        "sun": [
+          "10:00",
+          "22:00"
+        ]
+      },
+      "confidence": "medium",
+      "note": "木曜休（加えて月末の金曜も休＝月次）。土日祝10:00開店",
+      "exceptions": [
+        {
+          "en": "Sat, Sun & holidays open from 10:00",
+          "ja": "土日祝は10:00開店"
+        },
+        {
+          "en": "Also closed the last Friday of the month",
+          "ja": "月末の金曜も休"
+        }
+      ]
+    },
+    "241": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "23:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "242": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "17:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休（予約時要電話）",
+      "exceptions": []
+    },
+    "243": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "10:00",
+        "26:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2火・水曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd Tuesday & Wednesday each month",
+          "ja": "毎月第2火・水曜休"
+        }
+      ]
+    },
+    "244": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "11:00",
+        "21:30"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "毎週水曜休",
+      "exceptions": []
+    },
+    "245": {
+      "publish": false,
+      "status": "irregular",
+      "window": [
+        "10:00",
+        "17:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "不定休",
+      "exceptions": [
+        {
+          "en": "Irregular closing days — confirm before visiting",
+          "ja": "不定休 — 事前にご確認ください"
+        }
+      ]
+    },
+    "246": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "06:00",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    },
+    "247": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "09:00",
+        "19:30"
+      ],
+      "closed": [
+        "tue"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "火曜休",
+      "exceptions": []
+    },
+    "248": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "05:00",
+        "21:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休（注: カタログ上はisActive:false／retired）",
+      "exceptions": []
+    },
+    "249": {
+      "publish": false,
+      "status": "monthly",
+      "window": [
+        "06:30",
+        "22:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "第2・3火曜休（月次）",
+      "exceptions": [
+        {
+          "en": "Closed the 2nd & 3rd Tuesday each month",
+          "ja": "毎月第2・第3火曜休"
+        }
+      ]
+    },
+    "250": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "08:30",
+        "17:00"
+      ],
+      "closed": [
+        "wed"
+      ],
+      "overrides": {},
+      "confidence": "high",
+      "note": "水曜休",
+      "exceptions": []
+    },
+    "251": {
+      "publish": true,
+      "status": "structured",
+      "window": [
+        "10:00",
+        "26:00"
+      ],
+      "closed": [],
+      "overrides": {},
+      "confidence": "high",
+      "note": "無休",
+      "exceptions": []
+    }
   }
 }

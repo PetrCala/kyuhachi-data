@@ -147,6 +147,32 @@ def live_schedule(bhf: dict):
     return out
 
 
+def exc_val(exceptions: list) -> dict:
+    """Encode exceptions [{en,ja}] as a Firestore arrayValue of {en,ja} maps."""
+    return {"arrayValue": {"values": [
+        {"mapValue": {"fields": {"en": {"stringValue": e["en"]},
+                                 "ja": {"stringValue": e["ja"]}}}}
+        for e in exceptions]}}
+
+
+def conf_val(confidence: str) -> dict:
+    return {"stringValue": confidence}
+
+
+def live_exceptions(bhf: dict) -> list:
+    vals = bhf.get("exceptions", {}).get("arrayValue", {}).get("values", [])
+    out = []
+    for v in vals:
+        f = v.get("mapValue", {}).get("fields", {})
+        out.append({"en": f.get("en", {}).get("stringValue", ""),
+                    "ja": f.get("ja", {}).get("stringValue", "")})
+    return out
+
+
+def live_confidence(bhf: dict):
+    return bhf.get("confidence", {}).get("stringValue")
+
+
 # --- backfill -----------------------------------------------------------------
 
 def build_plan():
@@ -194,17 +220,19 @@ def _closed_str(s) -> str:
 
 
 def run_curated(commit: bool, show: bool) -> None:
-    """Backfill from the hand-curated data/hours_curated.json: read each live doc,
-    diff its schedule against the curated target, and write only the changes
-    (new/corrected structured schedules, or clear ones now deemed unstructured)."""
+    """Backfill from data/hours_curated.json: read each live doc, diff the three
+    structured sub-fields (schedule, exceptions, confidence) against the curated
+    target, and PATCH only the fields that changed."""
     cur = json.loads(CURATED.read_text(encoding="utf-8"))["onsens"]
     names = _names()
     tok = token()
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    print(f"curated schedule backfill — {'COMMIT' if commit else 'DRY-RUN'}   "
-          f"project={PROJECT}   onsens={len(cur)}\nreading live schedules…")
+    print(f"curated hours backfill — {'COMMIT' if commit else 'DRY-RUN'}   "
+          f"project={PROJECT}   onsens={len(cur)}\nreading live docs…")
 
-    writes, clears, unchanged, deferred, skipped = [], [], 0, [], []
+    changed = []          # (hid, bh_fields, mask, summary)
+    n = {"schedule": 0, "clear": 0, "exceptions": 0, "confidence": 0}
+    deferred, skipped = [], []
     for hid, entry in cur.items():
         if entry["status"] == "deferred-annual":
             deferred.append(hid)
@@ -214,46 +242,56 @@ def run_curated(commit: bool, show: bool) -> None:
             skipped.append(hid)
             continue
         bhf = fields.get("businessHours", {}).get("mapValue", {}).get("fields", {})
-        live, target = live_schedule(bhf), expand_curated(entry)
-        if target == live:
-            unchanged += 1
-        elif target is not None:
-            writes.append((hid, kid, entry, live, target))
-        else:
-            clears.append((hid, kid, entry, live))
+        bh, mask, summary = {}, [], []
 
-    print(f"\n  writes  (new/corrected structured): {len(writes)}")
-    print(f"  clears  (live had a schedule, now raw): {len(clears)}")
-    print(f"  unchanged: {unchanged}   deferred-annual (left raw): {len(deferred)}   "
-          f"skipped (no kid/doc): {len(skipped)}")
+        t_sched, l_sched = expand_curated(entry), live_schedule(bhf)
+        if t_sched != l_sched:
+            bh["schedule"] = sched_val(t_sched)
+            mask.append("businessHours.schedule")
+            if t_sched is None:
+                n["clear"] += 1
+                summary.append(f"sched {_closed_str(l_sched)}→raw")
+            else:
+                n["schedule"] += 1
+                summary.append(f"sched {_closed_str(l_sched)}→{_closed_str(t_sched)}")
+
+        t_exc, l_exc = entry.get("exceptions", []), live_exceptions(bhf)
+        if t_exc != l_exc:
+            bh["exceptions"] = exc_val(t_exc)
+            mask.append("businessHours.exceptions")
+            n["exceptions"] += 1
+            summary.append(f"exc {len(l_exc)}→{len(t_exc)}")
+
+        t_conf, l_conf = entry["confidence"], live_confidence(bhf)
+        if t_conf != l_conf:
+            bh["confidence"] = conf_val(t_conf)
+            mask.append("businessHours.confidence")
+            n["confidence"] += 1
+            summary.append(f"conf {l_conf}→{t_conf}")
+
+        if mask:
+            changed.append((hid, kid, {"businessHours": {"mapValue": {"fields": bh}}}, mask, summary))
+
+    print(f"\n  docs to PATCH: {len(changed)}   (schedule {n['schedule']}, clears {n['clear']}, "
+          f"exceptions {n['exceptions']}, confidence {n['confidence']})")
+    print(f"  deferred-annual (left raw): {len(deferred)}   skipped (no kid/doc): {len(skipped)}")
+    # schedule changes are the interesting ones — always list those; field-only writes are uniform.
     if show or not commit:
-        for hid, _kid, entry, live, target in writes:
-            print(f"  WRITE id={hid:<4} {_closed_str(live):>14} → {_closed_str(target):<14} "
-                  f"[{entry['confidence']}] {names.get(hid,'')[:20]}  ({entry['note']})")
-        for hid, _kid, entry, live in clears:
-            print(f"  CLEAR id={hid:<4} {_closed_str(live):>14} → raw            "
-                  f"{names.get(hid,'')[:20]}  ({entry['status']})")
+        for hid, _kid, _f, _mask, summary in changed:
+            if any(s.startswith("sched") for s in summary) or show:
+                print(f"  id={hid:<4} {names.get(hid,'')[:22]:<22} {'; '.join(summary)}")
     if deferred:
-        print(f"  deferred-annual (open-all-week candidates, left raw pending policy): "
-              f"{','.join(deferred)}")
+        print(f"  deferred-annual: {','.join(deferred)}")
 
     if not commit:
-        print(f"\nDry-run only — nothing written. Would write {len(writes)} and clear "
-              f"{len(clears)} schedules, then bump catalog_meta/current.version. Re-run with --commit.")
+        print("\nDry-run only — nothing written. Re-run with --commit.")
         return
 
-    print(f"\n-- writing {len(writes)} + clearing {len(clears)} businessHours.schedule --")
-    for hid, kid, _e, _live, target in writes:
-        patch(f"onsens/{kid}",
-              {"businessHours": {"mapValue": {"fields": {"schedule": sched_val(target)}}},
-               "updatedAt": {"timestampValue": now}},
-              ["businessHours.schedule", "updatedAt"], tok)
-    for hid, kid, _e, _live in clears:
-        patch(f"onsens/{kid}",
-              {"businessHours": {"mapValue": {"fields": {"schedule": sched_val(None)}}},
-               "updatedAt": {"timestampValue": now}},
-              ["businessHours.schedule", "updatedAt"], tok)
-    print(f"    wrote {len(writes)}, cleared {len(clears)}.")
+    print(f"\n-- patching {len(changed)} docs --")
+    for _hid, kid, fields, mask, _s in changed:
+        fields["updatedAt"] = {"timestampValue": now}
+        patch(f"onsens/{kid}", fields, mask + ["updatedAt"], tok)
+    print(f"    patched {len(changed)}.")
     bump_catalog_version(now, tok)
 
 
