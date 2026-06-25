@@ -73,13 +73,18 @@ If `sample` can't fetch, the host isn't allowlisted (`403` from sandboxes) — r
 a networked shell. If pages fetch but parse empty, the DOM drifted — fix selectors in
 `onsen_scraper/parser.py` before continuing.
 
-**Phase 1 — Detect.** One polite scrape, diffed against the baseline:
+**Phase 1 — Detect.** One polite scrape + the map seed, diffed against the baseline:
 ```bash
-python .claude/skills/catalog-sync/catalog_sync.py detect --discover
+python .claude/skills/catalog-sync/catalog_sync.py detect
 ```
-Writes `reports/<ts>/{changelog.json,summary.md}` and `data/snapshot.next.json`
-(the staging scrape for Phase 6), and prints a **triage** routing each change to its
-phase. Read `summary.md`. If nothing material changed, stop — there's nothing to do.
+`detect` fetches the **map seed** (one request to `/map` → every listed onsen's
+`hid → {name, areaName, lat, lng, address}`). The seed is the authoritative
+membership set (ADDED / REMOVED) and supplies the name + coordinates the detail
+page can't. It writes `reports/<ts>/{changelog.json,summary.md}` and
+`data/snapshot.next.json` (the staging scrape, **incl. the seed**, for Phase 6),
+and prints a **triage** routing each change to its phase — new onsens come out
+fully identified (area：name + coords). Read `summary.md`. If nothing material
+changed, stop.
 
 **Phase 2 — Publish field / fee / retire / add changes** via the surgical publisher:
 ```bash
@@ -107,17 +112,19 @@ python publisher/backfill_schedule.py --from-curated --commit   # writes schedul
 **Order matters:** run this AFTER Phase 2, so the curated schedule lands last and
 isn't masked. (apply.py touches only `raw`/`adultFee`, but keep the discipline.)
 
-**Phase 4 — New onsens (ADDED).** This repo mints the id:
+**Phase 4 — New onsens (ADDED).** `detect` already identified them fully (name /
+area / coords from the seed, detail fields from the scrape, both in staging). Mint
+the stable id:
 ```bash
 python .claude/skills/catalog-sync/catalog_sync.py mint --from-staging          # DRY-RUN
 python .claude/skills/catalog-sync/catalog_sync.py mint --from-staging --commit  # writes onsen-id-map.json
 ```
-Then curate the new onsen's hours (Phase 3) and create its doc. **Boundary:** a new
-onsen's **name + coordinates come from the 88onsen map seed, not the detail page**,
-which isn't wired into this repo yet — so a brand-new onsen can't be fully
-auto-published here. Mint the id, capture detail fields + hours, and hand off the
-name/coords + challenge-pool membership (the latter lives in the **app** repo). Flag
-this explicitly rather than shipping a half-populated doc.
+Then curate the new onsen's hours (Phase 3). **Creating the live Firestore doc
+(`apply.py add`) is the one piece not yet built** — until it lands, a new onsen is
+fully *identified and baselined* (it flows into `promote` as a complete row) but its
+catalog doc is created by hand from the staging data (name/areaName/lat/lng + detail
+fields + curated hours + derived adultFee, isActive:true). **Challenge-pool
+membership lives in the app repo** and is always a separate hand-off.
 
 **Phase 5 — Removed onsens** are handled as `retire` actions in the Phase-2 decisions
 file (`isActive:false`). Nothing else to do for them in Firestore.
@@ -126,7 +133,8 @@ file (`isActive:false`). Nothing else to do for them in Firestore.
 ```bash
 python .claude/skills/catalog-sync/catalog_sync.py promote            # DRY-RUN
 python .claude/skills/catalog-sync/catalog_sync.py promote --commit   # UPDATE/INSERT snapshot.db from staging
-#   add --prune to also drop confirmed-removed rows (use after a --discover detect)
+#   fills name/area/coords from the seed (new rows land COMPLETE; coord drift syncs).
+#   add --prune to also drop confirmed-removed rows.
 ```
 This is the fix for the long-standing gap: `snapshot.db` was never rewritten, so
 every diff was "vs the original scrape." After `promote`, the next `detect` diffs
@@ -154,9 +162,9 @@ fees with the `cost-analysis` skill.
 |---|---|---|
 | `status` | Offline: baseline size, id-map + curated coverage, pending staging. | — |
 | `sample --n N` | Preflight scrape of N pages → parse-health verdict. | — |
-| `detect [--discover] [--limit N]` | One scrape → `reports/<ts>/` + `snapshot.next.json` + triage. | report + staging |
+| `detect [--limit N]` | One scrape + map seed → `reports/<ts>/` + `snapshot.next.json` + triage. | report + staging |
 | `mint (hids… \| --from-staging) [--commit]` | Assign kyuhachiId(s) to new onsens. | `onsen-id-map.json` (gated) |
-| `promote [--scrape PATH] [--prune] [--commit]` | Advance `snapshot.db` from staging (UPDATE/INSERT, optional prune). | `snapshot.db` (gated) |
+| `promote [--scrape PATH] [--prune] [--commit]` | Advance `snapshot.db` from staging (UPDATE/INSERT + seed name/coords, optional prune). | `snapshot.db` (gated) |
 
 ## Guarantees
 
@@ -172,9 +180,15 @@ fees with the `cost-analysis` skill.
 
 ## Not yet automated (call these out, don't fake them)
 
-- **New-onsen name + coordinates** (88onsen map seed) and **challenge-pool membership**
-  (app repo) — Phase 4 mints the id and captures detail fields, but a brand-new onsen
-  needs these two manual hand-offs before it's fully live.
+- **New-onsen live-doc creation (`apply.py add`)** — `detect` now identifies new
+  onsens fully (name/area/coords from the map seed) and `promote` baselines them, but
+  the step that *creates the Firestore doc* from that data is still pending; for now
+  it's done by hand from the staging data. (The doc schema is known: `name`,
+  `areaName`, `lat`, `lng`, `prefecture`, `address`, `phone`, `admissionFee`,
+  `adultFee`, `springQuality`, `websiteUrl`, `imageUrl`, `businessHours`,
+  `isActive`, `catalogVersion`.)
+- **Challenge-pool membership** — adding a new onsen to a challenge pool lives in the
+  **app** repo; always a separate hand-off.
 - **`catalog` baseline adapter** — diffing against the *live published* Firestore
   catalog (vs the local snapshot) is still a stub (`catalog_diff.load_catalog`).
 - **Shared Firestore REST helper** — `apply.py` / `backfill_*.py` still each carry a

@@ -53,6 +53,7 @@ its phases.
 | `.claude/skills/recurate-hours/` | LLM re-parse of changed `business_hours` → `data/hours_curated.json`. |
 | `onsen_scraper/fetcher.py` | Polite HTTP fetch of a detail page by `hid`. |
 | `onsen_scraper/parser.py` | DOM → 13 raw fields (`_FIELD_MAP` over `dl.tableview`). |
+| `onsen_scraper/mapseed.py` | One fetch of `/map` → `hid → {name, areaName, lat, lng, address}` (the fields the detail page lacks; also the authoritative membership set). |
 | `onsen_scraper/{fees,hours}.py` | Free-text → numeric `adultFee` / regex `WeeklySchedule` (the regex is NOT the hours source of truth). |
 | `publisher/apply.py` | Surgical, decisions-driven Firestore publisher: `update`/`retire`/`skip` (writes text fields + `adultFee`; **not** the schedule). |
 | `publisher/backfill_schedule.py` | `--from-curated`: expand `hours_curated.json` → `businessHours.schedule`+`exceptions`+`confidence`. Sole owner of the published grid. |
@@ -73,17 +74,20 @@ its phases.
 ## Roadmap
 
 Done (the end-to-end loop now exists behind `catalog-sync`):
-- ✅ Index/listing crawl → ADDED + authoritative REMOVED (`catalog-diff --discover`).
+- ✅ Authoritative ADDED/REMOVED + membership from the **map seed** (`detect`).
 - ✅ `kyuhachiId` assignment for new onsens (`catalog-sync mint`).
+- ✅ New-onsen **name + coordinates** from the map seed (`onsen_scraper/mapseed.py`);
+  `detect` identifies new onsens fully, `promote` baselines them as complete rows.
 - ✅ `営業時間` → `WeeklySchedule` (LLM-curated `hours_curated.json` + `backfill_schedule --from-curated`).
 - ✅ Versioned backfill/merge publisher (`publisher/apply.py` + the backfills) — never a clean-slate wipe.
 - ✅ Baseline advance after publish (`catalog-sync promote`) — `snapshot.db` is no longer frozen.
 
 Still open:
+- **`apply.py` `add` action** — create the live Firestore doc for a new onsen from
+  the staging data (map seed + detail + curated hours + derived fee). The doc schema
+  is known; until this lands, a new onsen is identified + baselined but its catalog
+  doc is created by hand. Challenge-pool membership stays in the app repo.
 - `catalog` baseline adapter (diff against the live published Firestore catalog, not
   the local snapshot) — `catalog_diff.load_catalog` is a stub.
-- New-onsen **name + coordinates** from the 88onsen map seed (the detail page lacks
-  them), and an `apply.py` `add` action — so a brand-new onsen can be fully published
-  here instead of handed off. Challenge-pool membership stays in the app repo.
 - Shared `publisher/firestore_rest.py` (the REST/auth helper is copied across the
   publisher scripts).
