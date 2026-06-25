@@ -119,12 +119,15 @@ the stable id:
 python .claude/skills/catalog-sync/catalog_sync.py mint --from-staging          # DRY-RUN
 python .claude/skills/catalog-sync/catalog_sync.py mint --from-staging --commit  # writes onsen-id-map.json
 ```
-Then curate the new onsen's hours (Phase 3). **Creating the live Firestore doc
-(`apply.py add`) is the one piece not yet built** — until it lands, a new onsen is
-fully *identified and baselined* (it flows into `promote` as a complete row) but its
-catalog doc is created by hand from the staging data (name/areaName/lat/lng + detail
-fields + curated hours + derived adultFee, isActive:true). **Challenge-pool
-membership lives in the app repo** and is always a separate hand-off.
+Then curate the new onsen's hours (Phase 3) and record the change as an `add`
+decision (Phase 2): **`apply.py` `add` creates the live Firestore doc** — it
+assembles the full `OnsenDocument` from the /map seed (name/areaName/lat/lng) + a
+live detail scrape + the curated hours + a derived `adultFee` + a generated
+`nameKana` + a rehosted photo (`isActive:true`), and **creates** `/onsens/{kid}`.
+It's the sole create (vs PATCH) write — idempotent (skips if the doc exists) and
+gated like every other publish. A new onsen still needs a minted `kyuhachiId` and a
+curated-hours entry first. **Challenge-pool membership lives in the app repo** and is
+always a separate hand-off.
 
 **Phase 5 — Removed onsens** are handled as `retire` actions in the Phase-2 decisions
 file (`isActive:false`). Nothing else to do for them in Firestore.
@@ -201,15 +204,9 @@ so they have their own idempotent backfill instead of riding the detect→apply 
 
 ## Not yet automated (call these out, don't fake them)
 
-- **New-onsen live-doc creation (`apply.py add`)** — `detect` now identifies new
-  onsens fully (name/area/coords from the map seed) and `promote` baselines them, but
-  the step that *creates the Firestore doc* from that data is still pending; for now
-  it's done by hand from the staging data. (The doc schema is known: `name`,
-  `areaName`, `lat`, `lng`, `prefecture`, `address`, `phone`, `admissionFee`,
-  `adultFee`, `springQuality`, `websiteUrl`, `imageUrl`, `businessHours`,
-  `isActive`, `catalogVersion`.)
 - **Challenge-pool membership** — adding a new onsen to a challenge pool lives in the
-  **app** repo; always a separate hand-off.
+  **app** repo; always a separate hand-off. Creating a new onsen's catalog doc (now via
+  `apply.py add`) makes it exist in the catalog, but it never auto-joins a challenge.
 - **`catalog` baseline adapter** — diffing against the *live published* Firestore
   catalog (vs the local snapshot) is still a stub (`catalog_diff.load_catalog`).
 - **Shared Firestore REST helper** — `apply.py` / `backfill_*.py` still each carry a
