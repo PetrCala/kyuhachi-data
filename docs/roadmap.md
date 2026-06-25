@@ -1,59 +1,86 @@
 # kyuhachi-data — Roadmap
 
-_Audit snapshot: 2026-06-23. This repo owns the onsen catalog source of truth: scraping 88onsen.com, maintaining stable `kyuhachiId`s, and publishing the catalog to Firestore (`kyuhachi-fddcc`). The app lives in the separate `kyuhachi` repo and only reads the published catalog._
+_Audit snapshot: 2026-06-25. This repo owns the onsen catalog source of truth: scraping 88onsen.com, maintaining stable `kyuhachiId`s, and publishing the catalog to Firestore (`kyuhachi-fddcc`). The app lives in the separate `kyuhachi` repo and only reads the published catalog._
 
 ## Current state
 
-All five PRs to date are merged to `master`; no open PRs.
+The end-to-end update loop now exists and is orchestrated by the **`catalog-sync`** skill
+(`detect → publish → retire/mint → promote`). All work below is merged to `master`; no open
+PRs. The previously in-flight `feat/catalog-pipeline` branch (changelog-driven `apply.py`)
+has landed.
 
-| PR | What landed |
+What's in place:
+
+| Capability | Where it lives |
 |---|---|
-| #1 | `catalog-diff` hardening — `norm()` strips site-wide "as-of" date stamps; MATERIAL vs MUTED field tiers; per-onsen material/muted split + `suppressedDateStampOnly`. |
-| #2 | `cost-analysis` skill — read-only 88-cost estimator (Monte Carlo + cheapest/priciest bounds). |
-| #3 | Surgical merge-based publisher (`publisher/apply.py`) — MERGE-PATCH only named fields, `retire`→`isActive:false`, never deletes, dry-run by default. |
-| #4 | Shared adult-fee parser (`onsen_scraper/fees.py`) + one-time `adultFee` backfill (`publisher/backfill_fees.py`); fetcher/parser made lazy so `fees` needs no network stack. |
-| #5 | Publish-time `adultFee` recompute hook in `apply.py` `build_update()` + 30s timeout/retry on the Firestore REST helpers. |
+| Polite scraper (fetcher + parser → 13 raw fields), diff baseline, id map | `onsen_scraper/`, `data/snapshot.db`, `data/onsen-id-map.json` |
+| Read-only drift report (MODIFIED / REMOVED, MATERIAL vs MUTED tiers, date-stamp suppression) | `.claude/skills/catalog-diff/` |
+| **Soft-removal detection** — a delisted onsen serves HTTP 200 + empty detail table; `is_soft_removed()` routes it to REMOVED instead of a spurious "material modification" | `catalog_diff.py` + `tests/test_catalog_diff_soft_removal.py` |
+| **ADDED detection + membership from the map seed** — one `/map` fetch is the authoritative membership set and supplies name/area/lat/lng the detail page lacks | `onsen_scraper/mapseed.py`, `catalog-sync detect --discover` |
+| **`kyuhachiId` assignment for new onsens** — mints UUIDs, writes `onsen-id-map.json` (human-gated) | `catalog-sync mint` |
+| **New-onsen name + coordinates** baselined as complete rows | `catalog-sync promote` (overlays the map-seed columns) |
+| Surgical, changelog-driven publisher — `--from-changelog` scaffolds `decisions.json`; `--decisions [--commit]` MERGE-PATCHes only named fields; `update` / `retire` (→ `isActive:false`) / `skip`; never deletes, dry-run by default | `publisher/apply.py` |
+| Numeric `adultFee` — shared parser + publish-time recompute hook + one-time backfill | `onsen_scraper/fees.py`, `apply.py` `build_update()`, `publisher/backfill_fees.py` |
+| `営業時間` → `WeeklySchedule` — LLM-curated `data/hours_curated.json` is the source of truth; `backfill_schedule.py --from-curated` owns the published `businessHours.schedule` + `exceptions` + `confidence`; `recurate-hours` skill refreshes drifted hours | `onsen_scraper/hours.py`, `publisher/backfill_schedule.py`, `.claude/skills/recurate-hours/` |
+| Generated `nameKana` (hiragana reading, gojūon sort key) — auto, no hand-correction; consumed by app PR kyuhachi#143 | `onsen_scraper/readings.py`, `publisher/backfill_name_kana.py` |
+| **Baseline advance after publish** — `snapshot.db` is no longer frozen | `catalog-sync promote` |
+| **GitHub-native automation** — monthly `catalog-detect` cron → `catalog-drift` issue → human-prepared `catalog-publish` PR → `catalog-dry-run` posts the live Firestore diff → merge gates the write behind a `production` environment approval | `.github/workflows/{catalog-detect,catalog-dry-run,catalog-publish}.yml`, `.github/CATALOG_AUTOMATION.md` |
+| Cost estimator (read-only admission-fee Monte Carlo + bounds) | `.claude/skills/cost-analysis/` |
 
-Data: `data/snapshot.db` = 148 onsens; `data/onsen-id-map.json` = 148 `hid`→`kyuhachiId`. Live catalog at `catalog_meta` v2 with `admissionFee` (text) + `adultFee` (numeric yen) per onsen.
+Data: `data/snapshot.db` = 148 onsens (raw fields + `raw_html`); `data/onsen-id-map.json` =
+148 `hid`→`kyuhachiId`. Live catalog carries `admissionFee` (text) + `adultFee` (numeric yen),
+`businessHours.schedule`, and `nameKana` per onsen.
 
-**In-flight (not on origin):** `feat/catalog-pipeline` is being developed in the primary local checkout (uncommitted, not pushed). It refactors `apply.py` from a hardcoded `DECISIONS` list into a **changelog-driven** flow: `--from-changelog` scaffolds a `decisions.json` from a catalog-diff `changelog.json`, then `--decisions <file> [--commit]`, adding a `skip` action. Treat anything touching `publisher/apply.py` as colliding with it.
+Tests: **75 passing** across six files — `test_fees.py` (12), `test_hours.py` (17),
+`test_catalog_sync.py` (11), `test_catalog_diff_soft_removal.py` (14),
+`test_publish_schedule.py` (12), `test_readings.py` (9). Run with `pytest -q` (needs Python
+≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
 
 ## Remaining roadmap
 
-### A. Soft-removal detection in `catalog-diff` — Small; no collision; high leverage
-REMOVED only fires on `FetchError`. A delisted onsen (e.g. hid 248) returns HTTP 200 + page chrome with an empty detail table → parses all-None → surfaces as a spurious "material modification" instead of REMOVED. Fix: detect the empty/delisted parse and route it to `removed`. Why it matters: it's an active correctness bug whose output feeds the changelog the changelog-driven publisher consumes. Risk: false positives on legitimately sparse pages — keep the predicate conservative.
+### A. `apply.py` `add` action — create the live Firestore doc for a new onsen — Medium; the biggest remaining functional gap
+`ACTIONS = ("update", "retire", "skip")` — there is no `add`. A new onsen is now fully
+*identified and baselined* (map seed → `detect --discover` → `mint` → `promote`), but its live
+Firestore document is still created by hand. Scope: an `add` action that builds the doc from the
+staging data (map-seed name/area/coords + detail fields + curated hours + derived `adultFee` +
+generated `nameKana`). The doc schema is known. The `catalog-publish` run already emits a
+`::warning::` listing un-created new onsens until this lands. Challenge-pool membership stays in
+the app repo. Risk: it's the first **create** (not PATCH) write — keep it idempotent and gated.
 
-### B. `catalog` baseline adapter (diff vs live Firestore) — Medium; no `apply.py` collision; synergistic
-`load_catalog()` is `raise NotImplementedError`. Scope: authed REST read of `/onsens` (paginated), decode Firestore typed values, project onto `FIELDS`, map `kyuhachiId`→`hid`. Why it matters: lets the diff run against published truth, not just the drifting local snapshot; closes the live-diff → decisions → publish loop with `feat/catalog-pipeline`. Risk: field-shape mismatch (camelCase + nested `businessHours.raw` vs parser snake_case).
+### B. `catalog` baseline adapter (diff vs live Firestore) — Medium; independent
+`load_catalog()` is still `raise NotImplementedError`, so the diff can only run against the
+local `snapshot.db`, not published truth. Scope: authed REST read of `/onsens` (paginated),
+decode Firestore typed values, project onto `FIELDS`, map `kyuhachiId`→`hid`. Why it matters:
+lets the diff catch drift between the snapshot and what's actually live. Risk: field-shape
+mismatch (camelCase + nested `businessHours.raw` vs the parser's snake_case).
 
-### C. Index/listing crawl → ADDED detection + `kyuhachiId` assignment — Large; downstream of `feat/catalog-pipeline`; higher risk
-`diff()` computes `added` but it's only meaningful once a listing crawl feeds in new ids; today the pipeline is blind to brand-new onsens (MODIFIED/REMOVED over the 148 known hids only). Scope: crawl the listing/map seed, discover new hids, mint UUID `kyuhachiId`s, write `onsen-id-map.json`. Why it matters: the single biggest functional gap — the catalog can't grow without it; prerequisite for the publisher's `add` action. Risk: writes the irreversible id-map — needs idempotency + a human gate.
+### C. DRY the Firestore REST helpers into `publisher/firestore_rest.py` — Small; mechanical
+`token` / `_open` / `patch` / `ival` / `sval` are copy-pasted across `apply.py`,
+`backfill_fees.py`, `backfill_name_kana.py`, and `backfill_schedule.py`. Now safe to extract —
+the `apply.py` rewrite that used to collide with it has merged. Low-risk; ship with a smoke test
+that each script still authenticates.
 
-### D. DRY the Firestore REST helpers into `publisher/firestore_rest.py` — Small; COLLIDES with `feat/catalog-pipeline`
-`token`/`_open`/`patch`/`ival` are duplicated across `apply.py` and `backfill_fees.py` (plus `sval` / `get_fields`). Mechanical extraction, low-risk — but it touches `apply.py`, which `feat/catalog-pipeline` is rewriting. Do it immediately AFTER that branch lands.
-
-### E. Versioned-publisher maturation (the `add` action + full-publish path) — Medium; largely == `feat/catalog-pipeline`
-`apply.py` is the genesis; `feat/catalog-pipeline` is the changelog-driven maturation. Remaining after it merges: an `add` action for new onsens (blocked on C — no `kyuhachiId` to add a doc), and eventually a full scrape→snapshot→Firestore versioned publish. Don't duplicate the in-flight branch.
-
-### F. `営業時間` → `WeeklySchedule` adapter — Medium; mostly independent; app-facing
-**Parser landed** (`onsen_scraper/hours.py` + `tests/test_hours.py` + read-only `hours_report`): `parse_hours()` / `parsed_hours_doc()` project a single-window + explicit `無休`/weekday closure onto the app's `ParsedHours` shape (null day = closed), falling back to `raw` otherwise. Coverage on the snapshot: **56/148 structured** (20 open-all, 36 weekday-closed); the rest are genuinely irregular (`不定休`/`第N曜休`/multi-window) and stay raw. It deliberately does **not** infer "open daily" from a missing closed day — that gap is the official-site cross-check, not this adapter.
-**Publish wiring landed** too: `apply.py` `build_update()` now recomputes `businessHours.schedule` from `parsed_hours_doc()` whenever the hours text changes (parallels the `adultFee` hook), and `publisher/backfill_schedule.py` is the one-time fill (offline dry-run; writes 56/148 structured schedules — 20 open-all + 36 weekday-closed — skips raw-only). Policy per owner: `無休`/no-closed-day → open every day per window; no hours text at all → 24/7; hours-present-but-unparseable → `raw` only.
-Remaining: **app side** (separate repo): the current `WeeklySchedule` can't hold holiday-exception notes, split windows, or Nth-weekday closures — those survive only in `raw`; richer rendering would need a type extension. The app already renders `businessHours.schedule` (collapsed "Show weekly hours" grid, null day = "Closed"), so the backfill lights it up with no app change — but that render path has never run live, so smoke-test one onsen first. Risk: Japanese hours text is highly irregular — keep the raw fallback dominant.
-
-### G. Live re-publish smoke test of `apply.py` — Operational; BLOCKED on environment
-The `adultFee` publish hook's fetch→derive→PATCH path has never run live — 88onsen.com 403s from sandboxes. Needs one run from an allowlisted environment before the next real publish. A release gate, not a coding item.
+### Operational — live-write smoke test under WIF — release gate, not a coding item
+The publisher's fetch → derive → PATCH path and the `gcloud`-minted access token have never run
+against live Firestore from CI — 88onsen.com 403s from sandboxes, and Workload Identity
+Federation is configured but unproven. Before the first real automated publish, open a PR
+editing `data/hours_curated.json` and confirm `catalog-dry-run` authenticates and posts a diff
+(see `.github/CATALOG_AUTOMATION.md` → "Smoke test"). If token minting fails under WIF, the fix
+is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling out to `gcloud`.
 
 ### Cross-cutting
-- Tests are `tests/test_fees.py` only (12 cases); no tests for `catalog_diff` / `apply` / `backfill`, and there's no CI (`.github/workflows`). New work in A/D should ship with tests.
-- Cross-repo: the numeric `adultFee` is inert until the **app repo** adds `adultFee` to `OnsenDocument` + the Phase-4 Stats budget card.
+- New work in A/B/C should ship with tests — the suite already covers fees, hours, sync,
+  soft-removal, schedule publish, and readings.
+- Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, and `nameKana`
+  from the published catalog; coordinate any schema change with it.
 
 ## Recommended order
 
-1. **A — soft-removal detection.** Small, zero collision with `feat/catalog-pipeline`, fixes a verified correctness bug whose output feeds the changelog-driven publisher. Best leverage-to-effort.
-2. **B — `catalog` baseline adapter.** Independent of `apply.py`; gives the diff a real baseline and sets up the live-diff → publish loop.
-3. **D — extract `publisher/firestore_rest.py`** — but only AFTER `feat/catalog-pipeline` merges (else guaranteed `apply.py` conflict).
-4. **C — index crawl + ADDED + `kyuhachiId` assignment**, then the publisher `add` action (part of E). Biggest functional gap, but largest/highest-risk and downstream of the in-flight branch.
-5. **F — `WeeklySchedule` adapter.** Nice enrichment; needs the app-repo type; raw fallback works today.
-- **G (live smoke test):** do opportunistically from an allowlisted env; it's a release gate.
-
-**Collision flags:** D and E touch `apply.py` → do them after `feat/catalog-pipeline` lands. A and B don't touch `apply.py` and both improve the changelog/baseline that branch consumes → safe to start in parallel. C's `add` action is downstream of it.
+1. **A — `apply.py` `add` action.** The largest remaining functional gap: new onsens are
+   identified and baselined but their live docs are still hand-made. Highest leverage.
+2. **C — extract `publisher/firestore_rest.py`.** Small and mechanical; no longer blocked now
+   that the changelog-driven `apply.py` has merged. Good to land before A/B add more duplication.
+3. **B — `catalog` baseline adapter.** Independent enrichment; gives the diff a published-truth
+   baseline alongside the local snapshot.
+- **Operational smoke test:** do opportunistically from an allowlisted env / under WIF before the
+  first real automated publish. It's a release gate.

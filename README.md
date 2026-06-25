@@ -39,6 +39,15 @@ python .claude/skills/catalog-sync/catalog_sync.py detect --discover   # scrape 
 # …then follow the phases in .claude/skills/catalog-sync/SKILL.md
 ```
 
+### Automated updates (GitHub CI)
+
+The same loop also runs through GitHub, with the operator acting only as an approver:
+a monthly `catalog-detect` cron opens a `catalog-drift` issue on material change, a human
+Claude session prepares a `catalog-publish` PR, `catalog-dry-run` posts the live Firestore
+diff, and merging gates the write behind a `production` environment approval. See
+[`.github/CATALOG_AUTOMATION.md`](.github/CATALOG_AUTOMATION.md) for the wiring and one-time
+setup.
+
 ## Setup
 
 ```bash
@@ -74,5 +83,6 @@ for the full workflow.
 - [x] `営業時間` → `WeeklySchedule` via LLM-curated `hours_curated.json` + backfill
 - [x] Versioned backfill/merge publisher (`publisher/`); baseline advance (`promote`)
 - [x] Generated `nameKana` (hiragana reading) for gojūon sorting (`backfill_name_kana.py`)
+- [x] New-onsen **name + coordinates** from the map seed (`detect --discover` → `mint` → `promote`)
 - [ ] `catalog` baseline adapter (diff against the live published Firestore catalog)
-- [ ] New-onsen name/coords from the map seed + an `apply.py` `add` action
+- [ ] `apply.py` `add` action — create the live Firestore doc for a new onsen from staging data
