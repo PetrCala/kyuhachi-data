@@ -83,8 +83,15 @@ def test_backfill_plan_over_snapshot():
     import backfill_name_kana as bf  # noqa: E402  (publisher/ is non-package)
 
     plan = bf.build_plan()
-    assert len(plan) == 148
-    # Every row is (id, kid, name, kana); the snapshot has a name for all 148, so
+    # One row per snapshot onsen — derive the expected set from the baseline rather
+    # than hard-coding a count, so a `promote` that grows the snapshot doesn't break
+    # this *post*-promote check (the publish job runs it after promote).
+    import sqlite3
+    con = sqlite3.connect(f"file:{bf.SNAPSHOT_DB}?mode=ro", uri=True)
+    snap_ids = {r[0] for r in con.execute("select id from onsens")}
+    con.close()
+    assert {p[0] for p in plan} == snap_ids
+    # Every row is (id, kid, name, kana); the snapshot has a name for every onsen, so
     # every onsen should produce a non-null hiragana reading.
     assert all(kana for _oid, _kid, _name, kana in plan)
     for _oid, _kid, _name, kana in plan:
