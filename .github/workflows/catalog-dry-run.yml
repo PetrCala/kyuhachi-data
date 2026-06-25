@@ -1,0 +1,88 @@
+name: catalog-dry-run
+
+# Runs on a prep PR (decisions / curated hours). Surfaces the AUTHORITATIVE "what will
+# change" diff against live Firestore (read-only) BEFORE you merge, so the merge is an
+# informed gate. Requires Workload Identity Federation — inert until the repo variables
+# are configured (see .github/CATALOG_AUTOMATION.md). Read-only: never writes Firestore.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - decisions.json
+      - data/hours_curated.json
+      - data/onsen-id-map.json
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write # OIDC token for Workload Identity Federation
+
+jobs:
+  dry-run:
+    # Skip entirely until WIF is wired up — keeps the check from failing red pre-setup.
+    if: ${{ vars.WIF_PROVIDER != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: kyuhachi-fddcc
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_READONLY }}
+          # Exports GOOGLE_APPLICATION_CREDENTIALS so the scripts' ADC token() resolves.
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: apply.py — dry-run (fields / fees / retire)
+        run: |
+          set -uo pipefail
+          if [ -f decisions.json ]; then
+            uv run --python 3.12 python publisher/apply.py --decisions decisions.json 2>&1 | tee apply.out
+          else
+            echo "(no decisions.json in this PR — skipping apply dry-run)" | tee apply.out
+          fi
+
+      - name: backfill_schedule.py --from-curated — dry-run (reads live Firestore)
+        run: |
+          set -uo pipefail
+          uv run --python 3.12 python publisher/backfill_schedule.py --from-curated 2>&1 | tee backfill.out
+
+      - name: Tests
+        run: uv run --python 3.12 --with pytest python -m pytest tests/
+
+      - name: Build comment
+        run: |
+          {
+            echo "## 🔍 Catalog publish dry-run"
+            echo ""
+            echo "This is exactly what the gated \`catalog-publish\` workflow will write on merge."
+            echo ""
+            echo "<details><summary><code>apply.py --decisions</code> (fields / fees / retire)</summary>"
+            echo ""
+            echo '```'
+            cat apply.out
+            echo '```'
+            echo ""
+            echo "</details>"
+            echo ""
+            echo "<details><summary><code>backfill_schedule.py --from-curated</code> (hours grid)</summary>"
+            echo ""
+            echo '```'
+            cat backfill.out
+            echo '```'
+            echo ""
+            echo "</details>"
+          } > comment.md
+
+      - name: Post sticky comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: catalog-dry-run
+          path: comment.md
