@@ -53,3 +53,59 @@ def test_backfill_plan_over_snapshot():
     for _oid, _kid, _name, sched, _reason in structured:
         fields = bf.sched_val(sched)["mapValue"]["fields"]
         assert set(fields) == set(DAYS)
+
+
+# --- curated (hand/LLM-parsed) dataset --------------------------------------- #
+
+import json  # noqa: E402
+
+CURATED = json.loads((REPO / "data" / "hours_curated.json").read_text())["onsens"]
+
+
+def test_curated_covers_every_snapshot_onsen():
+    import sqlite3
+    con = sqlite3.connect(f"file:{REPO/'data'/'snapshot.db'}?mode=ro", uri=True)
+    snap = {str(r[0]) for r in con.execute("select id from onsens")}
+    con.close()
+    assert set(CURATED) == snap  # exactly the 148, no more, no fewer
+
+
+def test_curated_entries_wellformed():
+    import re
+    TIME = re.compile(r"^\d{2}:\d{2}$")
+    for hid, e in CURATED.items():
+        assert set(e["closed"]) <= set(bf._ABBR), hid
+        if e["publish"]:
+            assert e["window"] and all(TIME.match(t) for t in e["window"]), hid
+        for ov in e["overrides"].values():
+            assert ov is None or all(TIME.match(t) for t in ov), hid
+
+
+def test_expand_curated_open_all_and_weekday():
+    # open-all (無休)
+    s = bf.expand_curated({"publish": True, "window": ["10:00", "21:30"],
+                           "closed": [], "overrides": {}})
+    assert s["monday"] == {"opens": "10:00", "closes": "21:30"}
+    assert all(v is not None for v in s.values())
+    # weekday closed
+    s = bf.expand_curated({"publish": True, "window": ["10:00", "22:00"],
+                           "closed": ["tue"], "overrides": {}})
+    assert s["tuesday"] is None and s["monday"]["opens"] == "10:00"
+    # per-day override
+    s = bf.expand_curated({"publish": True, "window": ["08:00", "19:00"],
+                           "closed": ["wed"], "overrides": {"tue": ["08:00", "16:00"]}})
+    assert s["tuesday"] == {"opens": "08:00", "closes": "16:00"}
+    assert s["wednesday"] is None
+    # not published → None
+    assert bf.expand_curated({"publish": False, "window": None,
+                              "closed": [], "overrides": {}}) is None
+
+
+def test_curated_fixes_known_bugs():
+    # 151/224: the 翌日休 spurious-Sunday cases must be Tue-only / Thu-only now.
+    s151 = bf.expand_curated(CURATED["151"])
+    assert s151["sunday"] is not None and s151["tuesday"] is None
+    s224 = bf.expand_curated(CURATED["224"])
+    assert s224["sunday"] is not None and s224["thursday"] is None
+    # 元湯 (11) stays deferred (no grid for now).
+    assert CURATED["11"]["publish"] is False and CURATED["11"]["status"] == "deferred-annual"
