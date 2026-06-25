@@ -44,7 +44,14 @@ def test_apply_does_not_encode_schedule():
 
 def test_backfill_plan_over_snapshot():
     plan = bf.build_plan()
-    assert len(plan) == 148
+    # One row per snapshot onsen — derive the expected set from the baseline rather
+    # than hard-coding a count, so a `promote` that grows the snapshot (new onsens)
+    # doesn't break this *post*-promote check (the publish job runs it after promote).
+    import sqlite3
+    con = sqlite3.connect(f"file:{bf.SNAPSHOT_DB}?mode=ro", uri=True)
+    snap_ids = {r[0] for r in con.execute("select id from onsens")}
+    con.close()
+    assert {p[0] for p in plan} == snap_ids
     structured = [p for p in plan if p[3] is not None]
     # The snapshot yields a structured schedule for the open-all + weekday-closed
     # onsens (see hours_report); the rest stay raw-only. Sanity-bound it.
