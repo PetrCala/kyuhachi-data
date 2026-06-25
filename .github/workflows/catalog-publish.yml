@@ -1,0 +1,129 @@
+name: catalog-publish
+
+# The live write. Fires when a prep PR merges to master (decisions / curated hours land).
+# A dry_run job runs first; the publish job is gated behind the `production` environment
+# (you as required reviewer) and pauses for approval before any Firestore write. Requires
+# Workload Identity Federation — inert until repo variables are set (CATALOG_AUTOMATION.md).
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - decisions.json
+      - data/hours_curated.json
+  workflow_dispatch:
+
+permissions:
+  contents: write # to push the advanced snapshot.db baseline back to master
+  id-token: write # OIDC token for Workload Identity Federation
+
+concurrency:
+  group: catalog-publish
+  cancel-in-progress: false
+
+jobs:
+  # Read-only preview the approver sees in the run before approving the gate.
+  dry_run:
+    if: ${{ vars.WIF_PROVIDER != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: google-github-actions/auth@v2
+        with:
+          project_id: kyuhachi-fddcc
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_READONLY }}
+          create_credentials_file: true
+          export_environment_variables: true
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Dry-run preview
+        run: |
+          set -uo pipefail
+          {
+            echo "## Catalog publish — dry-run preview"
+            echo '### apply.py --decisions'
+            echo '```'
+            if [ -f decisions.json ]; then
+              uv run --python 3.12 python publisher/apply.py --decisions decisions.json 2>&1
+            else
+              echo "(no decisions.json — only hours will publish)"
+            fi
+            echo '```'
+            echo '### backfill_schedule.py --from-curated'
+            echo '```'
+            uv run --python 3.12 python publisher/backfill_schedule.py --from-curated 2>&1
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Tests
+        run: uv run --python 3.12 --with pytest python -m pytest tests/
+
+  # Gated live write. `environment: production` pauses for the required reviewer.
+  publish:
+    needs: dry_run
+    if: ${{ vars.WIF_PROVIDER != '' }}
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: google-github-actions/auth@v2
+        with:
+          project_id: kyuhachi-fddcc
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_PUBLISH }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # Regenerate the staging scrape (gitignored) that `promote` consumes, and refresh
+      # the seed/membership. Field values published by apply.py are re-fetched live anyway.
+      - name: Detect (regenerate staging)
+        run: uv run --python 3.12 python .claude/skills/catalog-sync/catalog_sync.py detect
+
+      # Fail-fast sequence — order matches the catalog-sync runbook (publish before promote).
+      - name: Publish fields / fees / retire
+        run: |
+          set -euo pipefail
+          if [ -f decisions.json ]; then
+            uv run --python 3.12 python publisher/apply.py --decisions decisions.json --commit
+          else
+            echo "no decisions.json — skipping field/fee/retire publish"
+          fi
+
+      - name: Publish curated hours
+        run: uv run --python 3.12 python publisher/backfill_schedule.py --from-curated --commit
+
+      - name: Advance the baseline (promote)
+        run: uv run --python 3.12 python .claude/skills/catalog-sync/catalog_sync.py promote --commit
+
+      - name: Tests
+        run: uv run --python 3.12 --with pytest python -m pytest tests/
+
+      # New onsens are baselined by promote but their Firestore doc is NOT created here
+      # (apply.py `add` is not built yet). Surface them so they aren't silently dropped.
+      - name: Flag ADDED onsens (manual doc-creation pending)
+        run: |
+          set -uo pipefail
+          python3 -c "import glob,json; reps=sorted(glob.glob('reports/*/changelog.json')); added=(json.load(open(reps[-1])).get('added',[]) if reps else []); print('::warning::ADDED onsens '+', '.join(str(a['hid']) for a in added)+' are baselined but their Firestore docs need manual creation (apply.py add is not built yet) plus an app-repo challenge-pool hand-off.') if added else print('no ADDED onsens')"
+
+      # Write-back: the only repo mutation. snapshot.db is NOT in the trigger paths, so
+      # this push does not re-trigger the workflow.
+      - name: Push advanced snapshot baseline
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/snapshot.db; then
+            echo "snapshot.db unchanged — nothing to push"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/snapshot.db
+            git commit -m "chore(catalog): advance snapshot baseline after publish [skip ci]"
+            git push origin HEAD:master
+          fi

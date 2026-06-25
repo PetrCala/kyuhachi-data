@@ -1,0 +1,94 @@
+name: catalog-detect
+
+# Monthly drift check against 88onsen.com. No secrets, no Firestore, no LLM — it only
+# scrapes (politely) and, when something material changed, opens/refreshes a nudge issue
+# that hands the operator a ready-to-paste prep prompt. See .github/CATALOG_AUTOMATION.md.
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # 00:00 UTC on the 1st of each month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: catalog-detect
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      # Preflight: are the selectors intact and is 88onsen reachable? A non-zero exit
+      # means selector drift or blocked egress — alert and stop (detection would be blind).
+      - name: Preflight — parse health
+        run: |
+          set -uo pipefail
+          if uv run --python 3.12 python .claude/skills/catalog-sync/catalog_sync.py sample --n 10; then
+            echo "parse health OK"
+          else
+            echo "::error::sample failed — selector drift or egress to 88onsen.com blocked"
+            gh label create catalog-pipeline-broken --color B60205 \
+              --description "Catalog automation needs attention" --force || true
+            body=$'**catalog-detect preflight failed.** `sample` could not parse 88onsen.com detail pages — either the DOM selectors drifted or egress to 88onsen.com is blocked. Monthly detection did **not** run.\n\nFix: check `onsen_scraper/parser.py` selectors (DOM drift) or restore network egress, then re-run this workflow.'
+            num=$(gh issue list --label catalog-pipeline-broken --state open --json number --jq '.[0].number // empty')
+            if [ -n "$num" ]; then
+              gh issue edit "$num" --body "$body"
+            else
+              gh issue create --title "Catalog pipeline broken: parse-health preflight failed" \
+                --label catalog-pipeline-broken --body "$body"
+            fi
+            exit 1
+          fi
+
+      # One polite scrape + the /map seed, diffed against the snapshot baseline.
+      - name: Detect drift
+        run: uv run --python 3.12 python .claude/skills/catalog-sync/catalog_sync.py detect
+
+      # Decide fire/seed_ok and render the nudge body from the prep-prompt template.
+      - name: Triage
+        id: triage
+        run: python3 .github/scripts/triage.py
+
+      # The /map seed failed to fetch → ADD/REMOVE detection was disabled this run.
+      # Field-level changes are still valid, so we alert but do not fail the run.
+      - name: Alert — degraded membership (seed unreachable)
+        if: steps.triage.outputs.seed_ok != 'true'
+        run: |
+          gh label create catalog-pipeline-broken --color B60205 \
+            --description "Catalog automation needs attention" --force || true
+          body=$'**catalog-detect ran with degraded membership.** The 88onsen `/map` seed could not be fetched, so ADD/REMOVE (new + delisted onsen) detection was **off** this run. Field-level change detection still ran.\n\nIf this persists, check egress to `https://www.88onsen.com/map` and the `parse_map_seed` selectors in `onsen_scraper/mapseed.py`, then re-run.'
+          num=$(gh issue list --label catalog-pipeline-broken --state open --json number --jq '.[0].number // empty')
+          if [ -n "$num" ]; then
+            gh issue edit "$num" --body "$body"
+          else
+            gh issue create --title "Catalog pipeline degraded: map seed unreachable" \
+              --label catalog-pipeline-broken --body "$body"
+          fi
+
+      # Material change → open or refresh the single nudge issue (dedup by label).
+      - name: Open / refresh drift nudge
+        if: steps.triage.outputs.fire == 'true'
+        run: |
+          gh label create catalog-drift --color FBCA04 \
+            --description "Onsen catalog drift detected — run a prep session" --force || true
+          num=$(gh issue list --label catalog-drift --state open --json number --jq '.[0].number // empty')
+          if [ -n "$num" ]; then
+            echo "refreshing existing nudge #$num"
+            gh issue edit "$num" --body-file issue_body.md
+          else
+            gh issue create --title "Onsen catalog drift detected — prep session needed" \
+              --label catalog-drift --body-file issue_body.md
+          fi
+
+      - name: No material change
+        if: steps.triage.outputs.fire != 'true'
+        run: echo "No material drift — nothing to do."
