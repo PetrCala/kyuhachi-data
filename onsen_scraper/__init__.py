@@ -14,6 +14,7 @@ to be installed.
 
 from onsen_scraper.fees import CORRECTIONS, adult_fee, fee_for
 from onsen_scraper.hours import HoursParse, parse_hours, parsed_hours_doc
+from onsen_scraper.mapseed import MAP_URL, fetch_map_seed, parse_map_seed
 
 _LAZY = {
     "FetchError": "onsen_scraper.fetcher",
@@ -30,6 +31,9 @@ __all__ = [
     "parse_hours",
     "parsed_hours_doc",
     "HoursParse",
+    "MAP_URL",
+    "fetch_map_seed",
+    "parse_map_seed",
     "FetchError",
     "fetch_detail_page",
     "fetch_url",

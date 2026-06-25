@@ -13,16 +13,19 @@ Stages:
              coverage, pending staging). No network, no auth. Start here.
   sample   — preflight: scrape N detail pages, report parse health, stop. Catches
              a dead allowlist or DOM drift before a full run.
-  detect   — ONE polite scrape of the source, diffed against the snapshot baseline
-             (reuses the catalog-diff engine). Writes the changelog report AND a
-             staging scrape (data/snapshot.next.json) for `promote`. With
-             --discover it crawls the index → ADDED + authoritative REMOVED.
+  detect   — ONE polite scrape of the source + the map seed, diffed against the
+             snapshot baseline (reuses the catalog-diff engine). The seed (one
+             fetch of /map) is the authoritative membership set → ADDED/REMOVED,
+             and supplies the name/area/coords the detail page lacks. Writes the
+             changelog report AND a staging scrape (data/snapshot.next.json,
+             incl. the seed) for `promote`.
   mint     — assign a stable kyuhachiId (UUID) to new onsens in onsen-id-map.json.
              This repo solely owns id assignment. Gated by --commit.
   promote  — advance the (otherwise frozen) snapshot.db baseline from the staging
-             scrape: UPDATE changed detail fields, INSERT new onsens, optionally
-             --prune confirmed-removed rows. Run this LAST, after a successful
-             publish, so the next `detect` diffs against reality. Gated by --commit.
+             scrape: UPDATE changed detail fields, fill name/area/coords from the
+             seed, INSERT new onsens as COMPLETE rows, optionally --prune
+             confirmed-removed rows. Run this LAST, after a successful publish, so
+             the next `detect` diffs against reality. Gated by --commit.
 
 What this driver deliberately does NOT do: write Firestore (that's the publisher
 scripts, with their own --commit gate) and re-parse hours with a regex (that's the
@@ -33,7 +36,7 @@ and sample touch the network (they import the catalog-diff scraper lazily).
 Usage:
   python catalog_sync.py status
   python catalog_sync.py sample --n 10
-  python catalog_sync.py detect --discover
+  python catalog_sync.py detect
   python catalog_sync.py mint --from-staging            # dry-run; add --commit
   python catalog_sync.py promote                        # dry-run; add --commit
 """
@@ -56,15 +59,17 @@ CURATED_PATH = DATA / "hours_curated.json"
 STAGING_PATH = DATA / "snapshot.next.json"
 CATALOG_DIFF_DIR = REPO_ROOT / ".claude" / "skills" / "catalog-diff"
 
-# The detail-page fields the parser produces — the only columns `promote` writes
-# (name/area/lat/lng come from the map seed, NOT the detail page, so a new onsen's
-# row is detail-only until the map seed is wired in). Kept in sync with
-# catalog_diff.FIELDS by test_detail_fields_match_catalog_diff so the two can't drift.
+# The detail-page fields the parser produces. Kept in sync with catalog_diff.FIELDS
+# by test_detail_fields_match_catalog_diff so the two can't drift.
 DETAIL_FIELDS = (
     "prefecture", "address", "phone", "business_hours", "admission_fee",
     "spring_quality", "website_url", "image_url", "access_info",
     "recommendation", "efficacy", "senjin_benefits", "covid_measures",
 )
+# snapshot columns the detail page CAN'T supply — sourced from the map seed
+# (onsen_scraper.mapseed: name/areaName/lat/lng). `promote` fills these from the
+# seed carried in the staging file, completing new rows and syncing coord drift.
+SEED_COLS = ("facility_name", "onsen_area_name", "latitude", "longitude")
 DETAIL_URL = "https://www.88onsen.com/spot/detail/hid/{id}"  # mirrors fetcher.DETAIL_URL_TEMPLATE
 
 
@@ -100,35 +105,51 @@ def build_staging(scrape: dict, index_removed=()) -> dict:
     return {"onsens": onsens, "removed": removed, "fetchFailed": sorted(fetch_failed)}
 
 
-def promote_into_db(con: sqlite3.Connection, staging: dict, *, prune: bool = False,
-                    now: str | None = None) -> dict:
+def promote_into_db(con: sqlite3.Connection, staging: dict, *, seed: dict | None = None,
+                    prune: bool = False, now: str | None = None) -> dict:
     """Apply a staging scrape onto an open snapshot.db connection (no commit here —
     the caller commits or rolls back, which is how `promote` does its dry-run).
 
-    UPDATEs the detail columns of existing onsens whose fields changed, INSERTs new
-    onsens (detail-only row + derived URL + scraped_at), and — only with prune —
-    DELETEs confirmed-removed rows. Idempotent: re-applying the same staging is a
-    no-op. Returns per-action counts."""
-    now = now or _now()
-    cols = ",".join(DETAIL_FIELDS)
-    existing = {row[0]: dict(zip(DETAIL_FIELDS, row[1:]))
-                for row in con.execute(f"select id,{cols} from onsens")}
+    Each onsen's row is recomputed from its existing row with the fresh detail
+    fields overlaid, plus the map-seed columns (name/area/lat/lng) when the seed
+    carries that hid — so existing rows gain coordinates / sync coord drift and a
+    brand-new onsen lands as a COMPLETE row, not detail-only. UPDATEs rows that
+    changed, INSERTs new onsens (+ derived URL + scraped_at), and — only with
+    prune — DELETEs confirmed-removed rows. Idempotent. Returns per-action counts.
 
-    updated = inserted = unchanged = 0
+    `seed` defaults to staging["seed"] (written by `detect`); pass {} to skip.
+    """
+    now = now or _now()
+    seed = staging.get("seed", {}) if seed is None else seed
+    managed = [*DETAIL_FIELDS, *SEED_COLS]
+    existing = {row[0]: dict(zip(managed, row[1:]))
+                for row in con.execute(f"select id,{','.join(managed)} from onsens")}
+
+    updated = inserted = unchanged = seeded = 0
     for hid_s, fields in staging.get("onsens", {}).items():
         hid = int(hid_s)
-        new = {f: fields.get(f) for f in DETAIL_FIELDS}
+        # Start from the existing row so columns we don't manage this run survive,
+        # then overlay fresh detail fields and (if present) the map-seed columns.
+        new = dict(existing.get(hid) or {c: None for c in managed})
+        for f in DETAIL_FIELDS:
+            new[f] = fields.get(f)
+        s = seed.get(hid_s)
+        if s:
+            seeded += 1
+            new["facility_name"], new["onsen_area_name"] = s.get("name"), s.get("areaName")
+            new["latitude"], new["longitude"] = s.get("lat"), s.get("lng")
+
         if hid in existing:
             if existing[hid] == new:
                 unchanged += 1
                 continue
-            assigns = ",".join(f"{f}=?" for f in DETAIL_FIELDS)
+            assigns = ",".join(f"{c}=?" for c in managed)
             con.execute(f"update onsens set {assigns} where id=?",
-                        [new[f] for f in DETAIL_FIELDS] + [hid])
+                        [new[c] for c in managed] + [hid])
             updated += 1
         else:
-            allcols = ["id", *DETAIL_FIELDS, "detail_page_url", "scraped_at"]
-            vals = [hid, *[new[f] for f in DETAIL_FIELDS], DETAIL_URL.format(id=hid), now]
+            allcols = ["id", *managed, "detail_page_url", "scraped_at"]
+            vals = [hid, *[new[c] for c in managed], DETAIL_URL.format(id=hid), now]
             con.execute(f"insert into onsens ({','.join(allcols)}) "
                         f"values ({','.join('?' * len(allcols))})", vals)
             inserted += 1
@@ -139,7 +160,7 @@ def promote_into_db(con: sqlite3.Connection, staging: dict, *, prune: bool = Fal
             cur = con.execute("delete from onsens where id=?", (int(hid),))
             pruned += cur.rowcount
     return {"updated": updated, "inserted": inserted, "unchanged": unchanged,
-            "pruned": pruned, "removedSeen": len(staging.get("removed", [])),
+            "seeded": seeded, "pruned": pruned, "removedSeen": len(staging.get("removed", [])),
             "fetchFailed": len(staging.get("fetchFailed", []))}
 
 
@@ -222,28 +243,43 @@ def cmd_sample(args) -> int:
 
 def cmd_detect(args) -> int:
     cd = _import_catalog_diff()
+    from onsen_scraper import fetch_map_seed  # lazy (network)
     idmap = _load_json(IDMAP_PATH)
     baseline = cd.load_snapshot()
-    ids = sorted(baseline)
 
-    index_ids = None
-    if args.discover:
-        index_ids = cd.crawl_index()
-        ids = sorted(index_ids | set(baseline))
-        print(f"index: {len(index_ids)} listed; baseline {len(baseline)}; "
-              f"+{len(index_ids - set(baseline))} new / -{len(set(baseline) - index_ids)} delisted")
+    # The map seed (one fetch) is the authoritative membership set AND supplies the
+    # name/area/coords the detail page lacks. Absent from the seed = delisted.
+    seed, seed_ids = {}, None
+    try:
+        seed = fetch_map_seed()
+        seed_ids = set(seed)
+        print(f"map seed: {len(seed)} listed; baseline {len(baseline)}; "
+              f"+{len(seed_ids - set(baseline))} new / -{len(set(baseline) - seed_ids)} delisted")
+    except Exception as e:  # noqa: BLE001 — any seed failure → degrade, don't crash
+        print(f"!! map seed fetch failed ({e}); membership (ADD/REMOVE) disabled this run")
+
+    ids = sorted(set(baseline) | (seed_ids or set()))
     if args.limit:
         ids = ids[:args.limit]
 
     scrape = cd.scrape_live(ids)
-    changelog = cd.diff(baseline, scrape, idmap, index_ids=index_ids)
+    changelog = cd.diff(baseline, scrape, idmap, index_ids=seed_ids)
+    # Enrich ADDED onsens with the seed's name/area/coords so they're fully
+    # identified (and ready for `mint` + the new-onsen publish path).
+    for a in changelog.get("added", []):
+        s = seed.get(int(a["hid"]))
+        if s:
+            a.update({"name": s["name"], "areaName": s["areaName"],
+                      "lat": s["lat"], "lng": s["lng"]})
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     outdir = args.out / stamp
     counts = cd.write_report(changelog, "snapshot", outdir)
 
-    index_removed = (set(baseline) - index_ids) if index_ids is not None else set()
+    index_removed = (set(baseline) - seed_ids) if seed_ids is not None else set()
     staging = build_staging(scrape, index_removed)
-    staging["_meta"] = {"scrapedAt": _now(), "discover": bool(args.discover),
+    if seed:
+        staging["seed"] = {str(h): seed[h] for h in seed}
+    staging["_meta"] = {"scrapedAt": _now(), "seed": bool(seed),
                         "reportDir": str(outdir.relative_to(REPO_ROOT))}
     STAGING_PATH.write_text(json.dumps(staging, ensure_ascii=False, indent=2) + "\n",
                             encoding="utf-8")
@@ -252,19 +288,23 @@ def cmd_detect(args) -> int:
     hours_changed = [m["hid"] for m in changelog["modified"]
                      if "business_hours" in m.get("fields", {})]
     material = [m for m in changelog["modified"] if m["severity"] == "material"]
-    added = [a["hid"] for a in changelog.get("added", [])]
+    added = changelog.get("added", [])
     removed = [r["hid"] for r in changelog.get("removed", [])]
-    new_ids = [h for h in added if str(h) not in idmap]
+    new_ids = [a["hid"] for a in added if str(a["hid"]) not in idmap]
 
     print(f"\nreport → {outdir.relative_to(REPO_ROOT)}   {counts}")
     print(f"staging → {STAGING_PATH.relative_to(REPO_ROOT)} "
-          f"({len(staging['onsens'])} onsens, {len(staging['removed'])} removed)\n")
+          f"({len(staging['onsens'])} onsens, {len(staging['removed'])} removed, "
+          f"seed {len(seed)})\n")
     print("triage:")
-    print(f"  material movers       : {len(material)}  → publisher/apply.py")
+    print(f"  material movers        : {len(material)}  → publisher/apply.py")
     print(f"  business_hours changed : {len(hours_changed)}  → recurate-hours  {hours_changed or ''}")
-    print(f"  added (new onsens)     : {len(added)}  → mint kyuhachiId + manual map-seed  {added or ''}")
+    print(f"  added (new onsens)     : {len(added)}  → mint + recurate-hours + apply.py add")
+    for a in added:
+        nm = f"  {a.get('areaName') or '?'}：{a.get('name') or '?'}" if a.get("name") else ""
+        print(f"      hid {a['hid']}{nm}")
     if new_ids:
-        print(f"      of which need a kyuhachiId: {new_ids}  → `catalog_sync.py mint --from-staging`")
+        print(f"      need a kyuhachiId: {new_ids}  → `catalog_sync.py mint --from-staging`")
     print(f"  removed / delisted     : {len(removed)}  → apply.py retire (isActive:false)  {removed or ''}")
     if changelog.get("fetchFailed"):
         print(f"  !! fetch failed        : {[f['hid'] for f in changelog['fetchFailed']]} — re-run detect")
@@ -297,7 +337,8 @@ def cmd_mint(args) -> int:
     idmap.update(minted)
     write_idmap(idmap)
     print(f"\nwrote {IDMAP_PATH.relative_to(REPO_ROOT)} (+{len(minted)}). "
-          "New onsens still need name/coords (map seed) + an apply.py `add` before they go live.")
+          "Next for each: recurate-hours, then `apply.py add` to create the live doc "
+          "(name/area/coords come from the map seed in staging).")
     return 0
 
 
@@ -323,7 +364,8 @@ def cmd_promote(args) -> int:
     prune_note = "" if args.prune else f" (skipped {stats['removedSeen']} removed; pass --prune)"
     print(f"promote — {mode}   baseline {SNAPSHOT_DB.relative_to(REPO_ROOT)}")
     print(f"  update {stats['updated']}   insert {stats['inserted']}   "
-          f"unchanged {stats['unchanged']}   prune {stats['pruned']}{prune_note}")
+          f"unchanged {stats['unchanged']}   seeded {stats['seeded']}   "
+          f"prune {stats['pruned']}{prune_note}")
     if stats["fetchFailed"]:
         print(f"  note: {stats['fetchFailed']} hid(s) failed to fetch and were left untouched.")
     if not args.commit:
@@ -346,9 +388,7 @@ def main(argv=None) -> int:
     p.add_argument("--n", type=int, default=10, help="pages to sample (default 10)")
     p.set_defaults(func=cmd_sample)
 
-    p = sub.add_parser("detect", help="one scrape → changelog report + staging scrape")
-    p.add_argument("--discover", action="store_true",
-                   help="crawl the source index first: detect ADDED + authoritative REMOVED")
+    p = sub.add_parser("detect", help="one scrape (+ map seed) → changelog report + staging scrape")
     p.add_argument("--limit", type=int, help="scrape only the first N ids (scoped run)")
     p.add_argument("--out", type=Path, default=REPO_ROOT / "reports", help="report output dir")
     p.set_defaults(func=cmd_detect)

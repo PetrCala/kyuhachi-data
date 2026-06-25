@@ -101,6 +101,63 @@ def test_promote_prune_only_with_flag():
     assert con.execute("select count(*) from onsens where id=2").fetchone()[0] == 0
 
 
+# --- map seed (name + coordinates the detail page lacks) ----------------------
+
+_MAP_HTML = (
+    "<html><script>\nvar marker = [];\n"
+    'var markerData = ['
+    '{"id":"1","onsenti":"二日市温泉","shisetsu":"博多湯","address":"筑紫野市湯町1-14-5",'
+    '"lat":33.4914372,"lng":130.5149407},'
+    '{"id":"253","onsenti":"新温泉","shisetsu":"新しい湯","address":"どこか","lat":31.5,"lng":130.2}'
+    '];\nfunction init(){}\n</script></html>'
+)
+
+
+def test_parse_map_seed():
+    from onsen_scraper import parse_map_seed
+    seed = parse_map_seed(_MAP_HTML)
+    assert set(seed) == {1, 253}
+    assert seed[1] == {"name": "博多湯", "areaName": "二日市温泉",
+                       "address": "筑紫野市湯町1-14-5", "lat": 33.4914372, "lng": 130.5149407}
+    assert seed[253]["name"] == "新しい湯" and seed[253]["lat"] == 31.5
+
+
+def test_parse_map_seed_missing_array_raises():
+    from onsen_scraper import parse_map_seed
+    with pytest.raises(ValueError):
+        parse_map_seed("<html>no markerData here</html>")
+
+
+def test_promote_fills_seed_name_and_coords():
+    con = _db([(1, _fields(address="a"))])               # existing row, seed cols NULL
+    staging = {"onsens": {"1": _fields(address="a"), "253": _fields(address="new")},
+               "seed": {"1": {"name": "博多湯", "areaName": "二日市温泉",
+                              "address": "a", "lat": 33.49, "lng": 130.51},
+                        "253": {"name": "新しい湯", "areaName": "新温泉",
+                                "address": "x", "lat": 31.5, "lng": 130.2}}}
+    stats = cs.promote_into_db(con, staging)
+    con.commit()
+    # existing onsen gains name/area/coords even though its detail didn't change
+    assert con.execute("select facility_name, onsen_area_name, latitude, longitude "
+                       "from onsens where id=1").fetchone() == ("博多湯", "二日市温泉", 33.49, 130.51)
+    # a brand-new onsen lands COMPLETE (detail + seed), not detail-only
+    assert con.execute("select facility_name, latitude, address from onsens where id=253"
+                       ).fetchone() == ("新しい湯", 31.5, "new")
+    assert (stats["updated"], stats["inserted"], stats["seeded"]) == (1, 1, 2)
+
+
+def test_promote_syncs_coord_drift():
+    con = _db([(1, {"address": "a", "latitude": 33.0, "longitude": 130.0})])
+    staging = {"onsens": {"1": _fields(address="a")},   # detail unchanged
+               "seed": {"1": {"name": None, "areaName": None,
+                              "address": "a", "lat": 33.49, "lng": 130.51}}}
+    stats = cs.promote_into_db(con, staging)
+    con.commit()
+    assert stats["updated"] == 1                          # coords drifted → update
+    assert con.execute("select latitude, longitude from onsens where id=1"
+                       ).fetchone() == (33.49, 130.51)
+
+
 # --- mint_ids + write_idmap ---------------------------------------------------
 
 def test_mint_ids_only_assigns_missing():
