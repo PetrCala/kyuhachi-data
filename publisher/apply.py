@@ -11,6 +11,11 @@ It is driven by a reviewed *decisions* file (one adjudicated change per onsen):
   - {"hid": N, "action": "retire"} → set isActive:false (+ updatedAt). Onsen
     docs are never deleted; existing visits + frozen challenge snapshots keep
     counting.
+  - {"hid": N, "action": "add"}    → CREATE /onsens/{kyuhachiId} for a new onsen,
+    assembling the full doc from the /map seed (name/area/lat/lng) + a live detail
+    scrape + the curated hours + a generated nameKana + a rehosted photo. The one
+    create (vs PATCH) write; idempotent (skips if the doc already exists) and gated.
+    Requires a minted kyuhachiId (catalog-sync mint) and a curated-hours entry.
   - {"hid": N, "action": "skip"}   → no-op (explicitly reviewed, no change).
 
 The decisions file is normally scaffolded from a catalog-diff changelog.json
@@ -39,13 +44,15 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
-from onsen_scraper import fee_for, fetch_detail_page, parse_detail_page  # noqa: E402
+from onsen_scraper import fee_for, fetch_detail_page, name_kana, parse_detail_page  # noqa: E402
 import catalog_diff as cd  # noqa: E402
 import image_processor as ip  # noqa: E402  (publisher/image_processor.py — photo rehosting)
+import backfill_schedule as bsf  # noqa: E402  (reuse the curated-hours encoders + Firestore GET)
 
 PROJECT = "kyuhachi-fddcc"
 BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
 IDMAP = json.loads((REPO / "data/onsen-id-map.json").read_text())
+CURATED_HOURS = REPO / "data" / "hours_curated.json"
 
 # parser field -> Firestore field path (MATERIAL fields only).
 FIELD_PATH = {
@@ -54,7 +61,7 @@ FIELD_PATH = {
     "website_url": "websiteUrl", "business_hours": "businessHours.raw",
 }
 
-ACTIONS = ("update", "retire", "skip")  # `add` (new onsen) needs a kyuhachiId first — not here yet
+ACTIONS = ("update", "retire", "skip", "add")  # `add` creates the live doc for a new onsen (needs a kyuhachiId)
 
 
 def token() -> str:
@@ -69,6 +76,14 @@ def sval(v):
 
 def ival(n):
     return {"nullValue": None} if n is None else {"integerValue": str(n)}
+
+
+def dval(x):
+    return {"nullValue": None} if x is None else {"doubleValue": float(x)}
+
+
+def bval(b):
+    return {"booleanValue": bool(b)}
 
 
 # Schedule encoding lives in backfill_schedule.py (sched_val), which solely owns
@@ -97,6 +112,24 @@ def patch(kid: str, fields: dict, mask: list[str], tok: str) -> int:
     req = urllib.request.Request(
         f"{BASE}/onsens/{kid}?{qs}", data=json.dumps({"fields": fields}).encode(),
         method="PATCH",
+        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
+    )
+    try:
+        with _open(req) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        print(f"    HTTP {e.code}: {e.read().decode()[:300]}")
+        raise
+
+
+def create(kid: str, fields: dict, tok: str) -> int:
+    """Create /onsens/{kid} with the full field set. Server rejects (409) if it
+    already exists — but apply_decision checks existence first, so this is the
+    sole *create* (vs PATCH) write in the publisher and is reached only for a
+    genuinely new doc."""
+    req = urllib.request.Request(
+        f"{BASE}/onsens?documentId={kid}", data=json.dumps({"fields": fields}).encode(),
+        method="POST",
         headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
     )
     try:
@@ -162,9 +195,134 @@ def build_update(hid: int, tok: str | None = None):
     return fields, mask, summary
 
 
+# --- new-onsen create (`add`) -------------------------------------------------
+# A new onsen has no baseline to diff, so `add` assembles its doc from the union of
+# every source the maintenance paths use: the /map seed (name / areaName / lat / lng,
+# which the detail page lacks), a live detail scrape (the descriptive fields), the
+# curated hours (the weekly grid — never the regex), a generated reading, and a
+# rehosted photo. The result must match the app's OnsenDocument contract exactly.
+
+_MAP_SEED = None
+_CURATED = None
+
+
+def map_seed():
+    """The live /map seed {hid: {name, areaName, address, lat, lng}}, fetched once."""
+    global _MAP_SEED
+    if _MAP_SEED is None:
+        from onsen_scraper.mapseed import fetch_map_seed
+        _MAP_SEED = fetch_map_seed()
+    return _MAP_SEED
+
+
+def curated_hours():
+    global _CURATED
+    if _CURATED is None:
+        _CURATED = json.loads(CURATED_HOURS.read_text(encoding="utf-8"))["onsens"]
+    return _CURATED
+
+
+def catalog_version(tok: str | None):
+    """The live catalog data version a new doc enters at; None in an unauthed dry-run."""
+    if not tok:
+        return None
+    meta = bsf.get_fields("catalog_meta/current", tok)
+    return int(meta.get("version", {}).get("integerValue", 0)) if meta else None
+
+
+def _business_hours_val(hid: int, raw):
+    """ParsedHours map {raw, schedule, exceptions?, confidence?} from the curated entry
+    (schedule via the curated parse, never the regex), or null when neither exists."""
+    entry = curated_hours().get(str(hid))
+    if raw is None and not entry:
+        return {"nullValue": None}
+    fields = {"raw": sval(raw)}
+    if entry:
+        fields["schedule"] = bsf.sched_val(bsf.expand_curated(entry))
+        if entry.get("exceptions"):
+            fields["exceptions"] = bsf.exc_val(entry["exceptions"])
+        if entry.get("confidence"):
+            fields["confidence"] = bsf.conf_val(entry["confidence"])
+    else:
+        fields["schedule"] = {"nullValue": None}
+    return {"mapValue": {"fields": fields}}
+
+
+def build_add(hid: int, tok: str | None):
+    """Assemble the OnsenDocument field set (minus createdAt/updatedAt) for a new
+    onsen. On --commit (tok set) the source photo is rehosted to Storage and the live
+    catalog version read; a dry-run leaves imageUrl/blurhash/catalogVersion null and
+    surfaces the source photo in the summary. Returns (fields, summary)."""
+    seed = map_seed().get(hid)
+    if not seed:
+        raise SystemExit(f"hid {hid}: not in the live /map seed — cannot add (delisted at source?)")
+    live = parse_detail_page(fetch_detail_page(hid), hid)
+    name = seed.get("name")
+    adult = fee_for(hid, live.get("admission_fee"))[0]
+    fields = {
+        "name": sval(name),
+        "nameKana": sval(name_kana(name)),
+        "areaName": sval(seed.get("areaName")),
+        "address": sval(live.get("address") or seed.get("address")),
+        "prefecture": sval(live.get("prefecture")),
+        "lat": dval(seed.get("lat")),
+        "lng": dval(seed.get("lng")),
+        "phone": sval(live.get("phone")),
+        "businessHours": _business_hours_val(hid, live.get("business_hours")),
+        "admissionFee": sval(live.get("admission_fee")),
+        "adultFee": ival(adult),
+        "springQuality": sval(live.get("spring_quality")),
+        "websiteUrl": sval(live.get("website_url")),
+        "imageUrl": sval(None),
+        "blurhash": sval(None),
+        "isActive": bval(True),
+        "catalogVersion": ival(catalog_version(tok)),
+    }
+    src_img = live.get("image_url")
+    if tok and src_img:
+        kid = IDMAP[str(hid)]
+        rawimg = ip.download(src_img)
+        fields["imageUrl"] = sval(ip.upload(ip.to_webp(rawimg), kid, ip.DEFAULT_BUCKET, tok))
+        fields["blurhash"] = sval(ip.blurhash_of(rawimg))
+    summary = [("name", name), ("areaName", seed.get("areaName")),
+               ("prefecture", live.get("prefecture")),
+               ("coords", f"{seed.get('lat')}, {seed.get('lng')}"),
+               ("adultFee", adult), ("source_image", src_img)]
+    return fields, summary
+
+
+# The top-level keys every published onsen doc carries (the app's OnsenDocument
+# contract). A new doc must match this exactly — validated before the first create
+# so a renamed/added field on the app side aborts instead of writing a bad doc.
+ONSEN_DOC_KEYS = {
+    "name", "nameKana", "areaName", "address", "prefecture", "lat", "lng", "phone",
+    "businessHours", "admissionFee", "adultFee", "springQuality", "websiteUrl",
+    "imageUrl", "blurhash", "isActive", "catalogVersion", "createdAt", "updatedAt",
+}
+
+
+def validate_add_schema(fields: dict, tok: str | None) -> None:
+    """Guard the first *create* write. Hard-fail if the proposed doc's keys don't
+    match the OnsenDocument contract; when authed, also compare against a real live
+    doc and warn on any drift (a soft check — existing docs can be heterogeneous)."""
+    proposed = set(fields)
+    if proposed != ONSEN_DOC_KEYS:
+        raise SystemExit(
+            f"add: doc keys don't match the OnsenDocument contract "
+            f"(missing={sorted(ONSEN_DOC_KEYS - proposed)}, "
+            f"extra={sorted(proposed - ONSEN_DOC_KEYS)}) — refusing to create")
+    if tok:
+        ref_kid = next((IDMAP[str(h)] for h in (1, 5, 7, 8) if str(h) in IDMAP), None)
+        ref = bsf.get_fields(f"onsens/{ref_kid}", tok) if ref_kid else None
+        if ref is not None and set(ref) != proposed:
+            print(f"    ⚠ live reference /onsens/{ref_kid} key drift: "
+                  f"only-on-ref={sorted(set(ref) - proposed)}, "
+                  f"only-on-new={sorted(proposed - set(ref))}")
+
+
 def load_decisions(path: Path) -> list[dict]:
     """Read a reviewed decisions file. Accepts a top-level list or {"decisions": [...]}.
-    Each item: {hid, action: update|retire|skip, note?}."""
+    Each item: {hid, action: update|retire|skip|add, note?}."""
     data = json.loads(path.read_text(encoding="utf-8"))
     items = data["decisions"] if isinstance(data, dict) else data
     bad = sorted({d.get("action") for d in items if d.get("action") not in ACTIONS})
@@ -189,8 +347,8 @@ def scaffold_from_changelog(path: Path) -> list[dict]:
     for r in cl.get("removed", []):
         out.append({"hid": r["hid"], "action": "retire", "note": "removed/delisted at source"})
     for a in cl.get("added", []):
-        out.append({"hid": a["hid"], "action": "skip",
-                    "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"})
+        out.append({"hid": a["hid"], "action": "add",
+                    "note": "NEW onsen — create live doc (mint a kyuhachiId first)"})
     for f in cl.get("fetchFailed", []):
         out.append({"hid": f["hid"], "action": "skip", "note": "fetch failed — re-run before deciding"})
     return out
@@ -206,6 +364,24 @@ def apply_decision(d: dict, now: str, tok: str | None, commit: bool) -> None:
         print(f"hid {hid} → no kyuhachiId in id map; skipping\n")
         return
     kid = IDMAP[str(hid)]
+    if d["action"] == "add":
+        if tok and bsf.get_fields(f"onsens/{kid}", tok) is not None:
+            print(f"hid {hid} → /onsens/{kid}  ADD: doc already exists — skip (idempotent)\n")
+            return
+        fields, summary = build_add(hid, tok)
+        print(f"hid {hid} → /onsens/{kid}  ADD (new onsen)   # {note}")
+        for k, v in summary:
+            print(f"    {k}: {v!r}")
+        fields["createdAt"] = {"timestampValue": now}
+        fields["updatedAt"] = {"timestampValue": now}
+        validate_add_schema(fields, tok)
+        if commit:
+            create(kid, fields, tok)
+            print("    created.")
+        else:
+            print(f"    would create ({len(fields)} fields): {', '.join(sorted(fields))}")
+        print()
+        return
     if d["action"] == "retire":
         fields = {"isActive": {"booleanValue": False}, "updatedAt": {"timestampValue": now}}
         mask = ["isActive", "updatedAt"]

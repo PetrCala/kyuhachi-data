@@ -38,14 +38,15 @@ Tests: **75 passing** across six files — `test_fees.py` (12), `test_hours.py` 
 
 ## Remaining roadmap
 
-### A. `apply.py` `add` action — create the live Firestore doc for a new onsen — Medium; the biggest remaining functional gap
-`ACTIONS = ("update", "retire", "skip")` — there is no `add`. A new onsen is now fully
-*identified and baselined* (map seed → `detect --discover` → `mint` → `promote`), but its live
-Firestore document is still created by hand. Scope: an `add` action that builds the doc from the
-staging data (map-seed name/area/coords + detail fields + curated hours + derived `adultFee` +
-generated `nameKana`). The doc schema is known. The `catalog-publish` run already emits a
-`::warning::` listing un-created new onsens until this lands. Challenge-pool membership stays in
-the app repo. Risk: it's the first **create** (not PATCH) write — keep it idempotent and gated.
+### A. ✅ Shipped — `apply.py` `add` action — create the live Firestore doc for a new onsen
+`ACTIONS = ("update", "retire", "skip", "add")`. A `{"action":"add"}` decision builds the full
+`OnsenDocument` from the /map seed (name/areaName/lat/lng) + a live detail scrape (the descriptive
+fields) + the curated hours (the weekly grid, never the regex) + a derived `adultFee` + a generated
+`nameKana` + a rehosted photo, then **creates** `/onsens/{kyuhachiId}`. It's the sole create (vs
+PATCH) write: idempotent (skips if the doc already exists), gated behind the `production` approval,
+and guarded by a key-set check against the app's `OnsenDocument` contract (plus a live-doc drift
+warning) before any write. Challenge-pool membership still lives in the app repo, and the live doc
+itself only appears once the gated `catalog-publish` run is approved.
 
 ### B. `catalog` baseline adapter (diff vs live Firestore) — Medium; independent
 `load_catalog()` is still `raise NotImplementedError`, so the diff can only run against the
@@ -76,11 +77,12 @@ is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling
 
 ## Recommended order
 
-1. **A — `apply.py` `add` action.** The largest remaining functional gap: new onsens are
-   identified and baselined but their live docs are still hand-made. Highest leverage.
-2. **C — extract `publisher/firestore_rest.py`.** Small and mechanical; no longer blocked now
-   that the changelog-driven `apply.py` has merged. Good to land before A/B add more duplication.
-3. **B — `catalog` baseline adapter.** Independent enrichment; gives the diff a published-truth
+1. **C — extract `publisher/firestore_rest.py`.** Small and mechanical; no longer blocked now
+   that the changelog-driven `apply.py` has merged. Good to land before B adds more duplication —
+   and `apply.py`'s new `add` path widened the copy-paste (it now reuses `backfill_schedule`'s
+   helpers), so the extraction is more worthwhile.
+2. **B — `catalog` baseline adapter.** Independent enrichment; gives the diff a published-truth
    baseline alongside the local snapshot.
+- **A — `apply.py` `add` action.** ✅ Shipped (see above).
 - **Operational smoke test:** do opportunistically from an allowlisted env / under WIF before the
   first real automated publish. It's a release gate.
