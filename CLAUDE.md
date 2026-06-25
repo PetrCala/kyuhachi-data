@@ -2,95 +2,70 @@
 
 ## What this repo is
 
-The **private data repo** for the Kyushu 88 onsen app. It owns the onsen
-**catalog source of truth** and everything upstream of Firestore:
+The **private data repo** for the 九州八十八湯 (Kyushu 88 onsen) app. It owns the
+onsen **catalog source of truth** and everything upstream of Firestore: scraping
+[88onsen.com](https://www.88onsen.com), assigning the stable **`kyuhachiId`** for
+every onsen, and publishing the catalog to Firestore.
 
-- scraping [88onsen.com](https://www.88onsen.com) detail pages,
-- assigning and maintaining the stable **`kyuhachiId`** for every onsen,
-- publishing the onsen catalog to Firestore.
-
-The app lives in a **separate repo** (`kyuhachi`: Expo app + Firebase Functions
-+ shared types + firebase config). This is the two-repo split. The app never
-sees upstream ids — it reads only the published catalog.
+The app lives in a **separate repo**
+([`kyuhachi`](https://github.com/PetrCala/kyuhachi)) — the two-repo split. The app
+never sees upstream ids; it reads only the published catalog. Don't move app/UI
+concerns here, or catalog/id concerns into the app repo.
 
 ## Locked decisions (do not challenge without instruction)
 
-- **Stable ids.** Every onsen has a `kyuhachiId` (UUID) that never changes.
-  Upstream ids (88onsen `hid`) are unstable and live ONLY in this repo, in
-  `data/onsen-id-map.json` (`hid` → `kyuhachiId`). This repo is solely
+- **Stable ids.** Every onsen has a `kyuhachiId` (UUID) that never changes. Upstream
+  88onsen ids (`hid`) are unstable and live ONLY in this repo. This repo is solely
   responsible for assigning and maintaining them.
-- **Onsen documents are never deleted.** A removed/deprecated onsen gets
-  `isActive: false` in the published catalog, never a delete.
-- **Catalog snapshots are frozen per challenge** in the app. Catalog changes
-  never mutate existing user challenges. (Relevant because a reseed must not
-  assume it can rewrite history.)
-- **Be a polite scraper.** 1s delay, exponential backoff, browser UA. Sample,
-  don't hammer. (Enforced in `onsen_scraper/fetcher.py`.)
+- **Onsen documents are never deleted.** A removed onsen gets `isActive: false`.
+- **Catalog snapshots are frozen per challenge** in the app. Catalog changes never
+  mutate existing user challenges — a reseed cannot rewrite history.
+- **Be a polite scraper.** Delay, exponential backoff, browser UA. Sample, don't hammer.
+- **The regex never authors hours.** The published weekly schedule comes only from the
+  LLM-curated hours, never from the fallback parser.
+- **Name readings are generated, never hand-edited.** Each onsen's `nameKana` reading
+  has no upstream source — it's machine-generated and folded to **hiragana**, the hard
+  contract the app's gojūon name sort relies on (katakana/kanji/romaji would break it).
+- **Every live write is human-gated** and runs a dry-run first.
 
-## Source structure reference
+## Updating the catalog
 
-The 88onsen detail-page DOM, every field's selector, and per-field coverage are
-documented in the **app repo** at `docs/onsen-source-field-audit.md`. That is
-the canonical reference for what's on the source and where. `onsen_scraper/` is
-the working implementation of those selectors.
+The [`catalog-sync`](.claude/skills/catalog-sync/SKILL.md) skill is the **single
+entry point** for any onsen-data update. Ask to "update / sync the onsen catalog" and
+it runs the whole loop — detect what changed → publish to Firestore → retire/mint →
+advance the baseline — gating every write. Start there and follow its phases; don't
+reinvent the sequence.
 
-URL pattern: `https://www.88onsen.com/spot/detail/hid/{hid}`.
+It orchestrates the focused, single-purpose skills, each usable on its own:
+[`catalog-diff`](.claude/skills/catalog-diff/SKILL.md) (read-only "what changed"),
+[`recurate-hours`](.claude/skills/recurate-hours/SKILL.md) (re-parse changed hours),
+and [`cost-analysis`](.claude/skills/cost-analysis/SKILL.md) (fee sanity-check). The
+skills are self-documenting — read the relevant `SKILL.md` rather than relying on any
+commands restated elsewhere.
 
-## Updating the catalog — start here
+The GitHub-native automation (operator-as-approver) is documented in
+[`.github/CATALOG_AUTOMATION.md`](.github/CATALOG_AUTOMATION.md).
 
-**`.claude/skills/catalog-sync/`** is the single entry point for any onsen-data
-update. Ask to "update / sync the onsen catalog" → that skill runs the whole loop
-(detect → publish to Firestore → retire/mint → advance the baseline), orchestrating
-the focused tools below and gating every write. Don't reinvent the sequence; follow
-its phases.
+## Structure
 
-## Components
+- `onsen_scraper/` — fetch + parse 88onsen detail pages and the `/map` seed; derive fees/hours and generated name readings.
+- `publisher/` — surgical, dry-run-by-default Firestore writers. Never a clean-slate wipe.
+- `data/` — the diff baseline, the `hid → kyuhachiId` map, and the curated hours.
+- `.claude/skills/` — the operational tools above. **Start here for any update.**
+- `docs/` — the published-schema contracts and roadmap.
 
-| Path | Role |
-|---|---|
-| `.claude/skills/catalog-sync/` | **Orchestrator** — the end-to-end update runbook + `catalog_sync.py` driver (`status`/`sample`/`detect`/`mint`/`promote`). |
-| `.claude/skills/catalog-diff/` | Read-only re-scrape + changelog (the detection engine `catalog-sync detect` builds on). |
-| `.claude/skills/recurate-hours/` | LLM re-parse of changed `business_hours` → `data/hours_curated.json`. |
-| `onsen_scraper/fetcher.py` | Polite HTTP fetch of a detail page by `hid`. |
-| `onsen_scraper/parser.py` | DOM → 13 raw fields (`_FIELD_MAP` over `dl.tableview`). |
-| `onsen_scraper/mapseed.py` | One fetch of `/map` → `hid → {name, areaName, lat, lng, address}` (the fields the detail page lacks; also the authoritative membership set). |
-| `onsen_scraper/{fees,hours}.py` | Free-text → numeric `adultFee` / regex `WeeklySchedule` (the regex is NOT the hours source of truth). |
-| `onsen_scraper/readings.py` | Generate the hiragana reading (`nameKana`) of a `name` via pykakasi, folded to hiragana (`name_kana`). Readings don't exist upstream — they're generated, auto, no hand-correction. |
-| `publisher/apply.py` | Surgical, decisions-driven Firestore publisher: `update`/`retire`/`skip` (writes text fields + `adultFee`; **not** the schedule). |
-| `publisher/backfill_schedule.py` | `--from-curated`: expand `hours_curated.json` → `businessHours.schedule`+`exceptions`+`confidence`. Sole owner of the published grid. |
-| `publisher/backfill_name_kana.py` | Generate + publish `nameKana` (hiragana reading) onto every onsen doc. Idempotent; the within-prefecture gojūon sort key the app reads. |
-| `data/snapshot.db` | Diff baseline (148 onsens, raw fields + `raw_html`). Advanced only by `catalog-sync promote`. |
-| `data/onsen-id-map.json` | `hid` → `kyuhachiId`. Minted by `catalog-sync mint`. |
-| `data/hours_curated.json` | LLM-curated hours, the source of truth for the published schedule. |
+The 88onsen DOM/selectors and per-field coverage are audited in the **app repo**
+(`docs/onsen-source-field-audit.md`); `onsen_scraper/` implements them.
 
 ## What NOT to do
 
-- Do not write user/challenge/visit data — that's the app's domain.
-- Do not delete onsen documents. Use `isActive: false`.
-- Do not change a `kyuhachiId` once assigned.
-- Do not make the `catalog-diff` skill mutate the snapshot DB or Firestore —
-  it is read-only by contract.
-- Do not move app/UI concerns here, and do not move catalog/id concerns into
-  the app repo.
+- Don't write user/challenge/visit data — that's the app's domain.
+- Don't delete onsen documents (use `isActive: false`) or change a `kyuhachiId`.
+- Don't let `catalog-diff` mutate the snapshot or Firestore — it is read-only by contract.
+- Don't let the fallback regex author a published schedule — only curated hours do.
+- Don't advance the baseline before the publish succeeds — you'd erase the diff you're acting on.
 
-## Roadmap
+## Delivering changes
 
-Done (the end-to-end loop now exists behind `catalog-sync`):
-- ✅ Authoritative ADDED/REMOVED + membership from the **map seed** (`detect`).
-- ✅ `kyuhachiId` assignment for new onsens (`catalog-sync mint`).
-- ✅ New-onsen **name + coordinates** from the map seed (`onsen_scraper/mapseed.py`);
-  `detect` identifies new onsens fully, `promote` baselines them as complete rows.
-- ✅ `営業時間` → `WeeklySchedule` (LLM-curated `hours_curated.json` + `backfill_schedule --from-curated`).
-- ✅ Versioned backfill/merge publisher (`publisher/apply.py` + the backfills) — never a clean-slate wipe.
-- ✅ Baseline advance after publish (`catalog-sync promote`) — `snapshot.db` is no longer frozen.
-- ✅ Generated `nameKana` (hiragana reading, gojūon sort key) — `onsen_scraper/readings.py` + `publisher/backfill_name_kana.py`; consumed by app PR kyuhachi#143.
-
-Still open:
-- **`apply.py` `add` action** — create the live Firestore doc for a new onsen from
-  the staging data (map seed + detail + curated hours + derived fee). The doc schema
-  is known; until this lands, a new onsen is identified + baselined but its catalog
-  doc is created by hand. Challenge-pool membership stays in the app repo.
-- `catalog` baseline adapter (diff against the live published Firestore catalog, not
-  the local snapshot) — `catalog_diff.load_catalog` is a stub.
-- Shared `publisher/firestore_rest.py` (the REST/auth helper is copied across the
-  publisher scripts).
+Deliver code changes as an open PR against `master` (branch, commit, push,
+`gh pr create`), never a direct push to `master`. Skip for read-only sessions.
