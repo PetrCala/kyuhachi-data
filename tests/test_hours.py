@@ -133,7 +133,20 @@ def test_parsed_hours_doc_shape():
 
 
 def test_parsed_hours_doc_none_schedule_keeps_raw():
+    # hours present but unparseable (no closure info) → schedule None, raw kept.
     doc = parsed_hours_doc("10:00～20:00")
     assert doc["schedule"] is None
     assert doc["raw"] == "10:00～20:00"
-    assert parsed_hours_doc(None) == {"raw": "", "schedule": None}
+
+
+def test_parsed_hours_doc_no_hours_is_24_7():
+    # Publish policy: no hours text at all → open 24/7 (every day 00:00–24:00).
+    for empty in (None, "", "   "):
+        doc = parsed_hours_doc(empty)
+        assert doc["raw"] == ""
+        assert set(doc["schedule"]) == set(DAYS)
+        assert all(s == {"opens": "00:00", "closes": "24:00"}
+                   for s in doc["schedule"].values())
+    # parse_hours itself stays honest — it does not invent 24/7.
+    from onsen_scraper.hours import parse_hours
+    assert parse_hours(None).schedule is None

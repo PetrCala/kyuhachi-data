@@ -39,7 +39,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
-from onsen_scraper import fee_for, fetch_detail_page, parse_detail_page  # noqa: E402
+from onsen_scraper import fee_for, fetch_detail_page, parse_detail_page, parsed_hours_doc  # noqa: E402
 import catalog_diff as cd  # noqa: E402
 
 PROJECT = "kyuhachi-fddcc"
@@ -68,6 +68,20 @@ def sval(v):
 
 def ival(n):
     return {"nullValue": None} if n is None else {"integerValue": str(n)}
+
+
+def sched_val(schedule):
+    """Encode a WeeklySchedule (or None) as a Firestore typed value. Each day is a
+    {opens, closes} map or null (= closed); the whole schedule is null when the
+    hours are unstructured (the app then renders `businessHours.raw`)."""
+    if schedule is None:
+        return {"nullValue": None}
+    days = {}
+    for day, slot in schedule.items():
+        days[day] = ({"nullValue": None} if slot is None else
+                     {"mapValue": {"fields": {"opens": {"stringValue": slot["opens"]},
+                                              "closes": {"stringValue": slot["closes"]}}}})
+    return {"mapValue": {"fields": days}}
 
 
 def _open(req, timeout=30, retries=3):
@@ -123,6 +137,15 @@ def build_update(hid: int):
     if "admissionFee" in mask:
         fields["adultFee"] = ival(fee_for(hid, live.get("admission_fee"))[0])
         mask.append("adultFee")
+    # Keep the structured businessHours.schedule in sync whenever the hours text
+    # changes, so the app's weekly grid never drifts from raw — derived via the
+    # shared hours parser (one source of truth, same as backfill_schedule.py).
+    # Writes even a null schedule, to clear a now-irregular grid.
+    if "businessHours.raw" in mask:
+        sched = parsed_hours_doc(live.get("business_hours"))["schedule"]
+        fields.setdefault("businessHours", {"mapValue": {"fields": {}}})\
+            ["mapValue"]["fields"]["schedule"] = sched_val(sched)
+        mask.append("businessHours.schedule")
     return fields, mask, summary
 
 
