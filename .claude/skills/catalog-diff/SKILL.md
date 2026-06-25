@@ -13,6 +13,11 @@ parser (`onsen_scraper/`), scrapes into memory, and diffs against a baseline.
 Never mutates the canonical snapshot DB (`data/snapshot.db`) or Firestore — the
 output is a changelog the operator acts on deliberately.
 
+> Part of the **`catalog-sync`** pipeline. For a full end-to-end update (detect →
+> publish → retire/mint → advance the baseline), start at `catalog-sync` — it wraps
+> this detection step (`catalog_sync.py detect`) and routes the rest. Use this skill
+> directly when you only want a read-only "what changed?" report.
+
 ## When to use
 
 - "Has anything changed on 88onsen.com since the last scrape?"

@@ -12,3 +12,7 @@ venv/
 # Generated diff reports (regenerable; the snapshot DB is the tracked baseline)
 .claude/skills/catalog-diff/reports/
 reports/
+
+# Staging scrape written by catalog-sync `detect`, consumed by `promote`
+# (transient; the promoted snapshot.db is the tracked baseline)
+data/snapshot.next.json

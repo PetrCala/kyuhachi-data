@@ -36,15 +36,29 @@ the working implementation of those selectors.
 
 URL pattern: `https://www.88onsen.com/spot/detail/hid/{hid}`.
 
+## Updating the catalog — start here
+
+**`.claude/skills/catalog-sync/`** is the single entry point for any onsen-data
+update. Ask to "update / sync the onsen catalog" → that skill runs the whole loop
+(detect → publish to Firestore → retire/mint → advance the baseline), orchestrating
+the focused tools below and gating every write. Don't reinvent the sequence; follow
+its phases.
+
 ## Components
 
 | Path | Role |
 |---|---|
+| `.claude/skills/catalog-sync/` | **Orchestrator** — the end-to-end update runbook + `catalog_sync.py` driver (`status`/`sample`/`detect`/`mint`/`promote`). |
+| `.claude/skills/catalog-diff/` | Read-only re-scrape + changelog (the detection engine `catalog-sync detect` builds on). |
+| `.claude/skills/recurate-hours/` | LLM re-parse of changed `business_hours` → `data/hours_curated.json`. |
 | `onsen_scraper/fetcher.py` | Polite HTTP fetch of a detail page by `hid`. |
 | `onsen_scraper/parser.py` | DOM → 13 raw fields (`_FIELD_MAP` over `dl.tableview`). |
-| `data/snapshot.db` | Last full scrape (148 onsens, raw fields + `raw_html`). The diff baseline. |
-| `data/onsen-id-map.json` | `hid` → `kyuhachiId`. |
-| `.claude/skills/catalog-diff/` | Read-only re-scrape + changelog. |
+| `onsen_scraper/{fees,hours}.py` | Free-text → numeric `adultFee` / regex `WeeklySchedule` (the regex is NOT the hours source of truth). |
+| `publisher/apply.py` | Surgical, decisions-driven Firestore publisher: `update`/`retire`/`skip` (writes text fields + `adultFee`; **not** the schedule). |
+| `publisher/backfill_schedule.py` | `--from-curated`: expand `hours_curated.json` → `businessHours.schedule`+`exceptions`+`confidence`. Sole owner of the published grid. |
+| `data/snapshot.db` | Diff baseline (148 onsens, raw fields + `raw_html`). Advanced only by `catalog-sync promote`. |
+| `data/onsen-id-map.json` | `hid` → `kyuhachiId`. Minted by `catalog-sync mint`. |
+| `data/hours_curated.json` | LLM-curated hours, the source of truth for the published schedule. |
 
 ## What NOT to do
 
@@ -56,10 +70,20 @@ URL pattern: `https://www.88onsen.com/spot/detail/hid/{hid}`.
 - Do not move app/UI concerns here, and do not move catalog/id concerns into
   the app repo.
 
-## Roadmap (not yet built)
+## Roadmap
 
-- `catalog` baseline adapter (diff against the live published Firestore catalog).
-- Index/listing crawl → ADDED detection + `kyuhachiId` assignment for new onsens.
-- `営業時間` → `WeeklySchedule` adapter (single-window cases; fall back to `raw`).
-- Catalog publisher (scrape → snapshot DB → Firestore) as a **versioned
-  backfill/merge**, not the pre-launch clean-slate wipe.
+Done (the end-to-end loop now exists behind `catalog-sync`):
+- ✅ Index/listing crawl → ADDED + authoritative REMOVED (`catalog-diff --discover`).
+- ✅ `kyuhachiId` assignment for new onsens (`catalog-sync mint`).
+- ✅ `営業時間` → `WeeklySchedule` (LLM-curated `hours_curated.json` + `backfill_schedule --from-curated`).
+- ✅ Versioned backfill/merge publisher (`publisher/apply.py` + the backfills) — never a clean-slate wipe.
+- ✅ Baseline advance after publish (`catalog-sync promote`) — `snapshot.db` is no longer frozen.
+
+Still open:
+- `catalog` baseline adapter (diff against the live published Firestore catalog, not
+  the local snapshot) — `catalog_diff.load_catalog` is a stub.
+- New-onsen **name + coordinates** from the 88onsen map seed (the detail page lacks
+  them), and an `apply.py` `add` action — so a brand-new onsen can be fully published
+  here instead of handed off. Challenge-pool membership stays in the app repo.
+- Shared `publisher/firestore_rest.py` (the REST/auth helper is copied across the
+  publisher scripts).

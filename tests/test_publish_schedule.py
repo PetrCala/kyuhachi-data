@@ -16,12 +16,12 @@ from onsen_scraper.hours import DAYS, parsed_hours_doc  # noqa: E402
 
 
 def test_sched_val_null_for_unstructured():
-    assert apply.sched_val(None) == {"nullValue": None}
+    assert bf.sched_val(None) == {"nullValue": None}
 
 
 def test_sched_val_open_all_week():
     sched = parsed_hours_doc("10:00～22:00\n無休")["schedule"]
-    val = apply.sched_val(sched)
+    val = bf.sched_val(sched)
     fields = val["mapValue"]["fields"]
     assert set(fields) == set(DAYS)
     assert fields["monday"] == {"mapValue": {"fields": {
@@ -30,16 +30,16 @@ def test_sched_val_open_all_week():
 
 def test_sched_val_weekday_closed_encodes_null_day():
     sched = parsed_hours_doc("10:00～22:00\n火曜休")["schedule"]
-    fields = apply.sched_val(sched)["mapValue"]["fields"]
+    fields = bf.sched_val(sched)["mapValue"]["fields"]
     assert fields["tuesday"] == {"nullValue": None}          # closed → null
     assert fields["monday"]["mapValue"]["fields"]["opens"]["stringValue"] == "10:00"
 
 
-def test_apply_and_backfill_encoders_agree():
-    # The encoder is duplicated across the two publisher scripts (DRY later — see
-    # roadmap D); guard that they stay byte-identical in output.
-    sched = parsed_hours_doc("9:00～20:30\n火・金曜休")["schedule"]
-    assert apply.sched_val(sched) == bf.sched_val(sched)
+def test_apply_does_not_encode_schedule():
+    # businessHours.schedule is owned solely by backfill_schedule.py (the curated
+    # parse); apply.py no longer carries a schedule encoder, so an hours-text
+    # change updates raw + adultFee but never ships a regex-derived grid.
+    assert not hasattr(apply, "sched_val")
 
 
 def test_backfill_plan_over_snapshot():
