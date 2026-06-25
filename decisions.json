@@ -1,0 +1,764 @@
+{
+  "decisions": [
+    {
+      "hid": 1,
+      "action": "update",
+      "note": "material: website_url"
+    },
+    {
+      "hid": 5,
+      "action": "update",
+      "note": "material: spring_quality"
+    },
+    {
+      "hid": 7,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 8,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 9,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 10,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 11,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 12,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 15,
+      "action": "update",
+      "note": "material: address, admission_fee"
+    },
+    {
+      "hid": 19,
+      "action": "update",
+      "note": "material: business_hours, spring_quality"
+    },
+    {
+      "hid": 21,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 24,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 29,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, efficacy, image_url"
+    },
+    {
+      "hid": 31,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 36,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 38,
+      "action": "skip",
+      "note": "low-signal only: senjin_benefits"
+    },
+    {
+      "hid": 41,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 42,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 44,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 47,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 48,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 57,
+      "action": "update",
+      "note": "material: address, admission_fee, business_hours, website_url"
+    },
+    {
+      "hid": 59,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 60,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 61,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 62,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 64,
+      "action": "skip",
+      "note": "low-signal only: efficacy, senjin_benefits"
+    },
+    {
+      "hid": 65,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 66,
+      "action": "skip",
+      "note": "low-signal only: efficacy, senjin_benefits"
+    },
+    {
+      "hid": 68,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 72,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 74,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 80,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 83,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 84,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 86,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 88,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 89,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 90,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 95,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 96,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 97,
+      "action": "skip",
+      "note": "low-signal only: image_url, senjin_benefits"
+    },
+    {
+      "hid": 99,
+      "action": "update",
+      "note": "material: business_hours, spring_quality"
+    },
+    {
+      "hid": 104,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 106,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 107,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 108,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 110,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 111,
+      "action": "skip",
+      "note": "low-signal only: senjin_benefits"
+    },
+    {
+      "hid": 115,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 116,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 117,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 119,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 122,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 124,
+      "action": "skip",
+      "note": "low-signal only: covid_measures"
+    },
+    {
+      "hid": 130,
+      "action": "skip",
+      "note": "low-signal only: access_info, image_url"
+    },
+    {
+      "hid": 132,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 133,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 135,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 137,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, efficacy"
+    },
+    {
+      "hid": 138,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 140,
+      "action": "update",
+      "note": "material: spring_quality"
+    },
+    {
+      "hid": 142,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, efficacy"
+    },
+    {
+      "hid": 143,
+      "action": "update",
+      "note": "material: website_url"
+    },
+    {
+      "hid": 148,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 150,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 151,
+      "action": "update",
+      "note": "material: business_hours, website_url"
+    },
+    {
+      "hid": 152,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 155,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 157,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 159,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, efficacy"
+    },
+    {
+      "hid": 160,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 161,
+      "action": "update",
+      "note": "material: admission_fee, spring_quality"
+    },
+    {
+      "hid": 162,
+      "action": "update",
+      "note": "material: business_hours, spring_quality"
+    },
+    {
+      "hid": 164,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 165,
+      "action": "update",
+      "note": "material: admission_fee, business_hours, website_url"
+    },
+    {
+      "hid": 167,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 169,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 171,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 172,
+      "action": "update",
+      "note": "material: business_hours, spring_quality"
+    },
+    {
+      "hid": 175,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 176,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 177,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 178,
+      "action": "update",
+      "note": "material: admission_fee, business_hours, website_url"
+    },
+    {
+      "hid": 182,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 183,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 184,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 188,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 189,
+      "action": "skip",
+      "note": "low-signal only: efficacy, image_url"
+    },
+    {
+      "hid": 191,
+      "action": "update",
+      "note": "material: business_hours, website_url"
+    },
+    {
+      "hid": 192,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, efficacy"
+    },
+    {
+      "hid": 193,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 195,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 196,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 200,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 201,
+      "action": "update",
+      "note": "material: business_hours, website_url"
+    },
+    {
+      "hid": 202,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 203,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, efficacy, senjin_benefits"
+    },
+    {
+      "hid": 204,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 205,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 206,
+      "action": "skip",
+      "note": "low-signal only: efficacy"
+    },
+    {
+      "hid": 208,
+      "action": "update",
+      "note": "material: admission_fee, business_hours, website_url"
+    },
+    {
+      "hid": 209,
+      "action": "update",
+      "note": "material: website_url"
+    },
+    {
+      "hid": 216,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 217,
+      "action": "skip",
+      "note": "low-signal only: efficacy, image_url"
+    },
+    {
+      "hid": 218,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 219,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 220,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 221,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 222,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 223,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 224,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 227,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 228,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 229,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 230,
+      "action": "skip",
+      "note": "low-signal only: efficacy, image_url"
+    },
+    {
+      "hid": 231,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url, recommendation"
+    },
+    {
+      "hid": 232,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 233,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 234,
+      "action": "update",
+      "note": "material: business_hours"
+    },
+    {
+      "hid": 235,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 236,
+      "action": "update",
+      "note": "material: website_url"
+    },
+    {
+      "hid": 237,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 238,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 239,
+      "action": "update",
+      "note": "material: website_url"
+    },
+    {
+      "hid": 240,
+      "action": "update",
+      "note": "material: admission_fee, business_hours, spring_quality"
+    },
+    {
+      "hid": 241,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 242,
+      "action": "update",
+      "note": "material: business_hours, spring_quality"
+    },
+    {
+      "hid": 243,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 244,
+      "action": "update",
+      "note": "material: admission_fee, business_hours"
+    },
+    {
+      "hid": 245,
+      "action": "skip",
+      "note": "low-signal only: image_url"
+    },
+    {
+      "hid": 246,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 247,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 249,
+      "action": "skip",
+      "note": "low-signal only: covid_measures, image_url"
+    },
+    {
+      "hid": 250,
+      "action": "update",
+      "note": "material: admission_fee, spring_quality"
+    },
+    {
+      "hid": 251,
+      "action": "update",
+      "note": "material: admission_fee"
+    },
+    {
+      "hid": 248,
+      "action": "retire",
+      "note": "removed/delisted at source"
+    },
+    {
+      "hid": 253,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 254,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 255,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 256,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 257,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 258,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 259,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 260,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 261,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 262,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 263,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 264,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 265,
+      "action": "skip",
+      "note": "NEW onsen — assign a kyuhachiId first (not auto-handled)"
+    },
+    {
+      "hid": 127,
+      "action": "skip",
+      "note": "fetch failed — re-run before deciding"
+    },
+    {
+      "hid": 128,
+      "action": "skip",
+      "note": "fetch failed — re-run before deciding"
+    }
+  ]
+}

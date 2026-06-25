@@ -55,8 +55,11 @@ jobs:
             uv run --python 3.12 python publisher/backfill_schedule.py --from-curated 2>&1
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Tests
-        run: uv run --python 3.12 --with pytest python -m pytest tests/
+      # Pre-promote: the curated⊇snapshot coverage invariant is enforced in the
+      # publish job AFTER promote. When new onsens are pending it legitimately
+      # differs here (curated has them, snapshot doesn't yet), so deselect it.
+      - name: Tests (pre-promote)
+        run: uv run --python 3.12 --with pytest python -m pytest tests/ --deselect tests/test_publish_schedule.py::test_curated_covers_every_snapshot_onsen
 
   # Gated live write. `environment: production` pauses for the required reviewer.
   publish:
