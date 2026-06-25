@@ -16,6 +16,10 @@ free-text `business_hours` column in `data/snapshot.db`. When 88onsen edits an
 onsen's hours, the matching curated entry goes stale; this skill re-parses just
 the changed onsens and refreshes the file, then publishes.
 
+> This is **Phase 3** of the **`catalog-sync`** pipeline. For a full catalog update,
+> start at `catalog-sync`; reach for this skill directly to fix one onsen's hours
+> without running the whole loop.
+
 **The re-parse is done by the session model, not by a regex.**
 `onsen_scraper/hours.py` exists but is deliberately *not* the source of truth — it
 misreads Japanese phrasing (e.g. `翌日休` "closed the next day" was parsed as

@@ -12,12 +12,31 @@ upstream ids — it only reads the published catalog.
 
 ```
 .
-├── onsen_scraper/        # detail-page fetcher + parser (ported from the prototype)
+├── onsen_scraper/         # detail-page fetcher + parser + fee/hours parsers
+├── publisher/             # surgical Firestore publisher + curated backfills
 ├── data/
-│   ├── snapshot.db       # last good full scrape — the diff baseline (148 onsens)
-│   └── onsen-id-map.json # upstream hid → stable kyuhachiId
+│   ├── snapshot.db        # the diff baseline (148 onsens); advanced by `catalog-sync promote`
+│   ├── onsen-id-map.json  # upstream hid → stable kyuhachiId
+│   └── hours_curated.json # LLM-curated hours → published businessHours.schedule
 └── .claude/skills/
-    └── catalog-diff/     # read-only "what changed on the source" report
+    ├── catalog-sync/      # ► the single entry point: full update loop, end-to-end
+    ├── catalog-diff/      # read-only "what changed on the source" report
+    ├── recurate-hours/    # LLM re-parse of changed business_hours
+    └── cost-analysis/     # admission-fee cost estimator
+```
+
+## Updating the catalog
+
+One entry point: the **`catalog-sync`** skill. It runs the whole loop — detect what
+changed on 88onsen, publish field/fee/hours updates to the live app, retire removed
+onsens, mint ids for new ones, and advance the local baseline — pausing at every
+write for approval.
+
+```bash
+python .claude/skills/catalog-sync/catalog_sync.py status        # where do things stand?
+python .claude/skills/catalog-sync/catalog_sync.py sample --n 10 # preflight the source
+python .claude/skills/catalog-sync/catalog_sync.py detect --discover   # scrape + diff + triage
+# …then follow the phases in .claude/skills/catalog-sync/SKILL.md
 ```
 
 ## Setup
@@ -49,8 +68,10 @@ for the full workflow.
 ## Status / roadmap
 
 - [x] Scraper port (fetcher + parser), baseline snapshot, id map
-- [x] `catalog-diff` skill — MODIFIED + REMOVED detection over known ids
+- [x] `catalog-diff` skill — MODIFIED + REMOVED detection; `--discover` adds ADDED
+- [x] `catalog-sync` skill — end-to-end update loop (detect → publish → mint → promote)
+- [x] kyuhachiId assignment for new onsens (`catalog-sync mint`)
+- [x] `営業時間` → `WeeklySchedule` via LLM-curated `hours_curated.json` + backfill
+- [x] Versioned backfill/merge publisher (`publisher/`); baseline advance (`promote`)
 - [ ] `catalog` baseline adapter (diff against the live published Firestore catalog)
-- [ ] Index/listing crawl → ADDED detection + kyuhachiId assignment for new onsens
-- [ ] `営業時間` → `WeeklySchedule` adapter (see the app repo's onsen-source-field-audit)
-- [ ] Catalog publisher (scrape → snapshot DB → Firestore) as a versioned backfill
+- [ ] New-onsen name/coords from the map seed + an `apply.py` `add` action
