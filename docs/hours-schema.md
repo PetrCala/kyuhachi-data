@@ -33,9 +33,13 @@ and everything uncertain is surfaced as a **visible exception**, never silently 
 ## Render contract (app)
 
 1. **Base weekly grid** from `schedule` (a `null` day renders as "Closed"/"定休日").
-2. **Exceptions** — caption list under the grid (e.g. ⚠ "2nd & 4th Thu closed").
+2. **Exceptions** — caption list under the grid (e.g. "2nd & 4th Thu closed").
+   These are factual schedule notes. This contract specifies only the **text**;
+   any visual indicator (icon, emphasis, color) is the app's choice, so it can be
+   tuned without a data-repo change.
 3. **"Show original text"** toggle reveals `raw`.
-4. `confidence` of `medium`/`low` → a small "hours may vary — confirm" hint.
+4. `confidence` of `medium`/`low` → surface a "confirm hours" hint. Again, only
+   the meaning is contractual here; wording and visual treatment are the app's.
 
 If `schedule` is `null`, show `raw` (+ exceptions) only. `exceptions` may be empty.
 
