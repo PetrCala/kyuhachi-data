@@ -28,14 +28,19 @@ output is a changelog the operator acts on deliberately.
    - If pages fetch but parse empty, the DOM drifted — fix selectors in
      `onsen_scraper/parser.py` BEFORE any full run.
 2. **Full diff:** `python .claude/skills/catalog-diff/catalog_diff.py`
-   (baseline = the last snapshot). Add `--baseline catalog` to diff against the
+   (baseline = the last snapshot). Add **`--discover`** to crawl the source index
+   first — this detects **ADDED** onsens and uses index membership as the
+   authoritative **REMOVED** signal. Add `--baseline catalog` to diff against the
    live published catalog instead (adapter is a TODO — see below).
 3. **Read `reports/<timestamp>/summary.md`.** Present the material changes;
-   treat the volatile section (image filenames, covid notes, recommendation)
-   as low-signal.
-4. **Propose, don't apply.** Map changes to catalog updates, and `isActive:false`
-   for removals (onsen docs are never deleted). The reseed/backfill is a
-   separate, explicit step in the publish pipeline.
+   treat the low-signal section (image filenames, covid notes, recommendation)
+   as noise.
+4. **Hand to the publisher (propose, don't auto-apply).** Scaffold a decisions
+   file from the changelog, review it, then apply:
+   `python publisher/apply.py --from-changelog reports/<ts>/changelog.json --out decisions.json`
+   → edit each `action` (`update`/`retire`/`skip`) → dry-run → `--commit`.
+   Removals → `isActive:false` (onsen docs are never deleted). New onsens need a
+   `kyuhachiId` assigned first (the publisher won't add them automatically).
 
 ## Normalization (low-noise diffs)
 
@@ -61,21 +66,25 @@ rather than blind-overwriting, since the upstream `hid` can be reused.
 | Flag | Effect |
 |---|---|
 | `--sample N` | Scrape N pages, report parse health, then stop (preflight). |
+| `--discover` | Crawl the source index first → detect ADDED + authoritative REMOVED. |
 | `--baseline snapshot\|catalog` | Baseline source. Default `snapshot`. |
 | `--limit N` | Diff only the first N ids (scoped run). |
 | `--out PATH` | Report output dir. Default `./reports/`. |
 
 ## Scope
 
-- MVP detects **MODIFIED** + **REMOVED** over the known ids — reliable today.
-  REMOVED covers both a hard 404 and a **soft delisting** — an HTTP-200 page that
-  still serves the site chrome but has dropped its detail table (every material
-  field parses empty). Both surface as retire/`isActive:false` candidates, never
-  as an "update everything to null" modification.
-- **ADDED** (brand-new onsens) needs an index/listing crawl plus a kyuhachiId
-  assignment step; not implemented yet.
-- The `catalog` baseline adapter (`load_catalog()`) is a TODO: authed REST read
-  of `/onsens`, mapping kyuhachiId back to hid.
+- Detects **MODIFIED**, **REMOVED**, and (with `--discover`) **ADDED**.
+- **REMOVED** fires on: an **empty detail page** (the source soft-removes with
+  HTTP 200 + generic chrome, not a 404, so every material field parses empty —
+  see `is_soft_removed`), or — with `--discover` — **absence from the source
+  index** (authoritative). Both surface as retire/`isActive:false` candidates,
+  never as an "update everything to null" modification. A genuine **fetch
+  error** is reported separately under **fetch failed** (re-run before
+  deciding), not treated as a removal.
+- **ADDED** requires `--discover`. New onsens are reported with prefecture +
+  address; assigning their `kyuhachiId` is a manual step (this repo owns ids).
+- The `catalog` baseline adapter (`load_catalog()`) is still a TODO: authed REST
+  read of `/onsens`, mapping kyuhachiId back to hid.
 
 ## Guarantees
 

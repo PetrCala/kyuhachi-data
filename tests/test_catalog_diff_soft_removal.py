@@ -120,8 +120,9 @@ def _populated(**over):
 def test_diff_routes_empty_live_to_removed_not_modified():
     hid = 248
     baseline = {hid: _populated()}
-    # scrape_live would have collapsed the delisted page to None.
-    live = {hid: None}
+    # scrape_live returns {} for a delisted page (HTTP 200, no detail); {} → removed.
+    # (A genuine fetch error is None and routes to fetchFailed instead.)
+    live = {hid: {}}
     idmap = {str(hid): "uuid-248"}
 
     out = cd.diff(baseline, live, idmap)
@@ -133,6 +134,49 @@ def test_diff_routes_empty_live_to_removed_not_modified():
     assert hid not in modified_hids
     assert hid not in failed_hids
     assert out["removed"][0]["kyuhachiId"] == "uuid-248"
+    assert out["removed"][0]["reason"] == "empty detail page"
+
+
+def test_diff_fetch_error_is_fetch_failed_not_removed():
+    # None (a genuine FetchError after retries) is NOT a clean removal signal.
+    hid = 248
+    baseline = {hid: _populated()}
+    live = {hid: None}
+    idmap = {str(hid): "uuid-248"}
+
+    out = cd.diff(baseline, live, idmap)
+
+    assert [r["hid"] for r in out["fetchFailed"]] == [hid]
+    assert hid not in [r["hid"] for r in out["removed"]]
+
+
+def test_diff_index_absence_routes_to_removed():
+    # With --discover, a baseline hid absent from the source index is an
+    # authoritative delisting — removed without even needing a fetch.
+    hid = 248
+    baseline = {hid: _populated()}
+    idmap = {str(hid): "uuid-248"}
+
+    out = cd.diff(baseline, {}, idmap, index_ids={1, 2, 3})
+
+    assert [r["hid"] for r in out["removed"]] == [hid]
+    assert out["removed"][0]["reason"] == "not on source index"
+    assert hid not in [r["hid"] for r in out["fetchFailed"]]
+
+
+def test_diff_added_detected_for_new_listed_onsen():
+    # An hid in live (scraped from the index) but absent from baseline, with real
+    # content, is a NEW onsen → added, surfaced with prefecture/address.
+    new = 300
+    baseline = {10: _populated()}
+    live = {10: _populated(), new: _populated(prefecture="大分県", address="別府市")}
+    idmap = {"10": "uuid-10"}
+
+    out = cd.diff(baseline, live, idmap, index_ids={10, new})
+
+    assert [a["hid"] for a in out["added"]] == [new]
+    assert out["added"][0]["prefecture"] == "大分県"
+    assert new not in [r["hid"] for r in out["removed"]]
 
 
 def test_diff_genuine_modification_still_lands_in_modified():
