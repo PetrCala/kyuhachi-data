@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "requests>=2.32",
     "beautifulsoup4>=4.13",
+    "pykakasi>=2.3",
 ]
 
 [project.optional-dependencies]

@@ -6,6 +6,10 @@ venv/
 *.egg-info/
 .pytest_cache/
 
+# uv lockfile (skills run tests via `uv run`; the repo installs via pip/venv —
+# this is a regenerable artifact, not a tracked manifest)
+uv.lock
+
 # macOS
 .DS_Store
 

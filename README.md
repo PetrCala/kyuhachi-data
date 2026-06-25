@@ -12,8 +12,8 @@ upstream ids — it only reads the published catalog.
 
 ```
 .
-├── onsen_scraper/         # detail-page fetcher + parser + fee/hours parsers
-├── publisher/             # surgical Firestore publisher + curated backfills
+├── onsen_scraper/         # detail-page fetcher + parser + fee/hours/reading parsers
+├── publisher/             # surgical Firestore publisher + derived-field backfills
 ├── data/
 │   ├── snapshot.db        # the diff baseline (148 onsens); advanced by `catalog-sync promote`
 │   ├── onsen-id-map.json  # upstream hid → stable kyuhachiId
@@ -73,5 +73,6 @@ for the full workflow.
 - [x] kyuhachiId assignment for new onsens (`catalog-sync mint`)
 - [x] `営業時間` → `WeeklySchedule` via LLM-curated `hours_curated.json` + backfill
 - [x] Versioned backfill/merge publisher (`publisher/`); baseline advance (`promote`)
+- [x] Generated `nameKana` (hiragana reading) for gojūon sorting (`backfill_name_kana.py`)
 - [ ] `catalog` baseline adapter (diff against the live published Firestore catalog)
 - [ ] New-onsen name/coords from the map seed + an `apply.py` `add` action
