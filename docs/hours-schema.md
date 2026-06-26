@@ -68,6 +68,12 @@ is a hard cutoff that changes whether a trip is worth making, so it earns the sa
 billing as the other tips. List it first. When the cutoff differs by bath or by day,
 spell that out (e.g. `Last entry: main bath 19:30, family bath 19:00`).
 
+This is **enforced**, not just advised: for the clean single-time form,
+`onsen_scraper.hours.last_entry_caption` is the one source of the wording, and both
+`recurate-hours validate` and the pytest suite fail if an onsen whose source states a
+`最終受付` lacks the matching caption — so a re-curation can't silently re-bury it. The
+per-bath/per-day forms return `None` there and stay hand-curated.
+
 ## Source of truth
 
 `data/hours_curated.json` — one-time LLM parse of `business_hours`, hand-reviewed.

@@ -200,3 +200,54 @@ def parsed_hours_doc(raw: str | None) -> dict:
     if raw is None or not raw.strip():
         return {"raw": "", "schedule": {d: dict(_ALL_DAY) for d in DAYS}}
     return {"raw": raw, "schedule": parse_hours(raw).schedule}
+
+
+# --- last entry (最終受付) ---------------------------------------------------- #
+# 88onsen states a last-entry cutoff inline in `business_hours`, e.g.
+# `…（最終受付21:00）` — a bath can stop accepting entries well before it closes.
+# It is otherwise invisible to the app (folded into `raw` / "show original text"),
+# so the catalog surfaces it as a published exception caption (docs/hours-schema.md).
+# These helpers DETECT that cutoff and format the one standard bilingual caption;
+# like the rest of this module they never author the published *schedule*. They
+# back a validation guard (recurate-hours / pytest) that the curated exceptions
+# actually carry the cutoff, so a future re-curation can't silently re-bury it.
+# Per-bath / per-day cutoffs (multiple times, 大風呂/家族風呂, 土日祝…) return None
+# and are curated by hand.
+_LAST_ENTRY = "最終受付"
+_LE_TIME = re.compile(r"(\d{1,2}):(\d{2})")
+_LE_COMPLEX = re.compile(r"[、，,]|大風呂|家族風呂|内湯|露天|土日祝|平日|但し|ただし|以降|[~〜]\s*\d")
+
+
+def single_last_entry(raw: str | None) -> str | None:
+    """The one clean last-entry time (`HH:MM`, zero-padded) stated in `raw`, else None.
+
+    Returns a time only when the text states exactly one `最終受付` cutoff with no
+    per-bath/per-day complication; None when there is no cutoff or it varies (those
+    are hand-curated). Detection only — never authors the published schedule.
+    """
+    n = norm(raw)
+    if _LAST_ENTRY not in n:
+        return None
+    m = re.search(_LAST_ENTRY + r"[^\n]*", n)
+    seg = re.split(r"[）)]", m.group(0), 1)[0]
+    if _LE_COMPLEX.search(seg):
+        return None
+    times = _LE_TIME.findall(seg)
+    if len(times) != 1:
+        return None
+    h, mm = times[0]
+    return f"{int(h):02d}:{mm}"
+
+
+def last_entry_caption(raw: str | None) -> dict | None:
+    """The standard bilingual `{en, ja}` last-entry caption for `raw`, or None.
+
+    The single source of the `最終受付` → caption wording (docs/hours-schema.md):
+    used to validate that a curated entry surfaces the cutoff, and available for a
+    future recurate-hours pass to propose it. None when the cutoff isn't a clean
+    single time — curate those by hand (e.g. a per-bath split like hid 57).
+    """
+    t = single_last_entry(raw)
+    if t is None:
+        return None
+    return {"en": f"Last entry by {t}", "ja": f"{_LAST_ENTRY} {t}"}

@@ -50,6 +50,14 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 SNAPSHOT_DB = REPO_ROOT / "data" / "snapshot.db"
 CURATED = REPO_ROOT / "data" / "hours_curated.json"
 
+# Detection-only helper for `validate`'s last-entry guard. It reads the source
+# text to CHECK the curated captions; it never authors the schedule (the regex
+# parser stays out of that — see onsen_scraper/hours.py). Add the repo root to
+# sys.path so this skill script can import the package.
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+from onsen_scraper.hours import last_entry_caption  # noqa: E402
+
 # Weekday abbreviations used in `closed` / `overrides` (Mon-first), matching
 # publisher/backfill_schedule.py._ABBR and the app's WeeklySchedule key order.
 ABBR = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
@@ -298,6 +306,23 @@ def cmd_validate(args) -> int:
         print("\n".join(errs))
         return 1
     print(f"OK — {len(onsens)} curated entries well-formed.")
+
+    # Last-entry guard: any onsen whose source states a clean single 最終受付 cutoff
+    # must surface it as a caption (docs/hours-schema.md), so a re-curation can't
+    # silently re-bury a trip-critical fact. Per-bath/per-day cutoffs return None
+    # from last_entry_caption and are curated by hand — not policed here.
+    snap = snapshot_hours()
+    le_missing = [
+        hid for hid, e in onsens.items()
+        if (cap := last_entry_caption(snap.get(hid, {}).get("business_hours"))) is not None
+        and cap not in e.get("exceptions", [])
+    ]
+    if le_missing:
+        print(f"MISSING last-entry caption — {len(le_missing)} onsen(s) state a "
+              f"最終受付 the curated exceptions don't surface: {sorted(le_missing, key=int)}")
+        print("  add it via recurate-hours `set` (en 'Last entry by HH:MM', ja '最終受付 HH:MM').")
+        return 1
+    print("  last-entry: every stated 最終受付 cutoff is surfaced as a caption.")
 
     # Coverage vs the snapshot is informational here (the pytest suite enforces an
     # exact match); a freshly-added onsen is expected to be missing until curated.
