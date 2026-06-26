@@ -12,7 +12,7 @@ sys.path.insert(0, str(REPO / "publisher"))
 
 import apply  # noqa: E402  (publisher/apply.py — the surgical publisher)
 import backfill_schedule as bf  # noqa: E402
-from onsen_scraper.hours import DAYS, parsed_hours_doc  # noqa: E402
+from onsen_scraper.hours import DAYS, last_entry_caption, parsed_hours_doc  # noqa: E402
 
 
 def test_sched_val_null_for_unstructured():
@@ -152,6 +152,25 @@ def test_last_entry_promoted_to_caption():
             assert e["exceptions"][i]["en"].lower().startswith("last entry"), hid
         total += len(idxs)
     assert total == 68
+
+
+def test_every_source_last_entry_is_captioned():
+    # Durability guard: any onsen whose SOURCE states a clean single 最終受付 cutoff
+    # must carry the matching caption, so a future recurate-hours pass (or a new
+    # onsen) can't silently re-bury it. Scales past the hard-coded set above — it
+    # derives the requirement straight from the snapshot, so an onsen that newly
+    # gains a 最終受付 is flagged until it's curated. Mirrors recurate-hours
+    # `validate`'s guard. (Per-bath/per-day cutoffs return None and are hand-curated.)
+    import sqlite3
+    con = sqlite3.connect(f"file:{REPO/'data'/'snapshot.db'}?mode=ro", uri=True)
+    raws = {str(i): bh for i, bh in con.execute("select id, business_hours from onsens")}
+    con.close()
+    missing = [
+        hid for hid, e in CURATED.items()
+        if (cap := last_entry_caption(raws.get(hid))) is not None
+        and cap not in e["exceptions"]
+    ]
+    assert not missing, f"source states 最終受付 but no caption: {sorted(missing, key=int)}"
 
 
 def test_curated_fixes_known_bugs():

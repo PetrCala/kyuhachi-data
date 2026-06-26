@@ -6,7 +6,13 @@ parser is deliberately conservative: it only emits a structured schedule for a
 single window with an explicit `無休`/weekday closure, and never invents
 "open every day" from a string that simply omits the closed day.
 """
-from onsen_scraper.hours import DAYS, parse_hours, parsed_hours_doc
+from onsen_scraper.hours import (
+    DAYS,
+    last_entry_caption,
+    parse_hours,
+    parsed_hours_doc,
+    single_last_entry,
+)
 
 
 def _sched(opens, closes, closed=()):
@@ -150,3 +156,26 @@ def test_parsed_hours_doc_no_hours_is_24_7():
     # parse_hours itself stays honest — it does not invent 24/7.
     from onsen_scraper.hours import parse_hours
     assert parse_hours(None).schedule is None
+
+
+# --- last entry (最終受付) ---------------------------------------------------- #
+
+def test_single_last_entry_clean():
+    # full-width digits/colon and no space both reduce to a zero-padded HH:MM.
+    assert single_last_entry("10：00～21：30（最終受付21：00）\n無休") == "21:00"
+    assert single_last_entry("9:00～20:30（最終受付 20:00）\n火・金曜休") == "20:00"
+
+
+def test_single_last_entry_absent_or_complex_is_none():
+    assert single_last_entry("10:00～22:00\n水曜休") is None          # no cutoff stated
+    assert single_last_entry(None) is None
+    # per-bath split (hid 57) and per-day split (hid 171) → hand-curated, not auto.
+    assert single_last_entry("10:00～20:00（最終受付 大風呂19:30、家族風呂19:00）") is None
+    assert single_last_entry("内湯10:00～最終受付 20:00（土日祝～14:00）\n露天10:00～最終受付 22:00") is None
+
+
+def test_last_entry_caption_wording():
+    # The one canonical wording (docs/hours-schema.md caption table).
+    assert last_entry_caption("10:00～21:30（最終受付21:00）") == {
+        "en": "Last entry by 21:00", "ja": "最終受付 21:00"}
+    assert last_entry_caption("10:00～22:00\n水曜休") is None
