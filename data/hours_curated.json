@@ -16,7 +16,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        }
+      ]
     },
     "5": {
       "publish": true,
@@ -110,6 +115,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 14:00",
+          "ja": "最終受付 14:00"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -127,6 +136,10 @@
       "confidence": "high",
       "note": "6:30-23:45（最終受付23:00）; 12月中旬に1日休館",
       "exceptions": [
+        {
+          "en": "Last entry by 23:00",
+          "ja": "最終受付 23:00"
+        },
         {
           "en": "Open year-round (one maintenance day in mid-December)",
           "ja": "通年営業（12月中旬に1日休館）"
@@ -165,7 +178,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "火・金曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 20:00",
+          "ja": "最終受付 20:00"
+        }
+      ]
     },
     "19": {
       "publish": true,
@@ -242,6 +260,10 @@
       "note": "普通浴/砂湯で時間別＋第3水曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 21:30",
+          "ja": "最終受付 21:30"
+        },
+        {
           "en": "Open in separate sessions — see original text",
           "ja": "時間帯が分かれます — 元の表記をご確認ください"
         },
@@ -282,6 +304,10 @@
       "note": "第4木曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
+        {
           "en": "Closed the 4th Thursday each month",
           "ja": "毎月第4木曜休"
         },
@@ -316,6 +342,10 @@
       "confidence": "high",
       "note": "無休（天候で変更あり）",
       "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
         {
           "en": "Hours may change in bad weather",
           "ja": "天候により営業時間が変わる場合あり"
@@ -367,6 +397,10 @@
       "confidence": "high",
       "note": "季節で営業時間が大きく変動＋年末年始休",
       "exceptions": [
+        {
+          "en": "Last entry by 17:00",
+          "ja": "最終受付 17:00"
+        },
         {
           "en": "Hours vary by season: Apr–Nov 9:00–18:00, Dec–Mar 10:00–17:30",
           "ja": "季節により変動：4〜11月 9:00〜18:00、12〜3月 10:00〜17:30"
@@ -450,6 +484,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -468,7 +506,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "火曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry: main bath 19:30, family bath 19:00",
+          "ja": "最終受付 大風呂19:30・家族風呂19:00"
+        }
+      ]
     },
     "59": {
       "publish": false,
@@ -500,6 +543,10 @@
       "confidence": "medium",
       "note": "旧不定休表記消滅; 9-21（最終20:00）",
       "exceptions": [
+        {
+          "en": "Last entry by 20:00",
+          "ja": "最終受付 20:00"
+        },
         {
           "en": "May occasionally close mornings for cleaning",
           "ja": "不定期で午前中に清掃のため休む場合あり"
@@ -602,6 +649,10 @@
       "note": "木曜休（祝日営業）",
       "exceptions": [
         {
+          "en": "Last entry by 22:00",
+          "ja": "最終受付 22:00"
+        },
+        {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
         }
@@ -639,6 +690,10 @@
       "confidence": "high",
       "note": "火曜休（祝日営業）。家族湯は13:00から",
       "exceptions": [
+        {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        },
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
@@ -731,7 +786,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "木曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 20:00",
+          "ja": "最終受付 20:00"
+        }
+      ]
     },
     "83": {
       "publish": true,
@@ -781,6 +841,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 15:00",
+          "ja": "最終受付 15:00"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -800,6 +864,10 @@
       "confidence": "medium",
       "note": "不定休あり追加",
       "exceptions": [
+        {
+          "en": "Last entry by 15:00",
+          "ja": "最終受付 15:00"
+        },
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
@@ -864,7 +932,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "木曜休→無休; 7-22（最終21:00）",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        }
+      ]
     },
     "96": {
       "publish": false,
@@ -878,6 +951,10 @@
       "confidence": "high",
       "note": "不定休",
       "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
@@ -897,7 +974,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "水曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 15:00",
+          "ja": "最終受付 15:00"
+        }
+      ]
     },
     "99": {
       "publish": true,
@@ -983,6 +1065,10 @@
       "note": "水曜休（その他不定休あり、要確認）",
       "exceptions": [
         {
+          "en": "Last entry by 14:00",
+          "ja": "最終受付 14:00"
+        },
+        {
           "en": "Other irregular closures may apply — confirm",
           "ja": "その他不定休あり — 要確認"
         }
@@ -1003,6 +1089,10 @@
       "note": "火曜休（その他不定休あり、要確認）",
       "exceptions": [
         {
+          "en": "Last entry by 17:00",
+          "ja": "最終受付 17:00"
+        },
+        {
           "en": "Other irregular closures may apply — confirm",
           "ja": "その他不定休あり — 要確認"
         },
@@ -1021,6 +1111,10 @@
       "confidence": "high",
       "note": "月水金は11-13入浴不可（昼休み）＋12/28-1/3休",
       "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
         {
           "en": "Mon/Wed/Fri: no bathing 11:00–13:00",
           "ja": "月・水・金は11:00〜13:00入浴不可"
@@ -1042,7 +1136,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 13:30",
+          "ja": "最終受付 13:30"
+        }
+      ]
     },
     "110": {
       "publish": true,
@@ -1071,6 +1170,10 @@
       "confidence": "high",
       "note": "第1火曜休（月次）",
       "exceptions": [
+        {
+          "en": "Last entry by 21:30",
+          "ja": "最終受付 21:30"
+        },
         {
           "en": "Closed the 1st Tuesday each month",
           "ja": "毎月第1火曜休"
@@ -1269,6 +1372,10 @@
       "note": "第3水曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 23:30",
+          "ja": "最終受付 23:30"
+        },
+        {
           "en": "Closed the 3rd Wednesday each month",
           "ja": "毎月第3水曜休"
         },
@@ -1306,6 +1413,10 @@
       "note": "第1火曜休（月次）。閉店は最終受付20:00基準",
       "exceptions": [
         {
+          "en": "Last entry by 20:00",
+          "ja": "最終受付 20:00"
+        },
+        {
           "en": "Closed the 1st Tuesday each month",
           "ja": "毎月第1火曜休"
         }
@@ -1324,6 +1435,10 @@
       "note": "第3火曜休（月次）。閉店は最終受付20:00基準",
       "exceptions": [
         {
+          "en": "Last entry by 20:00",
+          "ja": "最終受付 20:00"
+        },
+        {
           "en": "Closed the 3rd Tuesday each month",
           "ja": "毎月第3火曜休"
         }
@@ -1341,6 +1456,10 @@
       "confidence": "high",
       "note": "不定休",
       "exceptions": [
+        {
+          "en": "Last entry by 20:30",
+          "ja": "最終受付 20:30"
+        },
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
@@ -1403,6 +1522,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 21:30",
+          "ja": "最終受付 21:30"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -1420,6 +1543,10 @@
       "confidence": "high",
       "note": "無休（翌1:00まで）",
       "exceptions": [
+        {
+          "en": "Last entry by 24:00",
+          "ja": "最終受付 24:00"
+        },
         {
           "en": "Open until 1:00 the next morning",
           "ja": "翌1:00まで営業"
@@ -1440,6 +1567,10 @@
       "confidence": "high",
       "note": "火曜休のみ（祝日が火曜→翌日休）。旧regexの誤『日曜休』を修正",
       "exceptions": [
+        {
+          "en": "Last entry by 20:30",
+          "ja": "最終受付 20:30"
+        },
         {
           "en": "If the closing day is a public holiday, it closes the next day instead",
           "ja": "定休日が祝日の場合は翌日休"
@@ -1517,7 +1648,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "水曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 20:00",
+          "ja": "最終受付 20:00"
+        }
+      ]
     },
     "160": {
       "publish": false,
@@ -1554,6 +1690,10 @@
       "note": "第2水曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 20:30",
+          "ja": "最終受付 20:30"
+        },
+        {
           "en": "Closed the 2nd Wednesday each month",
           "ja": "毎月第2水曜休"
         }
@@ -1571,6 +1711,10 @@
       "confidence": "high",
       "note": "12-2月の時短追加",
       "exceptions": [
+        {
+          "en": "Last entry by 18:30",
+          "ja": "最終受付 18:30"
+        },
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
@@ -1612,6 +1756,10 @@
       "confidence": "high",
       "note": "新館/本館で時間別＋第4火曜休（隔月）",
       "exceptions": [
+        {
+          "en": "Last entry by 22:00",
+          "ja": "最終受付 22:00"
+        },
         {
           "en": "Open in separate sessions — see original text",
           "ja": "時間帯が分かれます — 元の表記をご確認ください"
@@ -1689,6 +1837,10 @@
       "note": "月曜休（祝日営業→翌火曜休）。16-18は宿泊者のみ",
       "exceptions": [
         {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        },
+        {
           "en": "16:00–18:00 is for overnight guests only",
           "ja": "16:00〜18:00は宿泊者のみ"
         },
@@ -1729,7 +1881,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "月曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        }
+      ]
     },
     "177": {
       "publish": false,
@@ -1768,6 +1925,10 @@
       "confidence": "medium",
       "note": "土日祝10:00開店追加; 臨時休業表記消滅",
       "exceptions": [
+        {
+          "en": "Last entry by 21:45",
+          "ja": "最終受付 21:45"
+        },
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
@@ -1849,6 +2010,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 15:15",
+          "ja": "最終受付 15:15"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         },
@@ -1871,6 +2036,10 @@
       "note": "第3月曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 21:30",
+          "ja": "最終受付 21:30"
+        },
+        {
           "en": "Closed the 3rd Monday each month",
           "ja": "毎月第3月曜休"
         },
@@ -1892,6 +2061,10 @@
       "confidence": "high",
       "note": "不定休",
       "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
@@ -1955,6 +2128,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 18:30",
+          "ja": "最終受付 18:30"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -1974,6 +2151,10 @@
       "confidence": "high",
       "note": "月曜休（祝日営業）。入浴10:00-21:50",
       "exceptions": [
+        {
+          "en": "Last entry by 21:30",
+          "ja": "最終受付 21:30"
+        },
         {
           "en": "Open on public holidays",
           "ja": "祝日は営業"
@@ -2011,6 +2192,10 @@
       "note": "土日祝7:00開店追加",
       "exceptions": [
         {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         },
@@ -2034,6 +2219,10 @@
       "confidence": "medium",
       "note": "水曜休（加えて第2・第4木曜も休＝月次）",
       "exceptions": [
+        {
+          "en": "Last entry by 18:00",
+          "ja": "最終受付 18:00"
+        },
         {
           "en": "Also closed the 2nd & 4th Thursday",
           "ja": "第2・第4木曜も休"
@@ -2075,6 +2264,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 15:00",
+          "ja": "最終受付 15:00"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -2091,7 +2284,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 22:00",
+          "ja": "最終受付 22:00"
+        }
+      ]
     },
     "206": {
       "publish": true,
@@ -2170,7 +2368,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "火曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 22:30",
+          "ja": "最終受付 22:30"
+        }
+      ]
     },
     "217": {
       "publish": true,
@@ -2219,6 +2422,10 @@
       "confidence": "high",
       "note": "2部制(8-17,19-21)＋不定休",
       "exceptions": [
+        {
+          "en": "Last entry by 16:00",
+          "ja": "最終受付 16:00"
+        },
         {
           "en": "Open 8:00–17:00 and 19:00–21:00",
           "ja": "8:00〜17:00 と 19:00〜21:00"
@@ -2269,6 +2476,10 @@
       "note": "夜の部(18-20)消滅; 11-16のみ; 不定休",
       "exceptions": [
         {
+          "en": "Last entry by 15:00",
+          "ja": "最終受付 15:00"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -2285,7 +2496,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 19:30",
+          "ja": "最終受付 19:30"
+        }
+      ]
     },
     "224": {
       "publish": true,
@@ -2320,7 +2536,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "木曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        }
+      ]
     },
     "228": {
       "publish": true,
@@ -2412,6 +2633,10 @@
       "note": "第4月曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 20:30",
+          "ja": "最終受付 20:30"
+        },
+        {
           "en": "Closed the 4th Monday each month",
           "ja": "毎月第4月曜休"
         }
@@ -2499,7 +2724,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 22:30",
+          "ja": "最終受付 22:30"
+        }
+      ]
     },
     "238": {
       "publish": false,
@@ -2513,6 +2743,10 @@
       "confidence": "high",
       "note": "第3水曜休（月次、3・8月なし）。金土祝前は24:00まで",
       "exceptions": [
+        {
+          "en": "Last entry by 22:00",
+          "ja": "最終受付 22:00"
+        },
         {
           "en": "Closed the 3rd Wednesday each month (except Mar & Aug)",
           "ja": "毎月第3水曜休（3・8月は除く）"
@@ -2545,6 +2779,10 @@
       "note": "無休。土日祝は10:00開店",
       "exceptions": [
         {
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        },
+        {
           "en": "Sat, Sun & holidays open from 10:00",
           "ja": "土日祝は10:00開店"
         }
@@ -2573,6 +2811,10 @@
       "confidence": "medium",
       "note": "木曜休（加えて月末の金曜も休＝月次）。土日祝10:00開店",
       "exceptions": [
+        {
+          "en": "Last entry by 20:45",
+          "ja": "最終受付 20:45"
+        },
         {
           "en": "Sat, Sun & holidays open from 10:00",
           "ja": "土日祝は10:00開店"
@@ -2627,6 +2869,10 @@
       "note": "第2火・水曜休（月次）",
       "exceptions": [
         {
+          "en": "Last entry by 24:00",
+          "ja": "最終受付 24:00"
+        },
+        {
           "en": "Closed the 2nd Tuesday & Wednesday each month",
           "ja": "毎月第2火・水曜休"
         }
@@ -2667,6 +2913,10 @@
       "note": "不定休",
       "exceptions": [
         {
+          "en": "Last entry by 16:30",
+          "ja": "最終受付 16:30"
+        },
+        {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
         }
@@ -2683,7 +2933,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 21:30",
+          "ja": "最終受付 21:30"
+        }
+      ]
     },
     "247": {
       "publish": true,
@@ -2711,7 +2966,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休（注: カタログ上はisActive:false／retired）",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 20:30",
+          "ja": "最終受付 20:30"
+        }
+      ]
     },
     "249": {
       "publish": false,
@@ -2744,7 +3004,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "水曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 16:30",
+          "ja": "最終受付 16:30"
+        }
+      ]
     },
     "251": {
       "publish": true,
@@ -2757,7 +3022,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "無休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 24:00",
+          "ja": "最終受付 24:00"
+        }
+      ]
     },
     "253": {
       "publish": true,
@@ -2773,6 +3043,10 @@
       "confidence": "medium",
       "note": "旅館とよとみ; 水曜休（不定休あり）",
       "exceptions": [
+        {
+          "en": "Last entry by 18:00",
+          "ja": "最終受付 18:00"
+        },
         {
           "en": "Other irregular closures may apply — confirm",
           "ja": "その他不定休あり — 要確認"
@@ -2791,6 +3065,10 @@
       "confidence": "high",
       "note": "雲仙福田屋/山照別邸; 不定休",
       "exceptions": [
+        {
+          "en": "Last entry by 14:00",
+          "ja": "最終受付 14:00"
+        },
         {
           "en": "Irregular closing days — confirm before visiting",
           "ja": "不定休 — 事前にご確認ください"
@@ -2909,7 +3187,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "赤川荘; 火〜木休（最終受付17:00）",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 17:00",
+          "ja": "最終受付 17:00"
+        }
+      ]
     },
     "262": {
       "publish": false,
@@ -2923,6 +3206,10 @@
       "confidence": "medium",
       "note": "サンチェリーきたごう; 第2・4月曜休",
       "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        },
         {
           "en": "Closed the 2nd & 4th Monday each month",
           "ja": "毎月第2・第4月曜休"
@@ -2961,7 +3248,12 @@
       "overrides": {},
       "confidence": "high",
       "note": "たまて箱温泉ヘルシーランド; 木曜休",
-      "exceptions": []
+      "exceptions": [
+        {
+          "en": "Last entry by 19:00",
+          "ja": "最終受付 19:00"
+        }
+      ]
     },
     "265": {
       "publish": true,

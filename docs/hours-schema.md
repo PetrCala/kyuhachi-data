@@ -49,6 +49,7 @@ Exceptions are short, factual, bilingual. Standard wordings by category:
 
 | Category | en | ja |
 |---|---|---|
+| Last entry (最終受付) | Last entry by 21:00 | 最終受付 21:00 |
 | Open on holidays | Open on public holidays | 祝日は営業 |
 | Holiday → next day | If the closing day is a public holiday, it closes the next day instead | 定休日が祝日の場合は翌日休 |
 | Monthly closure | Also closed the 2nd & 4th Thursday | 第2・第4木曜も休 |
@@ -59,6 +60,13 @@ Exceptions are short, factual, bilingual. Standard wordings by category:
 | Split sessions (raw) | Open in separate sessions — see original text | 時間帯が分かれます — 元の表記をご確認ください |
 | Partial day | Tuesday: bathing only after 16:00 | 火曜は16:00以降のみ入浴可 |
 | Annual only | Open year-round (closed only Jan 1) | 通年営業（1/1のみ休） |
+
+The **last-entry** (`最終受付`) caption is the one mechanical case: 88onsen states it
+inline in the `business_hours` text (`…（最終受付21:00）`), where it is otherwise hidden
+in the "show original text" fallback. Carry it forward as a visible caption — last entry
+is a hard cutoff that changes whether a trip is worth making, so it earns the same
+billing as the other tips. List it first. When the cutoff differs by bath or by day,
+spell that out (e.g. `Last entry: main bath 19:30, family bath 19:00`).
 
 ## Source of truth
 
