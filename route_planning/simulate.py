@@ -12,10 +12,10 @@ and flagged risk legs. Read-only.
 Walking model (empirically grounded; all configurable):
   SPEED_KMH   4.0   loaded moving pace. Strava: moving median 5.05, elapsed 3.97;
                     ~20% load penalty on moving -> ~4.0 (also matches real elapsed).
-  SOAK_MIN    20    onsendo.db real stays: median 13, p75 18, p90 25; +stamp/admin.
+  VISIT_MIN   20    onsendo.db real stays: median 13, p75 18, p90 25; +stamp/admin.
   ROAD_FACTOR 1.3   great-circle -> real foot distance.
   WAKE/SLEEP  06:00 / 22:00  -> 16 h awake, 8 h sleep (no fixed daily km budget;
-                    walk whenever awake & not soaking/waiting).
+                    walk whenever awake & not bathing/waiting).
 """
 from __future__ import annotations
 
@@ -23,8 +23,8 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from config import (DEADLINE, ROAD_FACTOR, SLEEP_MIN, SOAK_MIN, SPEED_KMH,
-                    START_DT, WAKE_MIN)
+from config import (DEADLINE, ROAD_FACTOR, SLEEP_MIN, SPEED_KMH, START_DT,
+                    VISIT_MIN, WAKE_MIN)
 
 HERE = Path(__file__).resolve().parent
 WEEKDAY_JP = "月火水木金土日"
@@ -155,7 +155,7 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
             irregular_seen += 1
         visited += 1
         events.append(_ev(s, entry, status, note, visited))
-        clock = entry + timedelta(minutes=SOAK_MIN)
+        clock = entry + timedelta(minutes=VISIT_MIN)
 
     # max onsens visited in a single calendar day
     from collections import Counter
@@ -181,7 +181,7 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
         "idle_days_from_waits": idle_days_total,
         "max_onsens_one_day": max_in_day,
         "irregular_不定休_visited(risk)": irregular_seen,
-        "model": {"speed_kmh": SPEED_KMH, "soak_min": SOAK_MIN, "road_factor": ROAD_FACTOR,
+        "model": {"speed_kmh": SPEED_KMH, "visit_min": VISIT_MIN, "road_factor": ROAD_FACTOR,
                   "wake": "06:00", "sleep": "22:00"},
     }
     return summary, events

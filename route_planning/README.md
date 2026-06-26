@@ -54,7 +54,7 @@ hand-drawn GPX  +  snapshot.db (onsens + hours)
 
 - `data/snapshot.db` — onsen catalog + opening hours (read-only).
 - `config.HANDDRAWN_GPX` — the path (`kyuhachi/local/route_26_02_14/Kyuhachi-3.gpx`).
-- `~/code/onsendo` — real soak time (`onsen_visits`) + Strava walking speed.
+- `~/code/onsendo` — real per-visit dwell time (`onsen_visits`) + Strava walking speed.
 
 ## Not done (Tier 2/3, if this becomes a recurring tool)
 

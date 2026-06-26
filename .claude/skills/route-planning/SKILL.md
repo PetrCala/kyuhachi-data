@@ -32,7 +32,7 @@ all 7 prefectures, ~1161 km, finishes ~Nov 7 (25 days slack)**. Packaged in
   and ≥88, what's the day count, where are the no-resupply gaps.
 - "The route should go through X instead" / "reroute the <region> section."
 - "Add onsen Y" or "pick up the onsens near Z."
-- "Re-derive my walking speed" / "change the soak time / deadline and re-schedule."
+- "Re-derive my walking speed" / "change the visit time / deadline and re-schedule."
 
 ## Steps
 
@@ -60,8 +60,8 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    nearest point and routes the spur on OSRM roads.
 
 6. **Re-derive the walk model**: `python route_planning/fetch_strava_walks.py`
-   refreshes walking speed from Strava (token in the `onsendo` repo). Soak time
-   comes from `onsendo`'s `onsen_visits.stay_length_minutes` (median 13 min).
+   refreshes walking speed from Strava (token in the `onsendo` repo). Per-visit
+   dwell time comes from `onsendo`'s `onsen_visits.stay_length_minutes` (median 13 min).
 
 ## Data sources / source-of-truth
 
@@ -69,7 +69,7 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
 |---|---|
 | Onsen catalog + opening hours | `data/snapshot.db` (read-only) |
 | The path (hand-drawn line) | `config.HANDDRAWN_GPX` (plotaroute export) |
-| Real soak time + walking speed | `~/code/onsendo` (`onsen_visits`, Strava sync) |
+| Real per-visit dwell time + walking speed | `~/code/onsendo` (`onsen_visits`, Strava sync) |
 | All shared constants | `route_planning/config.py` |
 
 ## Locked decisions (do not re-litigate)
