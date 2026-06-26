@@ -2,7 +2,7 @@
 
 Hand-drawn line + Nagasaki loop. **1205 km**, **119 onsens**, all 7 prefectures (鹿児島27・宮崎9・熊本25・福岡16・佐賀7・長崎1・大分34).
 
-Schedule (hours-aware, patient policy): start **Fri 10-02 06:00**, finish **Sun 11-08 10:20**, **38 days** (24 days slack to the Dec 2 deadline), visits all 119.
+**Realistic plan** (12 h walking day, ~50 min avg visit, skip-lean): finish **Sat 11-07 12:18**, **37 days**, visits **102** (≥88), **25 days slack** to the Dec 2 deadline. Catch-everything upper bound (visit all 119 + wait out closures): 50 days / Fri 11-20 11:20. `00_itinerary.md` lists all onsens in walking order (the catch-everything reference); you skip-lean live with `decision_card.md`.
 
 Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = only on an out-and-back detour; skip them and you finish earlier). Spurs ring teal, buffers ring amber on the maps.
 
@@ -14,18 +14,18 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 ## Stages
 | Stage | km | onsens | dates | prefectures | files |
 |---|---|---|---|---|---|
-| **1** | 139 | 16 | 2026-10-02→2026-10-05 | 鹿児島×16 | [gpx](stage_01.gpx) · [map](stage_01_map.html) |
-| **2** | 132 | 15 | 2026-10-05→2026-10-09 | 宮崎×9・鹿児島×6 | [gpx](stage_02.gpx) · [map](stage_02_map.html) |
-| **3** | 143 | 9 | 2026-10-10→2026-10-14 | 鹿児島×5・熊本×4 | [gpx](stage_03.gpx) · [map](stage_03_map.html) |
-| **4** | 69 | 8 | 2026-10-16→2026-10-17 | 熊本×8 | [gpx](stage_04.gpx) · [map](stage_04_map.html) |
-| **5** | 141 | 11 | 2026-10-17→2026-10-20 | 熊本×6・福岡×3・佐賀×1・長崎×1 | [gpx](stage_05.gpx) · [map](stage_05_map.html) |
-| **6** | 132 | 11 | 2026-10-21→2026-10-26 | 佐賀×6・福岡×5 | [gpx](stage_06.gpx) · [map](stage_06_map.html) |
-| **7** | 119 | 21 | 2026-10-27→2026-10-31 | 福岡×8・大分×6・熊本×7 | [gpx](stage_07.gpx) · [map](stage_07_map.html) |
-| **8** | 150 | 28 | 2026-11-01→2026-11-08 | 大分×28 | [gpx](stage_08.gpx) · [map](stage_08_map.html) |
+| **1** | 139 | 16 | 2026-10-02→2026-10-06 | 鹿児島×16 | [gpx](stage_01.gpx) · [map](stage_01_map.html) |
+| **2** | 132 | 15 | 2026-10-07→2026-10-13 | 宮崎×9・鹿児島×6 | [gpx](stage_02.gpx) · [map](stage_02_map.html) |
+| **3** | 143 | 9 | 2026-10-13→2026-10-21 | 鹿児島×5・熊本×4 | [gpx](stage_03.gpx) · [map](stage_03_map.html) |
+| **4** | 69 | 8 | 2026-10-23→2026-10-25 | 熊本×8 | [gpx](stage_04.gpx) · [map](stage_04_map.html) |
+| **5** | 141 | 11 | 2026-10-25→2026-10-31 | 熊本×6・福岡×3・佐賀×1・長崎×1 | [gpx](stage_05.gpx) · [map](stage_05_map.html) |
+| **6** | 132 | 11 | 2026-10-31→2026-11-06 | 佐賀×6・福岡×5 | [gpx](stage_06.gpx) · [map](stage_06_map.html) |
+| **7** | 119 | 21 | 2026-11-07→2026-11-12 | 福岡×8・大分×6・熊本×7 | [gpx](stage_07.gpx) · [map](stage_07_map.html) |
+| **8** | 150 | 28 | 2026-11-13→2026-11-20 | 大分×28 | [gpx](stage_08.gpx) · [map](stage_08_map.html) |
 
 ## Stage detail
 
-### Stage 1 — 139 km, 2026-10-02→2026-10-05
+### Stage 1 — 139 km, 2026-10-02→2026-10-06
 - 1. 鹿児島 指宿温泉：山川砂むし温泉「砂湯里」 (0.06km off line)
 - 2. 鹿児島 指宿温泉：たまて箱温泉ヘルシーランド露天風呂 (1.63km off line)
 - 3. 鹿児島 指宿温泉：砂むし会館「砂楽」 (0.0km off line)
@@ -43,7 +43,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 15. 鹿児島 硫黄谷温泉：霧島ホテル (0.03km off line)
 - 16. 鹿児島 霧島新湯温泉：霧島新燃荘　 (0.04km off line)
 
-### Stage 2 — 132 km, 2026-10-05→2026-10-09
+### Stage 2 — 132 km, 2026-10-07→2026-10-13
 - 17. 宮崎 皇子原温泉：健康村 (0.11km off line)
 - 18. 宮崎 湯之元温泉：湯之元温泉 (0.04km off line)
 - 19. 宮崎 ひなもり温泉：こばやし温泉美人の湯 (0.07km off line)
@@ -60,7 +60,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 30. 鹿児島 市比野温泉：割烹旅館　みどり屋 (0.16km off line)
 - 31. 鹿児島 入来温泉：百薬の名湯 諏訪温泉 (0.04km off line)
 
-### Stage 3 — 143 km, 2026-10-10→2026-10-14
+### Stage 3 — 143 km, 2026-10-13→2026-10-21
 - 32. 鹿児島 宮之城温泉：さがら温泉 (0.02km off line)
 - 33. 鹿児島 紫尾温泉：紫尾湯の宿くすのき (0.13km off line)
 - 34. 鹿児島 川内高城温泉：共同湯 (0.09km off line)
@@ -71,7 +71,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 39. 熊本 湯浦温泉：亀井荘 (0.1km off line)
 - 40. 熊本 日奈久温泉：旅館 幸ケ丘 (0.22km off line)
 
-### Stage 4 — 69 km, 2026-10-16→2026-10-17
+### Stage 4 — 69 km, 2026-10-23→2026-10-25
 - 41. 熊本 垂玉温泉：瀧日和 (0.02km off line)
 - 42. 熊本 地獄温泉：青風荘 (0.06km off line)
 - 43. 熊本 大阿蘇　火の山温泉：どんどこ湯 (0.04km off line)
@@ -81,7 +81,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 47. 熊本 亀の甲温泉：亀の甲温泉 (0.01km off line)
 - 48. 熊本 辰頭温泉：辰頭温泉 (0.04km off line)
 
-### Stage 5 — 141 km, 2026-10-17→2026-10-20
+### Stage 5 — 141 km, 2026-10-25→2026-10-31
 - 49. 熊本 宝田温泉：たからの湯 (0.04km off line)
 - 50. 熊本 植木温泉：旅館 平山 (0.04km off line)
 - 51. 熊本 山鹿温泉：さくら湯　 (0.03km off line)
@@ -94,7 +94,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 58. 佐賀 嬉野温泉：嬉泉館 (0.03km off line) ◄Nagasaki loop
 - 59. 長崎 波佐見温泉：はさみ温泉 湯治楼 (0.01km off line) ◄Nagasaki loop
 
-### Stage 6 — 132 km, 2026-10-21→2026-10-26
+### Stage 6 — 132 km, 2026-10-31→2026-11-06
 - 60. 佐賀 武雄温泉：元湯 (0.01km off line) ◄Nagasaki loop
 - 61. 佐賀 佐賀大和温泉：ホテル アマンディ (0.04km off line) ◄Nagasaki loop
 - 62. 佐賀 熊の川温泉：湯泉郷 温泉館 湯招花 (0.04km off line)
@@ -107,7 +107,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 69. 福岡 博多温泉：元祖　元湯　 (0.02km off line)
 - 70. 福岡 博多温泉：富士の苑 (0.01km off line)
 
-### Stage 7 — 119 km, 2026-10-27→2026-10-31
+### Stage 7 — 119 km, 2026-11-07→2026-11-12
 - 71. 福岡 あさくら温泉：ホテルグランスパアベニュー 幸楽の湯 (0.01km off line)
 - 72. 福岡 甘木温泉：天然温泉　卑弥呼ロマンの湯 (0.01km off line)
 - 73. 福岡 吉井温泉：ニュー筑水荘　　 (0.04km off line)
@@ -130,7 +130,7 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 90. 熊本 小田温泉：静寂な森の宿 山しのぶ (0.03km off line)
 - 91. 大分 筋湯温泉：うたせ大浴場 (0.13km off line)
 
-### Stage 8 — 150 km, 2026-11-01→2026-11-08
+### Stage 8 — 150 km, 2026-11-13→2026-11-20
 - 92. 大分 九酔渓温泉：渓谷の宿　二匹の鬼 (0.04km off line)
 - 93. 大分 筌の口温泉：炭酸温泉　山里の湯 (0.07km off line)
 - 94. 大分 筌の口温泉：旅館　新清館 (0.04km off line)
@@ -159,3 +159,57 @@ Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = o
 - 117. 大分 別府温泉：竹瓦温泉 (0.04km off line)
 - 118. 大分 別府温泉：永石温泉 (0.1km off line)
 - 119. 大分 浜脇温泉：茶房たかさきの湯 (0.03km off line)
+
+## Logistics (OpenStreetMap, within 1 km of the line)
+
+Total services found: **2051** — 🚉station 113 · 🍴food 1252 · 🏪conbini 328 · 🛏lodging 170 · 🛒supermarket 95 · 💧water 87 · ⛺campsite 6
+
+**No-resupply gaps** (>10 km with no conbini/food/lodging — carry supplies):
+- 22–34 km (12 km) — near #5 指宿温泉
+- 77–88 km (11 km) — near #7 大黒温泉
+- 108–128 km (21 km) — near #12 日の出温泉
+- 135–163 km (28 km) — near #17 皇子原温泉
+- 163–218 km (55 km) — near #21 白鳥温泉
+- 218–232 km (14 km) — near #27 吉松温泉
+- 242–261 km (19 km) — near #28 船津温泉
+- 261–278 km (17 km) — near #29 滝の湯
+- 290–351 km (61 km) — near #33 紫尾温泉
+- 365–375 km (10 km) — near #36 十三奉行温泉
+- 378–394 km (16 km) — near #37 湯の鶴温泉
+- 402–449 km (47 km) — near #39 湯浦温泉
+- 517–527 km (10 km) — near #41 垂玉温泉
+- 562–577 km (15 km) — near #44 阿蘇内牧温泉
+- 615–625 km (10 km) — near #53 平山温泉
+- 632–657 km (25 km) — near #55 船小屋温泉
+- 659–669 km (10 km) — near #57 久留米温泉
+- 684–705 km (22 km) — near #57 久留米温泉
+- 714–725 km (11 km) — near #58 嬉野温泉
+- 728–748 km (20 km) — near #59 波佐見温泉
+- 750–764 km (14 km) — near #60 武雄温泉
+- 768–782 km (14 km) — near #60 武雄温泉
+- 782–797 km (14 km) — near #61 佐賀大和温泉
+- 806–828 km (22 km) — near #64 古湯温泉
+- 872–886 km (14 km) — near #68 二日市温泉
+- 960–976 km (16 km) — near #80 天ヶ瀬温泉
+- 976–990 km (14 km) — near #80 天ヶ瀬温泉
+- 990–1032 km (42 km) — near #85 壁湯天然洞窟温泉
+- 1044–1055 km (10 km) — near #91 筋湯温泉
+- 1064–1096 km (32 km) — near #97 法華院温泉
+- 1096–1132 km (35 km) — near #102 湯平温泉
+- 1137–1159 km (22 km) — near #106 塚原温泉
+- 1176–1203 km (27 km) — near #115 賀来温泉
+
+Per-stage service counts:
+
+| Stage | 🏪 | 🛒 | 🍴 | 💧 | 🛏 | ⛺ | 🚉 |
+|---|---|---|---|---|---|---|---|
+| 1 | 108 | 27 | 352 | 51 | 38 | 0 | 27 |
+| 2 | 7 | 1 | 2 | 2 | 1 | 0 | 7 |
+| 3 | 5 | 0 | 11 | 0 | 3 | 2 | 12 |
+| 4 | 10 | 1 | 21 | 0 | 4 | 1 | 1 |
+| 5 | 16 | 3 | 60 | 1 | 11 | 0 | 4 |
+| 6 | 62 | 23 | 229 | 2 | 20 | 1 | 15 |
+| 7 | 7 | 6 | 28 | 8 | 13 | 0 | 6 |
+| 8 | 22 | 5 | 294 | 9 | 44 | 2 | 5 |
+
+_Each `stage_NN_map.html` now has toggleable POI layers (top-right)._

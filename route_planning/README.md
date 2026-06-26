@@ -8,57 +8,70 @@ route **on top of a hand-drawn GPX line**, against real onsen opening hours.
 
 ## The two layers
 
-1. **The plan** — which onsens, what order, the hours-aware day schedule, all-7
+1. **The plan** — which onsens, in what order, the hours-aware schedule, all-7
    coverage. Computed by these scripts.
 2. **The line** — the hand-drawn GPX (`config.HANDDRAWN_GPX`, drawn on
-   plotaroute.com) is the **source of truth for the path**. We don't auto-route it.
+   plotaroute.com) is the **source of truth for the path**. We don't auto-route it;
+   we splice surgical edits (the Nagasaki loop, out-and-back spurs) onto it.
 
-Current route = hand-drawn line + Nagasaki loop = **109 onsens, all 7, ~1161 km,
-finish ~Nov 7**. Output in `final_route/`.
+**Current route** = hand-drawn line + Nagasaki loop + spurs = **119 onsens
+(115 core + 4 optional buffer), all 7 prefectures, ~1205 km.** Packaged in
+`final_route/`.
+
+**Realistic schedule** (12 h walking day, ~50 min blended visit, skip-lean):
+**~37 days, finish ~Nov 7, ~25 days slack** to the Dec 2 deadline. Visiting all 119
+*and* waiting out every closure is the ~50-day upper bound — you skip-lean instead
+(see `decision_card.md`). Walk model in `config.py`, scheduler in `simulate.py`.
 
 ## Workflow
 
 ```
-hand-drawn GPX  +  snapshot.db (onsens + hours)
-      │
-  remap_nagasaki_loop.py   apply the Nagasaki loop edit (OSRM road-routing)
-      │   → kyuhachi_nagasaki_loop.gpx + handdrawn_loop_analysis.json
-  build_final_route.py     package + chunk into stages → final_route/
-      │
-  logistics_overlay.py     Overpass POIs + no-resupply gaps → enhances final_route/
+data/snapshot.db  +  new_onsens_staged.json
+   └─ build_overlay_db.py → cache/snapshot_overlay.db   (baseline + staged new onsens)
 
-  pipeline.py = all three, one command (run after editing the line or config.py)
+hand-drawn GPX  +  overlay catalog (via KYUHACHI_SNAPSHOT_DB)
+   ├─ remap_nagasaki_loop.py   Nagasaki loop + grafted spurs (OSRM) → handdrawn_loop_analysis.json
+   ├─ build_final_route.py     package + chunk into stages → final_route/
+   └─ logistics_overlay.py     Overpass POIs + no-resupply gaps → enhances final_route/
+
+   pipeline.py = remap → build → logistics, one command.
+
+# run route scripts against the overlay catalog:
+KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_planning/pipeline.py
 ```
 
 ## Files
 
 | File | Role |
 |---|---|
-| **`config.py`** | the one source for anchors, walk model, dates, exclusions, paths |
+| **`config.py`** | one source for anchors, walk model (12 h day, ~50 min visit), dates, exclusions, paths |
 | **`geo.py`** | shared helpers: haversine, load_track, cumulative, nearest_*, decimate, write_gpx |
 | `onsen_model.py` | load onsens + parse Japanese `business_hours` |
 | `osrm.py` | OSRM foot distance matrix + geometries (via curl), cached |
-| `simulate.py` | hours-aware day-by-day schedule simulator |
-| `analyze_handdrawn.py` | snap onsens to the line; coverage + schedule (no edits) |
-| `remap_nagasaki_loop.py` | **edit pattern A**: remap a section onto specific roads (`LEG_VIAS`) |
-| `graft_nagasaki.py` | **edit pattern B**: add an out-and-back spur (`SPUR_IDS`) |
-| `build_final_route.py` | package the route + chunk into stages |
-| `logistics_overlay.py` | OpenStreetMap services + gap analysis |
+| `simulate.py` | hours-aware day-by-day schedule simulator (patient / skip policies) |
+| `difficulty.py` | crux-zone warnings injected into the itinerary |
+| `build_overlay_db.py` | build the route-only overlay catalog (baseline + staged new onsens) |
+| `analyze_handdrawn.py` | snap onsens to the raw line; coverage + schedule (no edits) |
+| `remap_nagasaki_loop.py` | the route builder: Nagasaki loop + out-and-back spurs (`SPURS`) |
+| `graft_nagasaki.py` | standalone spur-only pattern (reference for the splice technique) |
+| `build_final_route.py` | package the route + chunk into stages → `final_route/` |
+| `logistics_overlay.py` | OpenStreetMap services + no-resupply gap analysis |
 | `pipeline.py` | run remap → build → logistics |
+| `build_aso_crater.py` | optional standalone Aso-crater climb-spur GPX |
 | `fetch_strava_walks.py` | re-derive walking speed from Strava |
-| `final_route/` | **canonical output** (regenerable): full GPX/map/itinerary + 8 stages |
-| `cache/` | OSRM + Overpass caches (regenerable) |
-| `archive/` | superseded scripts (great-circle solver, OSRM auto-router, …) + old artifacts — reference only, not runnable from there |
+| `new_onsens_staged.json` | staged catalog delta (13 added / 1 removed) folded into the overlay |
+| `strava_walk_summary.json` | Strava-derived walk-speed summary (walk-model input) |
+| `handdrawn_loop_analysis.json` | snapped onsens + along-track order (the schedule tools' input) |
+| `final_route/` | **canonical output** (regenerable): full GPX/map/itinerary + README + 8 stages |
+| `decision_card.md` | the one-page on-trail decision card (print it) |
+| `aso_crater_spur.gpx` · `aso_crater_map.html` | optional Aso-crater side-trip |
+| `cache/` | OSRM/Overpass caches + overlay DB — **gitignored**, regenerable |
 
 ## Data sources
 
-- `data/snapshot.db` — onsen catalog + opening hours (read-only).
+- `data/snapshot.db` — onsen catalog + opening hours (read-only baseline).
+- `cache/snapshot_overlay.db` — route-only overlay (baseline + staged new onsens),
+  built by `build_overlay_db.py`, selected via `KYUHACHI_SNAPSHOT_DB`. Never mutates
+  the baseline.
 - `config.HANDDRAWN_GPX` — the path (`kyuhachi/local/route_26_02_14/Kyuhachi-3.gpx`).
-- `~/code/onsendo` — real per-visit dwell time (`onsen_visits`) + Strava walking speed.
-
-## Not done (Tier 2/3, if this becomes a recurring tool)
-
-- Consolidate the per-script `write_map` HTML behind one flexible Leaflet template
-  (left divergent on purpose — route vs spur vs loop vs stage vs stage+POI).
-- Promote to a `trail/` package + an argparse CLI (`trail snap|edit|build|logistics`)
-  with tests.
+- `~/code/onsendo` — real visit time (`onsen_visits`) + Strava walking speed.

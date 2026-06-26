@@ -39,7 +39,9 @@ def main():
     lat, lon, cum = load_track(TRACK_GPX)
     total = float(cum[-1])
 
+    # patient = full ordered reference (00_itinerary); skip = realistic headline
     summ, events = simulate.simulate(ANALYSIS, policy="patient", road_factor=1.0)
+    summ_real, _ = simulate.simulate(ANALYSIS, policy="skip", road_factor=1.0)
     ev_by_id = {e["id"]: e for e in events}
 
     # copy full-route artifacts
@@ -75,7 +77,7 @@ def main():
         write_stage_gpx(stage)
         write_stage_map(stage)
 
-    write_readme(stages, total, summ, analysis)
+    write_readme(stages, total, summ, analysis, summ_real)
     print(f"Final route packaged in {OUT}/")
     for st in stages:
         pf = "・".join(f"{p}{n}" for p, n in st["prefs"].items())
@@ -130,8 +132,9 @@ map.fitBounds(LINE.length?LINE:PTS.map(p=>[p.lat,p.lon]));
     (OUT / f"stage_{stage['n']:02d}_map.html").write_text(html)
 
 
-def write_readme(stages, total, summ, analysis):
+def write_readme(stages, total, summ, analysis, summ_real=None):
     pc = analysis["prefecture_coverage"]
+    real = summ_real or summ
     lines = [
         "# 九州八十八湯 — final foot route",
         "",
@@ -139,10 +142,13 @@ def write_readme(stages, total, summ, analysis):
         f"**{analysis['passed']} onsens**, all 7 prefectures "
         f"({'・'.join(f'{k}{v}' for k, v in pc.items())}).",
         "",
-        f"Schedule (hours-aware, patient policy): start **{summ['start']}**, "
-        f"finish **{summ['finish']}**, **{summ['calendar_days_used']} days** "
-        f"({summ['slack_days_to_deadline']} days slack to the Dec 2 deadline), "
-        f"visits all {summ['visited']}.",
+        f"**Realistic plan** (12 h walking day, ~50 min avg visit, skip-lean): finish "
+        f"**{real['finish']}**, **{real['calendar_days_used']} days**, visits **{real['visited']}** "
+        f"(≥88), **{real['slack_days_to_deadline']} days slack** to the Dec 2 deadline. "
+        f"Catch-everything upper bound (visit all {summ['visited']} + wait out closures): "
+        f"{summ['calendar_days_used']} days / {summ['finish']}. "
+        f"`00_itinerary.md` lists all onsens in walking order (the catch-everything reference); "
+        f"you skip-lean live with `decision_card.md`.",
         "",
         (f"Includes **{sum(1 for s in analysis['stops'] if s.get('is_spur'))} grafted spur** "
          f"onsen(s) and **{sum(1 for s in analysis['stops'] if s.get('is_buffer'))} optional "

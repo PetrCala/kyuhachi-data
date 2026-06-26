@@ -8,9 +8,9 @@
 ## The one fact that sets the whole strategy
 
 You pass **~119 onsens on the line** for a target of **88** — about **30 to spare**.
-The simulator's **skip policy** (never wait overnight, miss anything closed/late) **still
-visits ~90 ≥ 88 and finishes ~10 days early.** The *patient* plan finishes **Nov 8 with
-24 days of slack** before the **Dec 2** deadline.
+At a realistic **12 h walking day + ~50 min/visit, skip-lean** (never wait overnight, miss
+anything closed/late) you **visit ~102 ≥ 88 and finish ~Nov 7, ~25 days early.** Visiting
+*everything* and waiting out every closure is the **~50-day / Nov 20** upper bound — you don't.
 
 > **So: skip freely. You are not optimizing — you are collecting. When in doubt, walk on.**
 > The day-to-day "visit this / skip that" call almost never threatens the goal. Only two
@@ -22,7 +22,7 @@ visits ~90 ≥ 88 and finishes ~10 days early.** The *patient* plan finishes **N
 
 | What you see | Do | Why |
 |---|---|---|
-| On-line, **open now**, not yet visited | **✅ VISIT** | collect it; in a cluster take the easiest bath |
+| On-line, **open now**, not yet visited | **✅ VISIT** | collect it — in a cluster grab *every* open one, each is its own stamp (no per-area limit) |
 | **Closed today** (定休日 weekday) | **🚫 SKIP** | hard block, no judgement needed |
 | Arrived **after last entry** | **⌛ SKIP** | don't wait overnight for one onsen |
 | Opens **later today**, wait **< ~2 h** | **⏳ WAIT** | a few hours for a morning/midday open is fine |
@@ -63,7 +63,10 @@ On-line cushion per prefecture: 大分 34 · 鹿児島 27 · 熊本 25 · 福岡
   when you're **ahead of pace** or it **completes a prefecture / bags 波佐見**.
 - Rough check: **visited ÷ days-elapsed ≥ ~2.5/day** keeps you safely ahead. Behind that two
   days running → tighten to pure skip-mode, drop all spurs and buffers.
-- Walk model baked into the plan: **4 km/h loaded, ~20 min/visit, awake 06:00–22:00.**
+- Walk model baked into the plan: **4 km/h loaded, ~50 min/visit (blended), walking day 06:00–18:00 (12 h, ~30–40 km).**
+- **Leeway budget:** ~25 days of slack are yours for long stays, rest days, and double-day
+  clusters. Rule of thumb: **every +20 min on your average visit ≈ +2–3 days** — even averaging
+  2 h per onsen still lands ~mid-Nov. Linger where it's worth it.
 
 ---
 
@@ -75,6 +78,14 @@ On-line cushion per prefecture: 大分 34 · 鹿児島 27 · 熊本 25 · 福岡
 - **#85–92 Kuju massif — THE crux.** Alpine. **法華院 (#91, ~1,250 m) is FOOT-ACCESS ONLY** —
   treat it as a mountain hut. Stacked no-resupply gaps; cold and early dark in November.
 - **#96–100 Yufuin → Beppu** — a climbing finish, not a coast-down; 22 km gap near 塚原.
+
+---
+
+## Optional side-trip — Aso crater (草千里 / 中岳)
+
+**Not** on the route and **not** an onsen — a ~20 km out-and-back climb (+~400 m) from the
+地獄/垂玉 junction. Separate file `aso_crater_spur.gpx` (+ `aso_crater_map.html`). Do it only
+if comfortably ahead; crater access depends on the volcanic alert level (often ropeway-only).
 
 ---
 
