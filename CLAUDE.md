@@ -26,6 +26,13 @@ concerns here, or catalog/id concerns into the app repo.
 - **Name readings are generated, never hand-edited.** Each onsen's `nameKana` reading
   has no upstream source — it's machine-generated and folded to **hiragana**, the hard
   contract the app's gojūon name sort relies on (katakana/kanji/romaji would break it).
+- **Visit, not soak/bank.** The unit of challenge progress is a **visit** — the app's
+  challenge model is "completion = unique eligible *visits* ≥ 88" (see the
+  [`kyuhachi`](https://github.com/PetrCala/kyuhachi) repo's `CLAUDE.md`). In code, docs,
+  and route outputs, an onsen that counts toward the 88 is **visited**, and the running
+  tally is **visits/visited** — never "banked" or a "soak" count. Reserve **soak** for
+  the literal act / dwell-time of bathing (e.g. `SOAK_MIN`, onsendo's `onsen_visits`
+  soak duration), never as the unit of progress.
 - **Every live write is human-gated** and runs a dry-run first.
 
 ## Updating the catalog

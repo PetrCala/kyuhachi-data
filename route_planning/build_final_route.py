@@ -142,7 +142,7 @@ def write_readme(stages, total, summ, analysis):
         f"Schedule (hours-aware, patient policy): start **{summ['start']}**, "
         f"finish **{summ['finish']}**, **{summ['calendar_days_used']} days** "
         f"({summ['slack_days_to_deadline']} days slack to the Dec 2 deadline), "
-        f"banks all {summ['banked']}.",
+        f"visits all {summ['visited']}.",
         "",
         (f"Includes **{sum(1 for s in analysis['stops'] if s.get('is_spur'))} grafted spur** "
          f"onsen(s) and **{sum(1 for s in analysis['stops'] if s.get('is_buffer'))} optional "

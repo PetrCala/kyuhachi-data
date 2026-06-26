@@ -99,7 +99,7 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
 ## Validation
 
 After any edit, confirm from the run output / `final_route/README.md`:
-all 7 prefectures present · ≥88 banked · finish before Dec 2 · **0 ferry legs**.
+all 7 prefectures present · ≥88 visited · finish before Dec 2 · **0 ferry legs**.
 
 ## Guarantees
 

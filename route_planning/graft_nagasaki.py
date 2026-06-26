@@ -116,7 +116,7 @@ def main():
     print(f"NOW: {len(passed)} onsens, coverage {dict(pc)}")
     print(f"all 7 prefectures: {result['all7']}")
     print(f"schedule: finish {summ['finish']}, {summ['calendar_days_used']} days, "
-          f"{summ['slack_days_to_deadline']} slack, banked {summ['banked']}")
+          f"{summ['slack_days_to_deadline']} slack, visited {summ['visited']}")
     print("Wrote kyuhachi_nagasaki.gpx, handdrawn_nagasaki_analysis.json, "
           "itinerary_nagasaki.md, route_nagasaki_map.html")
 

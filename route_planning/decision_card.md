@@ -9,11 +9,11 @@
 
 You pass **~119 onsens on the line** for a target of **88** — about **30 to spare**.
 The simulator's **skip policy** (never wait overnight, miss anything closed/late) **still
-banks ~90 ≥ 88 and finishes ~10 days early.** The *patient* plan finishes **Nov 8 with
+visits ~90 ≥ 88 and finishes ~10 days early.** The *patient* plan finishes **Nov 8 with
 24 days of slack** before the **Dec 2** deadline.
 
 > **So: skip freely. You are not optimizing — you are collecting. When in doubt, walk on.**
-> The day-to-day "soak this / skip that" call almost never threatens the goal. Only two
+> The day-to-day "visit this / skip that" call almost never threatens the goal. Only two
 > things do — the **Nagasaki linchpin** and **finishing healthy**. Guard those.
 
 ---
@@ -22,13 +22,13 @@ banks ~90 ≥ 88 and finishes ~10 days early.** The *patient* plan finishes **No
 
 | What you see | Do | Why |
 |---|---|---|
-| On-line, **open now**, not yet banked | **✅ SOAK** | collect it; in a cluster take the easiest bath |
+| On-line, **open now**, not yet visited | **✅ VISIT** | collect it; in a cluster take the easiest bath |
 | **Closed today** (定休日 weekday) | **🚫 SKIP** | hard block, no judgement needed |
 | Arrived **after last entry** | **⌛ SKIP** | don't wait overnight for one onsen |
 | Opens **later today**, wait **< ~2 h** | **⏳ WAIT** | a few hours for a morning/midday open is fine |
 | Opens only **tomorrow** | **🚫 SKIP** — *unless* it's **波佐見** or the **last of a prefecture** | overnight waits are for all-7 only |
 | **Off-line / spur** (not on the line) | **🚫 SKIP** *unless phone-confirmed open today AND you're ahead of pace* | never detour on a guess |
-| **不定休** (irregular) | **opportunistic** — soak if you find it open, never plan around it | luck, not a plan (37 of them) |
+| **不定休** (irregular) | **opportunistic** — visit it if you find it open, never plan around it | luck, not a plan (37 of them) |
 
 **Reading a door (Japanese):** 定休日 = closed day · 不定休 = irregular closure · 最終受付 = last
 entry · 営業時間 = hours · 本日休業 = closed today · 無休 = never closes.
@@ -48,7 +48,7 @@ entry · 営業時間 = hours · 本日休業 = closed today · 無休 = never c
 
 ---
 
-## All-7 prefecture tracker — tick when you bank your first in each
+## All-7 prefecture tracker — tick when you visit your first in each
 
 `[ ] 鹿児島`   `[ ] 宮崎`   `[ ] 熊本`   `[ ] 福岡`   `[ ] 佐賀`   `[ ] 長崎(=波佐見)`   `[ ] 大分`
 
@@ -61,7 +61,7 @@ On-line cushion per prefecture: 大分 34 · 鹿児島 27 · 熊本 25 · 福岡
 
 - Default is **skip-mode** from day one. Switch to *patient* (wait for same-day opens) only
   when you're **ahead of pace** or it **completes a prefecture / bags 波佐見**.
-- Rough check: **banked ÷ days-elapsed ≥ ~2.5/day** keeps you safely ahead. Behind that two
+- Rough check: **visited ÷ days-elapsed ≥ ~2.5/day** keeps you safely ahead. Behind that two
   days running → tighten to pure skip-mode, drop all spurs and buffers.
 - Walk model baked into the plan: **4 km/h loaded, ~20 min/soak, awake 06:00–22:00.**
 

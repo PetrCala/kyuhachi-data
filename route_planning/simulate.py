@@ -93,7 +93,7 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
     stops = r["stops"]
     clock = START_DT
     events = []
-    banked = skip_closed = skip_late = waited = irregular_seen = 0
+    visited = skip_closed = skip_late = waited = irregular_seen = 0
     idle_days_total = 0
     max_in_day = 0
 
@@ -115,13 +115,13 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
             if on_closure:
                 skip_closed += 1
                 events.append(_ev(s, arrive, "SKIP-closed",
-                                  f"定休日 {''.join(WEEKDAY_JP[d] for d in sorted(closed_wd))}曜", banked))
+                                  f"定休日 {''.join(WEEKDAY_JP[d] for d in sorted(closed_wd))}曜", visited))
                 clock = arrive
                 continue
             if too_late:
                 skip_late += 1
                 events.append(_ev(s, arrive, "SKIP-late",
-                                  f"arr {arrive.strftime('%H:%M')} > 終 {last_min//60}:{last_min%60:02d}", banked))
+                                  f"arr {arrive.strftime('%H:%M')} > 終 {last_min//60}:{last_min%60:02d}", visited))
                 clock = arrive
                 continue
             entry = arrive
@@ -129,12 +129,12 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
                 entry = arrive.replace(hour=open_min // 60, minute=open_min % 60, second=0, microsecond=0)
                 waited += 1
                 note = f"opens {open_min//60}:{open_min%60:02d}"
-            status = "wait-open" if too_early else "soak"
+            status = "wait-open" if too_early else "visit"
         else:  # patient
             entry, idle = earliest_entry(arrive, open_min, last_min, closed_wd)
             if entry is None:
                 skip_late += 1
-                events.append(_ev(s, arrive, "SKIP-unreachable", "no open day within a week", banked))
+                events.append(_ev(s, arrive, "SKIP-unreachable", "no open day within a week", visited))
                 clock = arrive
                 continue
             if idle >= 1:
@@ -149,18 +149,18 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
                 note = f"opens {open_min//60}:{open_min%60:02d}"
                 waited += 1
             else:
-                status = "soak"
+                status = "visit"
 
         if s.get("irregular"):
             irregular_seen += 1
-        banked += 1
-        events.append(_ev(s, entry, status, note, banked))
+        visited += 1
+        events.append(_ev(s, entry, status, note, visited))
         clock = entry + timedelta(minutes=SOAK_MIN)
 
-    # max onsens soaked in a single calendar day
+    # max onsens visited in a single calendar day
     from collections import Counter
     day_counts = Counter(e["date"] for e in events if e["status"] in
-                         ("soak", "wait-open", "wait-closed", "wait-late"))
+                         ("visit", "wait-open", "wait-closed", "wait-late"))
     max_in_day = max(day_counts.values()) if day_counts else 0
 
     finish = clock
@@ -173,8 +173,8 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
         "finishes_before_deadline": finish <= DEADLINE,
         "slack_days_to_deadline": (DEADLINE.date() - finish.date()).days,
         "routed_stops": len(stops),
-        "banked": banked,
-        "banked_ge_88": banked >= 88,
+        "visited": visited,
+        "visited_ge_88": visited >= 88,
         "skip_closed_定休日": skip_closed,
         "skip_late": skip_late,
         "waits": waited,
@@ -187,7 +187,7 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
     return summary, events
 
 
-def _ev(s, dt, status, note, banked_so_far):
+def _ev(s, dt, status, note, visited_so_far):
     return {
         "order": s["order"], "id": s["id"], "pref": s["pref_short"],
         "name": f'{s["area"]}：{s["name"]}', "arrive": fmt(dt),
@@ -217,8 +217,8 @@ def write_itinerary(summary, events, path, warnings=None):
     lines.append("\n---\n")
     for day in sorted(by_day):
         evs = by_day[day]
-        soaks = sum(1 for e in evs if e["status"] in ("soak", "wait-open", "wait-closed", "wait-late"))
-        lines.append(f"### {day}  ({len(evs)} stops, {soaks} soaked)")
+        visits = sum(1 for e in evs if e["status"] in ("visit", "wait-open", "wait-closed", "wait-late"))
+        lines.append(f"### {day}  ({len(evs)} stops, {visits} visited)")
         day_orders = [e["order"] for e in evs]
         for zi, z in enumerate(zones):
             lo, hi = z["orders"]
@@ -230,7 +230,7 @@ def write_itinerary(summary, events, path, warnings=None):
                     lines.append(f"> {ln}")
                 lines.append("")
         for e in evs:
-            flag = {"soak": "✅", "wait-open": "⏳", "wait-closed": "🛌", "wait-late": "🛌",
+            flag = {"visit": "✅", "wait-open": "⏳", "wait-closed": "🛌", "wait-late": "🛌",
                     "SKIP-closed": "🚫", "SKIP-late": "⌛", "SKIP-unreachable": "❌"}.get(e["status"], "·")
             extra = f" — {e['note']}" if e["note"] else ""
             irr = " ⚠️不定休" if e["irregular"] else ""
