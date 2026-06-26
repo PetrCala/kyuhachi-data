@@ -131,6 +131,29 @@ def test_irregular_onsen_carries_confirm_exception():
     assert any("不定休" in x["ja"] for x in CURATED["10"]["exceptions"])
 
 
+def test_last_entry_promoted_to_caption():
+    # 最終受付 (last entry) is otherwise buried in raw / "show original text". It's
+    # surfaced as a normal exception caption and listed FIRST — a hard entry cutoff
+    # decides whether a trip is worth making, so it earns top billing among the tips.
+    assert CURATED["1"]["exceptions"][0] == {"en": "Last entry by 21:00", "ja": "最終受付 21:00"}
+    # bath-specific cutoff (bath closes 20:00 but last entry is 19:30 / 19:00) spelled out.
+    assert CURATED["57"]["exceptions"][0] == {
+        "en": "Last entry: main bath 19:30, family bath 19:00",
+        "ja": "最終受付 大風呂19:30・家族風呂19:00",
+    }
+    # 171's last entry equals its close time and is already shown — no duplicate caption.
+    assert not any(x["ja"].startswith("最終受付") for x in CURATED["171"]["exceptions"])
+    # Every last-entry caption is the lead exception and well-formed; 67 single-time + 1 split.
+    total = 0
+    for hid, e in CURATED.items():
+        idxs = [i for i, x in enumerate(e["exceptions"]) if x["ja"].startswith("最終受付")]
+        for i in idxs:
+            assert i == 0, hid
+            assert e["exceptions"][i]["en"].lower().startswith("last entry"), hid
+        total += len(idxs)
+    assert total == 68
+
+
 def test_curated_fixes_known_bugs():
     # 151/224: the 翌日休 spurious-Sunday cases must be Tue-only / Thu-only now.
     s151 = bf.expand_curated(CURATED["151"])
