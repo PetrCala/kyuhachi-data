@@ -32,7 +32,7 @@ END_ID = 41                                           # 浜脇温泉 茶房た�
 
 # --- walk model (empirically grounded; see README) -------------------------
 SPEED_KMH = 4.0          # loaded moving pace (Strava: moving 5.05 / elapsed 3.97 -> ~4.0)
-SOAK_MIN = 20            # per-onsen visit (onsendo.db real stays: median 13, p75 18)
+VISIT_MIN = 20           # minutes per onsen visit (onsendo.db real stays: median 13, p75 18)
 ROAD_FACTOR = 1.3        # great-circle -> real foot distance (haversine fallback only)
 WAKE_MIN = 6 * 60        # 06:00 — awake window start
 SLEEP_MIN = 22 * 60      # 22:00 — sleep (8 h)

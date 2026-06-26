@@ -16,7 +16,7 @@
 - **idle_days_from_waits**: 24
 - **max_onsens_one_day**: 8
 - **irregular_不定休_visited(risk)**: 37
-- **model**: {'speed_kmh': 4.0, 'soak_min': 20, 'road_factor': 1.3, 'wake': '06:00', 'sleep': '22:00'}
+- **model**: {'speed_kmh': 4.0, 'visit_min': 20, 'road_factor': 1.3, 'wake': '06:00', 'sleep': '22:00'}
 
 ---
 

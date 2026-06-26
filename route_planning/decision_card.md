@@ -63,7 +63,7 @@ On-line cushion per prefecture: 大分 34 · 鹿児島 27 · 熊本 25 · 福岡
   when you're **ahead of pace** or it **completes a prefecture / bags 波佐見**.
 - Rough check: **visited ÷ days-elapsed ≥ ~2.5/day** keeps you safely ahead. Behind that two
   days running → tighten to pure skip-mode, drop all spurs and buffers.
-- Walk model baked into the plan: **4 km/h loaded, ~20 min/soak, awake 06:00–22:00.**
+- Walk model baked into the plan: **4 km/h loaded, ~20 min/visit, awake 06:00–22:00.**
 
 ---
 
