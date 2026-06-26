@@ -186,7 +186,7 @@ def main():
 
     print(f"\nNOW: {len(passed)} onsens, coverage {dict(pc)}, all7={result['all7']}")
     print(f"schedule: finish {summ['finish']}, {summ['calendar_days_used']} days, "
-          f"{summ['slack_days_to_deadline']} slack, banked {summ['banked']}")
+          f"{summ['slack_days_to_deadline']} slack, visited {summ['visited']}")
     print("\nNew order through the loop region:")
     for s in stops:
         if 52 <= s["order"] <= 63:

@@ -96,8 +96,8 @@ def main():
     print("\n" + "=" * 66)
     print("HOURS-AWARE SIM ALONG YOUR LINE (patient policy)")
     print("=" * 66)
-    for k in ("finish", "calendar_days_used", "slack_days_to_deadline", "banked",
-              "banked_ge_88", "waits", "idle_days_from_waits", "max_onsens_one_day",
+    for k in ("finish", "calendar_days_used", "slack_days_to_deadline", "visited",
+              "visited_ge_88", "waits", "idle_days_from_waits", "max_onsens_one_day",
               "irregular_不定休_visited(risk)"):
         print(f"  {k}: {summ[k]}")
     print("\nWrote handdrawn_analysis.json, itinerary_handdrawn.md")

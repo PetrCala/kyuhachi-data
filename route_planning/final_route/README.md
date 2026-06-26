@@ -2,7 +2,7 @@
 
 Hand-drawn line + Nagasaki loop. **1205 km**, **119 onsens**, all 7 prefectures (鹿児島27・宮崎9・熊本25・福岡16・佐賀7・長崎1・大分34).
 
-Schedule (hours-aware, patient policy): start **Fri 10-02 06:00**, finish **Sun 11-08 10:20**, **38 days** (24 days slack to the Dec 2 deadline), banks all 119.
+Schedule (hours-aware, patient policy): start **Fri 10-02 06:00**, finish **Sun 11-08 10:20**, **38 days** (24 days slack to the Dec 2 deadline), visits all 119.
 
 Includes **4 grafted spur** onsen(s) and **4 optional buffer** pickups (🅑 = only on an out-and-back detour; skip them and you finish earlier). Spurs ring teal, buffers ring amber on the maps.
 
