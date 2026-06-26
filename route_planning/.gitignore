@@ -1,0 +1,19 @@
+# regenerable OSRM/Overpass caches + the route-only overlay DB
+cache/
+.DS_Store
+
+# remap stage-1 intermediates — final_route/ holds the committed canonical copies
+kyuhachi_nagasaki_loop.gpx
+route_nagasaki_loop_map.html
+itinerary_loop.md
+
+# raw-line analysis (regenerate with analyze_handdrawn.py)
+handdrawn_analysis.json
+itinerary_handdrawn.md
+
+# markdown → html previews (open the .md; regenerate offline anytime)
+decision_card.html
+final_route/README.html
+
+# transient
+_*.json
