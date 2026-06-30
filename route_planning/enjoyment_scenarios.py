@@ -123,6 +123,7 @@ def main():
     L.append(f"_Clusters: stops within **{GAP_KM} km** of the previous. "
              f"{len(cls)} clusters total, **{len(multi)}** with ≥3 onsens. "
              f"Walk model: {simulate.SPEED_KMH} km/h, road_factor {ROAD_FACTOR}, "
+             f"Naismith grade penalty on, "
              f"day {simulate.WAKE_MIN//60:02d}:00–{simulate.SLEEP_MIN//60:02d}:00. "
              f"Deadline {DEADLINE:%a %m-%d}._")
     L += ["", "## The trade-off surface", "",

@@ -23,8 +23,8 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from config import (DEADLINE, ROAD_FACTOR, SLEEP_MIN, SPEED_KMH, START_DT,
-                    VISIT_MIN, WAKE_MIN)
+from config import (CLIMB_MIN_PER_M, DEADLINE, ROAD_FACTOR, SLEEP_MIN,
+                    SPEED_KMH, START_DT, VISIT_MIN, WAKE_MIN)
 
 HERE = Path(__file__).resolve().parent
 WEEKDAY_JP = "月火水木金土日"
@@ -86,11 +86,15 @@ def earliest_entry(arrive, open_min, last_min, closed_wd, horizon=8):
 
 
 def simulate(route, policy="patient", target=88, road_factor=ROAD_FACTOR,
-             visit_min=VISIT_MIN):
+             visit_min=VISIT_MIN, grade=True):
     """policy: 'skip' = miss closed/late onsens (raw yield);
                'patient' = retime to next valid opening (spend idle days).
     road_factor: 1.0 when leg_km are already real (OSRM); 1.3 for great-circle.
     visit_min: per-onsen dwell time; override to model 'fewer but longer' visits.
+    grade: add the Naismith climb-time penalty per leg from each stop's 'ascent_m'
+           (metres climbed on the leg INTO it; baked into the route by elevation.py).
+           A stop without 'ascent_m' contributes 0 — so a route with no elevation
+           data, or grade=False, is exactly the old flat model.
     route: a path to a route JSON, or an already-loaded route dict (so callers can
            feed a thinned/edited stop list in memory without writing a file)."""
     r = route if isinstance(route, dict) else json.loads(Path(route).read_text())
@@ -99,11 +103,16 @@ def simulate(route, policy="patient", target=88, road_factor=ROAD_FACTOR,
     events = []
     visited = skip_closed = skip_late = waited = irregular_seen = 0
     idle_days_total = 0
+    climb_min_total = 0.0
     max_in_day = 0
 
     for s in stops:
         leg_km = s["leg_km_gc"] * road_factor
         walk_min = leg_km / SPEED_KMH * 60.0
+        if grade:
+            climb_min = s.get("ascent_m", 0.0) * CLIMB_MIN_PER_M
+            walk_min += climb_min
+            climb_min_total += climb_min
         arrive = advance_walking(clock, walk_min)
         # Planned skip (e.g. cluster-thinning): you still WALK the fixed line past
         # it — only the visit is skipped, so advance the clock by the leg but don't
@@ -194,7 +203,8 @@ def simulate(route, policy="patient", target=88, road_factor=ROAD_FACTOR,
         "irregular_不定休_visited(risk)": irregular_seen,
         "model": {"speed_kmh": SPEED_KMH, "visit_min": visit_min, "road_factor": road_factor,
                   "wake": f"{WAKE_MIN//60:02d}:{WAKE_MIN%60:02d}",
-                  "sleep": f"{SLEEP_MIN//60:02d}:{SLEEP_MIN%60:02d}"},
+                  "sleep": f"{SLEEP_MIN//60:02d}:{SLEEP_MIN%60:02d}",
+                  "grade": grade, "climb_hours": round(climb_min_total / 60.0, 1)},
     }
     return summary, events
 
