@@ -49,6 +49,7 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | `onsen_model.py` | load onsens + parse Japanese `business_hours` |
 | `osrm.py` | OSRM foot distance matrix + geometries (via curl), cached |
 | `simulate.py` | hours-aware day-by-day schedule simulator (patient / skip policies) |
+| `enjoyment_scenarios.py` | cluster-thinning × longer-bath sweep — finish/slack/all-7 trade-off (the "skip by feel" budget) |
 | `difficulty.py` | crux-zone warnings injected into the itinerary |
 | `build_overlay_db.py` | build the route-only overlay catalog (baseline + staged new onsens) |
 | `analyze_handdrawn.py` | snap onsens to the raw line; coverage + schedule (no edits) |
