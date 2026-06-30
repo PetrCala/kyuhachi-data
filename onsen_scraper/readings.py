@@ -1,4 +1,4 @@
-"""Generated hiragana reading (yomi) of an onsen name.
+"""Generated readings of an onsen name — hiragana yomi (`nameKana`) and Hepburn romaji (`nameRomaji`).
 
 88onsen.com has no furigana/ruby markup and the scraper captures none (verified
 by grepping the snapshot's raw_html — zero reading fields anywhere), so the
@@ -13,15 +13,24 @@ hiragana being laid out in gojūon (あいうえお) order in Unicode. Katakana,
 romaji, or leftover kanji would break that sort, so the hiragana fold is the
 critical part of the contract — see app PR PetrCala/kyuhachi#143.
 
+`name_romaji()` is the Latin-script counterpart: the same pykakasi conversion,
+read off the analyzer's `hepburn` field instead of `hira`, joined on word
+boundaries and capitalised as a proper noun (別府温泉 → "Beppu Onsen"). The app
+shows it beneath the kanji name for non-Japanese users so they can pronounce and
+search an onsen — a pronunciation aid, never a translation. Unlike the kana it is
+display-only (not a sort key), so it carries no script-normalisation contract; it
+is modified Hepburn, macron-free (pykakasi's default — long vowels stay doubled,
+e.g. ou/oo). See app PR PetrCala/kyuhachi#183.
+
 Locked decisions (do not re-litigate — see CLAUDE.md):
   * **Auto-generated, no hand-correction.** Some proper-noun / place-name
     readings will be imperfect (e.g. 嬉泉館 → きいずみだて); that is the agreed
     tradeoff for keeping readings in the automated pipeline.
   * **Onsens only** — area names are never given readings.
 
-`name_kana()` imports pykakasi lazily, so importing this module (and
-`onsen_scraper`) stays dependency-free until a reading is actually generated —
-the same lazy discipline the fetcher/parser use for requests/bs4.
+Both `name_kana()` and `name_romaji()` import pykakasi lazily, so importing this
+module (and `onsen_scraper`) stays dependency-free until a reading is actually
+generated — the same lazy discipline the fetcher/parser use for requests/bs4.
 """
 from __future__ import annotations
 
@@ -85,3 +94,25 @@ def name_kana(name: str | None) -> str | None:
     reading = "".join(token["hira"] for token in _analyzer().convert(name))
     reading = to_hiragana(reading).strip()
     return reading or None
+
+
+def name_romaji(name: str | None) -> str | None:
+    """Hepburn romaji of an onsen `name`, capitalised as a proper noun, or None.
+
+    A pronunciation aid the app shows beneath the kanji name for non-Japanese
+    users (別府温泉 → "Beppu Onsen"). Built from the same pykakasi conversion as
+    `name_kana()`, read off each token's `hepburn` field; the per-token output is
+    re-split on whitespace to collapse the analyzer's segmentation (including the
+    single space pykakasi emits for a full-width space between name parts) into
+    clean word boundaries, and each word is capitalised.
+
+    Returns ``None`` for an empty/whitespace-only name or when the analyzer yields
+    nothing — the app shows the kanji alone on null. Display-only, so (unlike
+    `name_kana`) there is no script-normalisation contract: it stays modified
+    Hepburn (macron-free) as pykakasi produces it.
+    """
+    if not name or not name.strip():
+        return None
+    hepburn = " ".join(token["hepburn"] for token in _analyzer().convert(name))
+    romaji = " ".join(word[:1].upper() + word[1:] for word in hepburn.split())
+    return romaji or None
