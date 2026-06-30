@@ -18,10 +18,12 @@ route **on top of a hand-drawn GPX line**, against real onsen opening hours.
 (115 core + 4 optional buffer), all 7 prefectures, ~1205 km.** Packaged in
 `final_route/`.
 
-**Realistic schedule** (12 h walking day, ~50 min blended visit, skip-lean):
-**~37 days, finish ~Nov 7, ~25 days slack** to the Dec 2 deadline. Visiting all 119
-*and* waiting out every closure is the ~50-day upper bound — you skip-lean instead
-(see `decision_card.md`). Walk model in `config.py`, scheduler in `simulate.py`.
+**Realistic schedule** (12 h walking day, ~50 min blended visit, skip-lean, with the
+Naismith grade penalty on): **~38 days, finish ~Nov 8, ~24 days slack** to the Dec 2
+deadline. Visiting all 119 *and* waiting out every closure is the ~52-day upper bound —
+you skip-lean instead (see `decision_card.md`). Walk model in `config.py`, scheduler in
+`simulate.py`. The route's ~14,000 m of ascent adds only ~1 day overall but makes the
+crux days run long — see `grade_impact.py`.
 
 ## Workflow
 
@@ -31,10 +33,11 @@ data/snapshot.db  +  new_onsens_staged.json
 
 hand-drawn GPX  +  overlay catalog (via KYUHACHI_SNAPSHOT_DB)
    ├─ remap_nagasaki_loop.py   Nagasaki loop + grafted spurs (OSRM) → handdrawn_loop_analysis.json
+   ├─ elevation.py             SRTM per-leg ascent (grade penalty) → route_elevation.json + bake ascent_m
    ├─ build_final_route.py     package + chunk into stages → final_route/
    └─ logistics_overlay.py     Overpass POIs + no-resupply gaps → enhances final_route/
 
-   pipeline.py = remap → build → logistics, one command.
+   pipeline.py = remap → elevation → build → logistics, one command.
 
 # run route scripts against the overlay catalog:
 KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_planning/pipeline.py
@@ -48,8 +51,10 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | **`geo.py`** | shared helpers: haversine, load_track, cumulative, nearest_*, decimate, write_gpx |
 | `onsen_model.py` | load onsens + parse Japanese `business_hours` |
 | `osrm.py` | OSRM foot distance matrix + geometries (via curl), cached |
-| `simulate.py` | hours-aware day-by-day schedule simulator (patient / skip policies) |
+| `simulate.py` | hours-aware day-by-day schedule simulator (patient / skip policies); Naismith grade penalty from `route_elevation.json` |
 | `enjoyment_scenarios.py` | cluster-thinning × longer-bath sweep — finish/slack/all-7 trade-off (the "skip by feel" budget) |
+| `elevation.py` | sample SRTM along the line → per-leg ascent (`route_elevation.json`); the grade-penalty input (network, run once) |
+| `grade_impact.py` | flat vs grade-aware schedule — where the ~14,000 m of climb time lands (per crux zone / leg) |
 | `difficulty.py` | crux-zone warnings injected into the itinerary |
 | `build_overlay_db.py` | build the route-only overlay catalog (baseline + staged new onsens) |
 | `analyze_handdrawn.py` | snap onsens to the raw line; coverage + schedule (no edits) |
@@ -63,6 +68,7 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | `new_onsens_staged.json` | staged catalog delta (13 added / 1 removed) folded into the overlay |
 | `strava_walk_summary.json` | Strava-derived walk-speed summary (walk-model input) |
 | `handdrawn_loop_analysis.json` | snapped onsens + along-track order (the schedule tools' input) |
+| `route_elevation.json` | SRTM per-leg ascent/descent (committed; regenerate with `elevation.py`) |
 | `final_route/` | **canonical output** (regenerable): full GPX/map/itinerary + README + 8 stages |
 | `decision_card.md` | the one-page on-trail decision card (print it) |
 | `aso_crater_spur.gpx` · `aso_crater_map.html` | optional Aso-crater side-trip |
@@ -76,3 +82,5 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
   the baseline.
 - `config.HANDDRAWN_GPX` — the path (`kyuhachi/local/route_26_02_14/Kyuhachi-3.gpx`).
 - `~/code/onsendo` — real visit time (`onsen_visits`) + Strava walking speed.
+- opentopodata **SRTM-30 m** — elevation profile along the line (the grade penalty's
+  per-leg ascent); sampled once by `elevation.py` into `route_elevation.json`.

@@ -14,6 +14,9 @@ itinerary_handdrawn.md
 # enjoyment-first scenario report (regenerate with enjoyment_scenarios.py)
 enjoyment_scenarios.md
 
+# grade-penalty impact report (regenerate with grade_impact.py)
+grade_impact.md
+
 # markdown → html previews (open the .md; regenerate offline anytime)
 decision_card.html
 final_route/README.html

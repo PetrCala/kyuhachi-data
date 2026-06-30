@@ -36,7 +36,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 54,
+      "descent_m": 8
     },
     {
       "order": 2,
@@ -60,7 +62,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 3,
@@ -82,7 +86,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 43,
+      "descent_m": 76
     },
     {
       "order": 4,
@@ -106,7 +112,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 7
     },
     {
       "order": 5,
@@ -130,7 +138,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 2
     },
     {
       "order": 6,
@@ -152,7 +162,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 179,
+      "descent_m": 90
     },
     {
       "order": 7,
@@ -174,7 +186,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 25,
+      "descent_m": 103
     },
     {
       "order": 8,
@@ -198,7 +212,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 466,
+      "descent_m": 476
     },
     {
       "order": 9,
@@ -222,7 +238,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 20,
+      "descent_m": 6
     },
     {
       "order": 10,
@@ -244,7 +262,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 64,
+      "descent_m": 31
     },
     {
       "order": 11,
@@ -266,7 +286,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 25,
+      "descent_m": 0
     },
     {
       "order": 12,
@@ -290,7 +312,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 64,
+      "descent_m": 0
     },
     {
       "order": 13,
@@ -314,7 +338,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 14,
@@ -338,7 +364,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 424,
+      "descent_m": 19
     },
     {
       "order": 15,
@@ -362,7 +390,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 150,
+      "descent_m": 0
     },
     {
       "order": 16,
@@ -386,7 +416,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 227,
+      "descent_m": 0
     },
     {
       "order": 17,
@@ -410,7 +442,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 565,
+      "descent_m": 1213
     },
     {
       "order": 18,
@@ -434,7 +468,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 80
     },
     {
       "order": 19,
@@ -458,7 +494,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 46,
+      "descent_m": 61
     },
     {
       "order": 20,
@@ -482,7 +520,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 169,
+      "descent_m": 0
     },
     {
       "order": 21,
@@ -506,7 +546,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 538,
+      "descent_m": 180
     },
     {
       "order": 22,
@@ -530,7 +572,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 23,
@@ -552,7 +596,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 460
     },
     {
       "order": 24,
@@ -576,7 +622,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 34,
+      "descent_m": 3
     },
     {
       "order": 25,
@@ -598,7 +646,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 8,
+      "descent_m": 65
     },
     {
       "order": 26,
@@ -620,7 +670,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 5,
+      "descent_m": 5
     },
     {
       "order": 27,
@@ -642,7 +694,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 28,
@@ -664,7 +718,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 170,
+      "descent_m": 381
     },
     {
       "order": 29,
@@ -686,7 +742,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 40,
+      "descent_m": 14
     },
     {
       "order": 30,
@@ -708,7 +766,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 217,
+      "descent_m": 213
     },
     {
       "order": 31,
@@ -730,7 +790,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 112,
+      "descent_m": 73
     },
     {
       "order": 32,
@@ -752,7 +814,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 85,
+      "descent_m": 127
     },
     {
       "order": 33,
@@ -776,7 +840,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 79,
+      "descent_m": 29
     },
     {
       "order": 34,
@@ -798,7 +864,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 317,
+      "descent_m": 302
     },
     {
       "order": 35,
@@ -820,7 +888,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 42,
+      "descent_m": 137
     },
     {
       "order": 36,
@@ -844,7 +914,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 60,
+      "descent_m": 29
     },
     {
       "order": 37,
@@ -866,7 +938,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 359,
+      "descent_m": 271
     },
     {
       "order": 38,
@@ -888,7 +962,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": true,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 33,
+      "descent_m": 150
     },
     {
       "order": 39,
@@ -910,7 +986,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 136,
+      "descent_m": 144
     },
     {
       "order": 40,
@@ -934,7 +1012,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 297,
+      "descent_m": 293
     },
     {
       "order": 41,
@@ -959,7 +1039,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 717,
+      "descent_m": 59
     },
     {
       "order": 42,
@@ -983,7 +1065,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 43,
@@ -1005,7 +1089,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 71,
+      "descent_m": 257
     },
     {
       "order": 44,
@@ -1027,7 +1113,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 37,
+      "descent_m": 34
     },
     {
       "order": 45,
@@ -1049,7 +1137,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 477,
+      "descent_m": 877
     },
     {
       "order": 46,
@@ -1071,7 +1161,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 46,
+      "descent_m": 62
     },
     {
       "order": 47,
@@ -1095,7 +1187,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 10,
+      "descent_m": 20
     },
     {
       "order": 48,
@@ -1117,7 +1211,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 21
     },
     {
       "order": 49,
@@ -1139,7 +1235,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 3,
+      "descent_m": 0
     },
     {
       "order": 50,
@@ -1164,7 +1262,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 4
     },
     {
       "order": 51,
@@ -1188,7 +1288,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 15
     },
     {
       "order": 52,
@@ -1210,7 +1312,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 6,
+      "descent_m": 0
     },
     {
       "order": 53,
@@ -1232,7 +1336,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 47,
+      "descent_m": 30
     },
     {
       "order": 54,
@@ -1257,7 +1363,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 41,
+      "descent_m": 52
     },
     {
       "order": 55,
@@ -1282,7 +1390,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 76,
+      "descent_m": 96
     },
     {
       "order": 56,
@@ -1306,7 +1416,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 8
     },
     {
       "order": 57,
@@ -1330,7 +1442,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 6,
+      "descent_m": 2
     },
     {
       "order": 58,
@@ -1352,7 +1466,9 @@
       "irregular": true,
       "in_loop": true,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 294,
+      "descent_m": 229
     },
     {
       "order": 59,
@@ -1374,7 +1490,9 @@
       "irregular": true,
       "in_loop": true,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 306,
+      "descent_m": 352
     },
     {
       "order": 60,
@@ -1398,7 +1516,9 @@
       "irregular": false,
       "in_loop": true,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 222,
+      "descent_m": 226
     },
     {
       "order": 61,
@@ -1420,7 +1540,9 @@
       "irregular": true,
       "in_loop": true,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 511,
+      "descent_m": 509
     },
     {
       "order": 62,
@@ -1444,7 +1566,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 63,
@@ -1469,7 +1593,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 64,
@@ -1491,7 +1617,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 93,
+      "descent_m": 0
     },
     {
       "order": 65,
@@ -1513,7 +1641,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 58,
+      "descent_m": 228
     },
     {
       "order": 66,
@@ -1535,7 +1665,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 2
     },
     {
       "order": 67,
@@ -1559,7 +1691,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 80,
+      "descent_m": 6
     },
     {
       "order": 68,
@@ -1581,7 +1715,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 54,
+      "descent_m": 95
     },
     {
       "order": 69,
@@ -1606,7 +1742,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 11,
+      "descent_m": 42
     },
     {
       "order": 70,
@@ -1630,7 +1768,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 71,
@@ -1652,7 +1792,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 45,
+      "descent_m": 24
     },
     {
       "order": 72,
@@ -1676,7 +1818,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 73,
@@ -1698,7 +1842,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 9,
+      "descent_m": 11
     },
     {
       "order": 74,
@@ -1720,7 +1866,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 75,
@@ -1744,7 +1892,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 4,
+      "descent_m": 0
     },
     {
       "order": 76,
@@ -1766,7 +1916,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 7,
+      "descent_m": 5
     },
     {
       "order": 77,
@@ -1790,7 +1942,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 78,
@@ -1814,7 +1968,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 11,
+      "descent_m": 0
     },
     {
       "order": 79,
@@ -1838,7 +1994,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 34,
+      "descent_m": 7
     },
     {
       "order": 80,
@@ -1860,7 +2018,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 176,
+      "descent_m": 61
     },
     {
       "order": 81,
@@ -1882,7 +2042,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 82,
@@ -1904,7 +2066,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 442,
+      "descent_m": 338
     },
     {
       "order": 83,
@@ -1926,7 +2090,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 84,
@@ -1948,7 +2114,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 417,
+      "descent_m": 141
     },
     {
       "order": 85,
@@ -1970,7 +2138,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 84
     },
     {
       "order": 86,
@@ -1994,7 +2164,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 231,
+      "descent_m": 16
     },
     {
       "order": 87,
@@ -2018,7 +2190,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 88,
@@ -2040,7 +2214,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 53
     },
     {
       "order": 89,
@@ -2062,7 +2238,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 163,
+      "descent_m": 159
     },
     {
       "order": 90,
@@ -2084,7 +2262,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 9,
+      "descent_m": 0
     },
     {
       "order": 91,
@@ -2106,7 +2286,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 498,
+      "descent_m": 189
     },
     {
       "order": 92,
@@ -2128,7 +2310,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 26,
+      "descent_m": 229
     },
     {
       "order": 93,
@@ -2153,7 +2337,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 36,
+      "descent_m": 0
     },
     {
       "order": 94,
@@ -2175,7 +2361,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 95,
@@ -2197,7 +2385,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 319,
+      "descent_m": 0
     },
     {
       "order": 96,
@@ -2221,7 +2411,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": true,
-      "is_buffer": true
+      "is_buffer": true,
+      "ascent_m": 451,
+      "descent_m": 489
     },
     {
       "order": 97,
@@ -2243,7 +2435,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 652,
+      "descent_m": 423
     },
     {
       "order": 98,
@@ -2267,7 +2461,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 411,
+      "descent_m": 1213
     },
     {
       "order": 99,
@@ -2291,7 +2487,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 109
     },
     {
       "order": 100,
@@ -2313,7 +2511,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 33,
+      "descent_m": 0
     },
     {
       "order": 101,
@@ -2337,7 +2537,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 31
     },
     {
       "order": 102,
@@ -2359,7 +2561,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 549,
+      "descent_m": 504
     },
     {
       "order": 103,
@@ -2383,7 +2587,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 108,
+      "descent_m": 169
     },
     {
       "order": 104,
@@ -2405,7 +2611,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 82,
+      "descent_m": 0
     },
     {
       "order": 105,
@@ -2430,7 +2638,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 106,
@@ -2452,7 +2662,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 399,
+      "descent_m": 170
     },
     {
       "order": 107,
@@ -2474,7 +2686,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 53,
+      "descent_m": 485
     },
     {
       "order": 108,
@@ -2496,7 +2710,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 109,
@@ -2518,7 +2734,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 80
     },
     {
       "order": 110,
@@ -2540,7 +2758,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 100
     },
     {
       "order": 111,
@@ -2564,7 +2784,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 0
     },
     {
       "order": 112,
@@ -2588,7 +2810,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 142
     },
     {
       "order": 113,
@@ -2610,7 +2834,9 @@
       "irregular": true,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 46,
+      "descent_m": 48
     },
     {
       "order": 114,
@@ -2632,7 +2858,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": true,
-      "is_buffer": true
+      "is_buffer": true,
+      "ascent_m": 117,
+      "descent_m": 30
     },
     {
       "order": 115,
@@ -2654,7 +2882,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": true,
-      "is_buffer": true
+      "is_buffer": true,
+      "ascent_m": 0,
+      "descent_m": 85
     },
     {
       "order": 116,
@@ -2678,7 +2908,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": true
+      "is_buffer": true,
+      "ascent_m": 124,
+      "descent_m": 4
     },
     {
       "order": 117,
@@ -2702,7 +2934,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 323,
+      "descent_m": 449
     },
     {
       "order": 118,
@@ -2726,7 +2960,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 0,
+      "descent_m": 1
     },
     {
       "order": 119,
@@ -2752,7 +2988,9 @@
       "irregular": false,
       "in_loop": false,
       "is_spur": false,
-      "is_buffer": false
+      "is_buffer": false,
+      "ascent_m": 1,
+      "descent_m": 0
     }
   ]
 }

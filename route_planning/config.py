@@ -39,6 +39,18 @@ WAKE_MIN = 6 * 60        # 06:00 — start of the walking day
 SLEEP_MIN = 18 * 60      # 18:00 — end of the walking day (realistic 12 h day, ~30-40 km;
                          # rest/onsen/sleep after). NOT literally sleep — just the walk cutoff.
 
+# --- grade penalty (Naismith) ----------------------------------------------
+# The flat SPEED_KMH ignores climbs; on Kyushu-88's real ascents (Kirishima, Aso
+# south rim, the Kuju massif) a day's distance costs more time than the flat model
+# implies. simulate adds CLIMB_MIN_PER_M of walking time per metre of ASCENT, from
+# the SRTM per-leg ascent in route_elevation.json (built by elevation.py).
+# Naismith's rule = +1 h per 600 m climbed -> 0.10 min/m. Ascent-only (Tobler /
+# Langmuir would also slow steep descents) — the standard, conservative choice.
+CLIMB_MIN_PER_M = 60.0 / 600.0   # 0.10 min per metre of ascent
+ELEVATION_JSON = HERE / "route_elevation.json"   # SRTM per-leg record written by
+                                                 # elevation.py (which also bakes
+                                                 # ascent_m into the analysis stops)
+
 # --- trip dates ------------------------------------------------------------
 START_DT = datetime(2026, 10, 2, 6, 0)      # Fri Oct 2 2026, early morning
 DEADLINE = datetime(2026, 12, 2, 23, 59)    # finish by Wed Dec 2 2026 (flight Dec 3)
