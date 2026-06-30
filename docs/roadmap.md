@@ -23,26 +23,28 @@ What's in place:
 | Numeric `adultFee` — shared parser + publish-time recompute hook + one-time backfill | `onsen_scraper/fees.py`, `apply.py` `build_update()`, `publisher/backfill_fees.py` |
 | `営業時間` → `WeeklySchedule` — LLM-curated `data/hours_curated.json` is the source of truth; `backfill_schedule.py --from-curated` owns the published `businessHours.schedule` + `exceptions` + `confidence`; `recurate-hours` skill refreshes drifted hours | `onsen_scraper/hours.py`, `publisher/backfill_schedule.py`, `.claude/skills/recurate-hours/` |
 | Generated `nameKana` (hiragana reading, gojūon sort key) — auto, no hand-correction; consumed by app PR kyuhachi#143 | `onsen_scraper/readings.py`, `publisher/backfill_name_kana.py` |
+| Generated `nameRomaji` (Hepburn, proper-noun-cased) — display-only pronunciation aid for non-JP users; auto, no hand-correction; consumed by app PR kyuhachi#183 | `onsen_scraper/readings.py`, `publisher/backfill_name_romaji.py` |
 | **Baseline advance after publish** — `snapshot.db` is no longer frozen | `catalog-sync promote` |
 | **GitHub-native automation** — monthly `catalog-detect` cron → `catalog-drift` issue → human-prepared `catalog-publish` PR → `catalog-dry-run` posts the live Firestore diff → merge gates the write behind a `production` environment approval | `.github/workflows/{catalog-detect,catalog-dry-run,catalog-publish}.yml`, `.github/CATALOG_AUTOMATION.md` |
 | Cost estimator (read-only admission-fee Monte Carlo + bounds) | `.claude/skills/cost-analysis/` |
 
 Data: `data/snapshot.db` = 148 onsens (raw fields + `raw_html`); `data/onsen-id-map.json` =
 148 `hid`→`kyuhachiId`. Live catalog carries `admissionFee` (text) + `adultFee` (numeric yen),
-`businessHours.schedule`, and `nameKana` per onsen.
+`businessHours.schedule`, `nameKana`, and `nameRomaji` per onsen.
 
-Tests: **75 passing** across six files — `test_fees.py` (12), `test_hours.py` (17),
+Tests: **100 passing** across eight files — `test_fees.py` (12), `test_hours.py` (20),
 `test_catalog_sync.py` (11), `test_catalog_diff_soft_removal.py` (14),
-`test_publish_schedule.py` (12), `test_readings.py` (9). Run with `pytest -q` (needs Python
-≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
+`test_publish_schedule.py` (14), `test_apply_add.py` (5), `test_image_processor.py` (10),
+`test_readings.py` (14). Run with `pytest -q` (needs Python ≥3.12 and the `dev` extra:
+`pip install -e '.[dev]'`).
 
 ## Remaining roadmap
 
 ### A. ✅ Shipped — `apply.py` `add` action — create the live Firestore doc for a new onsen
 `ACTIONS = ("update", "retire", "skip", "add")`. A `{"action":"add"}` decision builds the full
 `OnsenDocument` from the /map seed (name/areaName/lat/lng) + a live detail scrape (the descriptive
-fields) + the curated hours (the weekly grid, never the regex) + a derived `adultFee` + a generated
-`nameKana` + a rehosted photo, then **creates** `/onsens/{kyuhachiId}`. It's the sole create (vs
+fields) + the curated hours (the weekly grid, never the regex) + a derived `adultFee` + generated
+`nameKana`/`nameRomaji` + a rehosted photo, then **creates** `/onsens/{kyuhachiId}`. It's the sole create (vs
 PATCH) write: idempotent (skips if the doc already exists), gated behind the `production` approval,
 and guarded by a key-set check against the app's `OnsenDocument` contract (plus a live-doc drift
 warning) before any write. Challenge-pool membership still lives in the app repo, and the live doc
@@ -57,7 +59,7 @@ mismatch (camelCase + nested `businessHours.raw` vs the parser's snake_case).
 
 ### C. DRY the Firestore REST helpers into `publisher/firestore_rest.py` — Small; mechanical
 `token` / `_open` / `patch` / `ival` / `sval` are copy-pasted across `apply.py`,
-`backfill_fees.py`, `backfill_name_kana.py`, and `backfill_schedule.py`. Now safe to extract —
+`backfill_fees.py`, `backfill_name_kana.py`, `backfill_name_romaji.py`, and `backfill_schedule.py`. Now safe to extract —
 the `apply.py` rewrite that used to collide with it has merged. Low-risk; ship with a smoke test
 that each script still authenticates.
 
@@ -72,8 +74,8 @@ is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling
 ### Cross-cutting
 - New work in A/B/C should ship with tests — the suite already covers fees, hours, sync,
   soft-removal, schedule publish, and readings.
-- Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, and `nameKana`
-  from the published catalog; coordinate any schema change with it.
+- Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, `nameKana`, and
+  `nameRomaji` from the published catalog; coordinate any schema change with it.
 
 ## Recommended order
 

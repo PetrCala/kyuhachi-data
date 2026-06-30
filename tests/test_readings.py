@@ -1,9 +1,10 @@
-"""Tests for onsen_scraper.readings — the generated hiragana reading (`nameKana`)
-the catalog publisher writes for reading-based (gojūon) sorting in the app.
+"""Tests for onsen_scraper.readings — the generated readings (`nameKana` hiragana
+yomi, `nameRomaji` Hepburn) the catalog publisher writes for the app: the kana is
+the gojūon sort key, the romaji a pronunciation aid for non-Japanese users.
 
-`to_hiragana` is pure stdlib and always tested. The analyzer-backed `name_kana`
-and the publisher plan need pykakasi (a declared dependency); those tests
-`importorskip` it so a bare environment still runs the fold tests. Offline
+`to_hiragana` is pure stdlib and always tested. The analyzer-backed `name_kana` /
+`name_romaji` and the publisher plans need pykakasi (a declared dependency); those
+tests `importorskip` it so a bare environment still runs the fold tests. Offline
 throughout — no network, no auth, no writes.
 """
 import sys
@@ -11,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from onsen_scraper.readings import name_kana, to_hiragana
+from onsen_scraper.readings import name_kana, name_romaji, to_hiragana
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "publisher"))
@@ -76,7 +77,43 @@ def test_name_kana_strips_surrounding_whitespace():
     assert not kana.endswith("　")
 
 
-# --- publisher backfill plan (offline, over the snapshot) --------------------
+# --- name_romaji: analyzer-backed romaji generation --------------------------
+
+def test_name_romaji_matches_the_contract_examples():
+    pytest.importorskip("pykakasi")
+    # The example called out in the contract / app PR #183: Title-cased Hepburn.
+    assert name_romaji("別府温泉") == "Beppu Onsen"
+    assert name_romaji("由布院温泉") == "Yufuin Onsen"
+
+
+def test_name_romaji_none_for_empty_input():
+    assert name_romaji(None) is None
+    assert name_romaji("") is None
+    assert name_romaji("   　 ") is None
+
+
+def test_name_romaji_collapses_segmentation_and_trims():
+    pytest.importorskip("pykakasi")
+    # A full-width space between name parts makes pykakasi emit a stray space token;
+    # the output must collapse to single-spaced words with no leading/trailing space.
+    romaji = name_romaji("武雄温泉　元湯")
+    assert romaji is not None
+    assert romaji == romaji.strip()
+    assert "  " not in romaji
+
+
+def test_name_romaji_capitalises_each_word():
+    pytest.importorskip("pykakasi")
+    # Every space-separated word starts capitalised so the reading reads as a proper
+    # noun (the kana, by contrast, is lowercase script with no capitalisation).
+    for name in ("別府温泉", "由布院温泉", "黒川温泉", "嬉野温泉"):
+        romaji = name_romaji(name)
+        assert romaji is not None
+        for word in romaji.split(" "):
+            assert word[:1] == word[:1].upper(), romaji
+
+
+# --- publisher backfill plans (offline, over the snapshot) -------------------
 
 def test_backfill_plan_over_snapshot():
     pytest.importorskip("pykakasi")
@@ -96,3 +133,20 @@ def test_backfill_plan_over_snapshot():
     assert all(kana for _oid, _kid, _name, kana in plan)
     for _oid, _kid, _name, kana in plan:
         assert all(not (0x30A1 <= ord(ch) <= 0x30F6) for ch in kana), kana
+
+
+def test_backfill_romaji_plan_over_snapshot():
+    pytest.importorskip("pykakasi")
+    import backfill_name_romaji as bf  # noqa: E402  (publisher/ is non-package)
+
+    plan = bf.build_plan()
+    import sqlite3
+    con = sqlite3.connect(f"file:{bf.SNAPSHOT_DB}?mode=ro", uri=True)
+    snap_ids = {r[0] for r in con.execute("select id from onsens")}
+    con.close()
+    assert {p[0] for p in plan} == snap_ids
+    # Every row is (id, kid, name, romaji); the snapshot has a name for every onsen,
+    # so every onsen should produce a non-null, trimmed, single-spaced romaji.
+    assert all(romaji for _oid, _kid, _name, romaji in plan)
+    for _oid, _kid, _name, romaji in plan:
+        assert romaji == romaji.strip() and "  " not in romaji, romaji

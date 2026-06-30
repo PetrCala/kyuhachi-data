@@ -13,7 +13,7 @@ It is driven by a reviewed *decisions* file (one adjudicated change per onsen):
     counting.
   - {"hid": N, "action": "add"}    → CREATE /onsens/{kyuhachiId} for a new onsen,
     assembling the full doc from the /map seed (name/area/lat/lng) + a live detail
-    scrape + the curated hours + a generated nameKana + a rehosted photo. The one
+    scrape + the curated hours + generated nameKana/nameRomaji + a rehosted photo. The one
     create (vs PATCH) write; idempotent (skips if the doc already exists) and gated.
     Requires a minted kyuhachiId (catalog-sync mint) and a curated-hours entry.
   - {"hid": N, "action": "skip"}   → no-op (explicitly reviewed, no change).
@@ -44,7 +44,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
-from onsen_scraper import fee_for, fetch_detail_page, name_kana, parse_detail_page  # noqa: E402
+from onsen_scraper import (  # noqa: E402
+    fee_for,
+    fetch_detail_page,
+    name_kana,
+    name_romaji,
+    parse_detail_page,
+)
 import catalog_diff as cd  # noqa: E402
 import image_processor as ip  # noqa: E402  (publisher/image_processor.py — photo rehosting)
 import backfill_schedule as bsf  # noqa: E402  (reuse the curated-hours encoders + Firestore GET)
@@ -262,6 +268,7 @@ def build_add(hid: int, tok: str | None):
     fields = {
         "name": sval(name),
         "nameKana": sval(name_kana(name)),
+        "nameRomaji": sval(name_romaji(name)),
         "areaName": sval(seed.get("areaName")),
         "address": sval(live.get("address") or seed.get("address")),
         "prefecture": sval(live.get("prefecture")),
@@ -295,8 +302,8 @@ def build_add(hid: int, tok: str | None):
 # contract). A new doc must match this exactly — validated before the first create
 # so a renamed/added field on the app side aborts instead of writing a bad doc.
 ONSEN_DOC_KEYS = {
-    "name", "nameKana", "areaName", "address", "prefecture", "lat", "lng", "phone",
-    "businessHours", "admissionFee", "adultFee", "springQuality", "websiteUrl",
+    "name", "nameKana", "nameRomaji", "areaName", "address", "prefecture", "lat", "lng",
+    "phone", "businessHours", "admissionFee", "adultFee", "springQuality", "websiteUrl",
     "imageUrl", "blurhash", "isActive", "catalogVersion", "createdAt", "updatedAt",
 }
 
