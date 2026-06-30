@@ -11,6 +11,9 @@ itinerary_loop.md
 handdrawn_analysis.json
 itinerary_handdrawn.md
 
+# enjoyment-first scenario report (regenerate with enjoyment_scenarios.py)
+enjoyment_scenarios.md
+
 # markdown → html previews (open the .md; regenerate offline anytime)
 decision_card.html
 final_route/README.html

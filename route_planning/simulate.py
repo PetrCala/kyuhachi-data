@@ -85,11 +85,15 @@ def earliest_entry(arrive, open_min, last_min, closed_wd, horizon=8):
     return None, None
 
 
-def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACTOR):
+def simulate(route, policy="patient", target=88, road_factor=ROAD_FACTOR,
+             visit_min=VISIT_MIN):
     """policy: 'skip' = miss closed/late onsens (raw yield);
                'patient' = retime to next valid opening (spend idle days).
-    road_factor: 1.0 when leg_km are already real (OSRM); 1.3 for great-circle."""
-    r = json.loads(Path(route_path).read_text())
+    road_factor: 1.0 when leg_km are already real (OSRM); 1.3 for great-circle.
+    visit_min: per-onsen dwell time; override to model 'fewer but longer' visits.
+    route: a path to a route JSON, or an already-loaded route dict (so callers can
+           feed a thinned/edited stop list in memory without writing a file)."""
+    r = route if isinstance(route, dict) else json.loads(Path(route).read_text())
     stops = r["stops"]
     clock = START_DT
     events = []
@@ -101,6 +105,13 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
         leg_km = s["leg_km_gc"] * road_factor
         walk_min = leg_km / SPEED_KMH * 60.0
         arrive = advance_walking(clock, walk_min)
+        # Planned skip (e.g. cluster-thinning): you still WALK the fixed line past
+        # it — only the visit is skipped, so advance the clock by the leg but don't
+        # bathe. The walking distance is unchanged; only visit time is saved.
+        if s.get("_skip_reason"):
+            events.append(_ev(s, arrive, "SKIP-capped", s["_skip_reason"], visited))
+            clock = arrive
+            continue
         amin = mod_min(arrive)
         closed_wd = set(s.get("closed_weekdays") or [])
         open_min = s.get("open_min")
@@ -155,7 +166,7 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
             irregular_seen += 1
         visited += 1
         events.append(_ev(s, entry, status, note, visited))
-        clock = entry + timedelta(minutes=VISIT_MIN)
+        clock = entry + timedelta(minutes=visit_min)
 
     # max onsens visited in a single calendar day
     from collections import Counter
@@ -181,8 +192,9 @@ def simulate(route_path: str, policy="patient", target=88, road_factor=ROAD_FACT
         "idle_days_from_waits": idle_days_total,
         "max_onsens_one_day": max_in_day,
         "irregular_不定休_visited(risk)": irregular_seen,
-        "model": {"speed_kmh": SPEED_KMH, "visit_min": VISIT_MIN, "road_factor": ROAD_FACTOR,
-                  "wake": "06:00", "sleep": "22:00"},
+        "model": {"speed_kmh": SPEED_KMH, "visit_min": visit_min, "road_factor": road_factor,
+                  "wake": f"{WAKE_MIN//60:02d}:{WAKE_MIN%60:02d}",
+                  "sleep": f"{SLEEP_MIN//60:02d}:{SLEEP_MIN%60:02d}"},
     }
     return summary, events
 
@@ -231,7 +243,8 @@ def write_itinerary(summary, events, path, warnings=None):
                 lines.append("")
         for e in evs:
             flag = {"visit": "✅", "wait-open": "⏳", "wait-closed": "🛌", "wait-late": "🛌",
-                    "SKIP-closed": "🚫", "SKIP-late": "⌛", "SKIP-unreachable": "❌"}.get(e["status"], "·")
+                    "SKIP-closed": "🚫", "SKIP-late": "⌛", "SKIP-unreachable": "❌",
+                    "SKIP-capped": "➖"}.get(e["status"], "·")
             extra = f" — {e['note']}" if e["note"] else ""
             irr = " ⚠️不定休" if e["irregular"] else ""
             tag = " 🅑BUFFER(optional)" if e.get("is_buffer") else (" ➰SPUR" if e.get("is_spur") else "")
