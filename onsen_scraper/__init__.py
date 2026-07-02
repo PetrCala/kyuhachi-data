@@ -17,7 +17,14 @@ dependency-free.
 from onsen_scraper.fees import CORRECTIONS, adult_fee, fee_for
 from onsen_scraper.hours import HoursParse, parse_hours, parsed_hours_doc
 from onsen_scraper.mapseed import MAP_URL, fetch_map_seed, parse_map_seed
-from onsen_scraper.readings import name_kana, name_romaji, to_hiragana
+from onsen_scraper.readings import (
+    curated_readings,
+    kana_for,
+    name_kana,
+    name_romaji,
+    romaji_for,
+    to_hiragana,
+)
 
 _LAZY = {
     "FetchError": "onsen_scraper.fetcher",
@@ -37,8 +44,11 @@ __all__ = [
     "MAP_URL",
     "fetch_map_seed",
     "parse_map_seed",
+    "curated_readings",
+    "kana_for",
     "name_kana",
     "name_romaji",
+    "romaji_for",
     "to_hiragana",
     "FetchError",
     "fetch_detail_page",

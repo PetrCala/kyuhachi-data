@@ -158,17 +158,20 @@ so they have their own idempotent backfill instead of riding the detect→apply 
   gojūon sort key. Readings don't exist upstream and `name` isn't a detail-page field
   (it comes from the map seed, so `apply.py` never sees it change), so it's published
   by [`publisher/backfill_name_kana.py`](../../../publisher/backfill_name_kana.py)
-  (generated via `onsen_scraper.readings.name_kana`, folded to hiragana):
+  (resolved via `onsen_scraper.readings.kana_for`: the curated overlay in
+  [`data/readings_curated.json`](../../../data/readings_curated.json) wins, pykakasi
+  folded to hiragana is the fallback):
   ```bash
   python publisher/backfill_name_kana.py            # DRY-RUN: plan + sample readings
   python publisher/backfill_name_kana.py --show     # also list all 148 readings
   python publisher/backfill_name_kana.py --commit   # writes nameKana; bumps version
   ```
-  Idempotent, so re-run it after a new onsen's name lands (or a name correction) to
-  republish only what changed. A future `apply.py` `add` action should call
-  `name_kana()` when it mints a new doc. Auto-generated, no hand-correction — some
-  proper-noun readings will be imperfect (the agreed tradeoff). Consumed by app PR
-  PetrCala/kyuhachi#143.
+  Idempotent, so re-run it after a new onsen's name lands (or a curated correction) to
+  republish only what changed. The `apply.py` `add` action calls the same `kana_for()`
+  when it mints a new doc. Auto-generated + curated corrections overlay — where the
+  analyzer misreads a proper noun, the verified reading (with its evidence) lives in
+  the overlay; `nameRomaji` works the same via `romaji_for` /
+  `backfill_name_romaji.py`. Consumed by app PR PetrCala/kyuhachi#143.
 
 ## Ordering rules (the things you'd otherwise rediscover the hard way)
 

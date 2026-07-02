@@ -5,8 +5,10 @@ onsen doc.
 
 Generates the romaji reading of each onsen's `name` from the kanji
 `facility_name` in the snapshot DB (offline — no scraping) via the shared
-analyzer (`onsen_scraper.readings.name_romaji`, pykakasi Hepburn capitalised as a
-proper noun) and MERGE-PATCHes it onto `/onsens/{kyuhachiId}` as `nameRomaji`,
+resolver (`onsen_scraper.readings.romaji_for`: the curated overlay in
+data/readings_curated.json wins — restoring e.g. the original English word behind
+a katakana loanword — with pykakasi Hepburn capitalised as a proper noun as the
+fallback) and MERGE-PATCHes it onto `/onsens/{kyuhachiId}` as `nameRomaji`,
 then bumps `/catalog_meta/current.version` so the app refetches. Additive and
 idempotent — same contract as `apply.py` / `backfill_name_kana.py`: writes one
 named field via updateMask, never overwrites other fields, never deletes.
@@ -24,8 +26,8 @@ Why a dedicated backfill (not the surgical `apply.py` update path): `name` is no
 a detail-page field — it comes from the map seed, not the scrape — so `apply.py`
 never sees a name change to react to. This script is therefore both the initial
 fill AND the ongoing path: it is idempotent, so re-running it after a new onsen's
-name lands (or any name correction) republishes only what changed. A future
-`apply.py` `add` action should call `name_romaji()` when it mints the new doc.
+name lands (or a curated correction) republishes only what changed. The
+`apply.py` `add` action calls the same `romaji_for()` when it mints a new doc.
 
 Auth: gcloud Application Default Credentials (same as `publisher/apply.py`).
 Run `gcloud auth application-default login` if 401. Dry-run needs no auth — the
@@ -48,7 +50,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
-from onsen_scraper.readings import name_romaji  # noqa: E402
+from onsen_scraper.readings import curated_readings, romaji_for  # noqa: E402
 
 PROJECT = "kyuhachi-fddcc"
 BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
@@ -122,7 +124,7 @@ def build_plan():
         ).fetchall()
     finally:
         con.close()
-    return [(oid, IDMAP.get(str(oid)), name, name_romaji(name)) for oid, name in rows]
+    return [(oid, IDMAP.get(str(oid)), name, romaji_for(oid, name)) for oid, name in rows]
 
 
 def bump_catalog_version(now: str, tok: str):
@@ -149,9 +151,12 @@ def main() -> None:
     missing = [oid for oid, kid, *_ in plan if kid is None]
     writable = [p for p in plan if p[1] is not None]
 
+    curated = {oid for oid, *_ in plan
+               if curated_readings().get(str(oid), {}).get("romaji")}
     print(f"nameRomaji backfill — {'COMMIT' if args.commit else 'DRY-RUN'}   "
           f"project={PROJECT}   onsens={len(plan)}")
-    print(f"readings generated: {len(plan) - len(no_romaji)}   null (no reading): {len(no_romaji)}")
+    print(f"readings generated: {len(plan) - len(no_romaji)}   "
+          f"curated overrides: {len(curated)}   null (no reading): {len(no_romaji)}")
     if missing:
         print(f"!! {len(missing)} onsens have no kyuhachiId in onsen-id-map.json: {missing}")
     if no_romaji:
@@ -165,9 +170,10 @@ def main() -> None:
         print(f"  id={oid:<4} {(name or ''):<28} → {romaji}")
 
     if args.show:
-        print(f"\n-- all {len(plan)} readings --")
+        print(f"\n-- all {len(plan)} readings ((c) = curated override) --")
         for oid, _kid, name, romaji in plan:
-            print(f"  id={oid:<4} {(name or ''):<32} → {romaji}")
+            mark = " (c)" if oid in curated else ""
+            print(f"  id={oid:<4} {(name or ''):<32} → {romaji}{mark}")
 
     if not args.commit:
         print(f"\nDry-run only — nothing written. Would PATCH nameRomaji on {len(writable)} "
