@@ -21,10 +21,12 @@ import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Make the repo root importable so `onsen_scraper` resolves regardless of CWD.
-# This file lives at <repo>/.claude/skills/catalog-diff/catalog_diff.py.
+# Make the repo root (for `onsen_scraper`) and the publisher dir (for the shared
+# Firestore REST helpers) importable regardless of CWD. This file lives at
+# <repo>/.claude/skills/catalog-diff/catalog_diff.py.
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(REPO_ROOT / "publisher"))
 
 from onsen_scraper import FetchError, fetch_detail_page, fetch_url, parse_detail_page  # noqa: E402
 
@@ -48,6 +50,23 @@ MUTED = {
     "image_url", "covid_measures", "efficacy",
     "recommendation", "senjin_benefits", "access_info",
 }
+
+# Published-catalog projection: snake_case parser field → live-doc field path.
+# Only the source-authored fields the catalog actually publishes — every one of
+# them MATERIAL. The muted descriptive fields (covid/efficacy/recommendation/…)
+# are not published, and `imageUrl` is a *rehosted* Storage URL, not the source
+# `image_url`, so neither is diffable against a scrape. The catalog baseline
+# therefore compares published truth on these fields alone (see `load_catalog`).
+CATALOG_FIELD_PATH = {
+    "prefecture": "prefecture",
+    "address": "address",
+    "phone": "phone",
+    "business_hours": "businessHours.raw",
+    "admission_fee": "admissionFee",
+    "spring_quality": "springQuality",
+    "website_url": "websiteUrl",
+}
+CATALOG_FIELDS = list(CATALOG_FIELD_PATH)
 
 DATA = REPO_ROOT / "data"
 SNAPSHOT_DB = DATA / "snapshot.db"
@@ -93,12 +112,28 @@ def load_snapshot() -> dict[int, dict]:
 
 
 def load_catalog() -> dict[int, dict]:
-    """Published Firestore /onsens projected onto FIELDS, keyed by hid.
+    """Published Firestore /onsens projected onto CATALOG_FIELDS, keyed by hid.
 
-    TODO: authed REST read (mirror scripts/reseed-catalog.py in the app repo),
-    then map kyuhachiId back to hid via onsen-id-map.json.
+    Read-only: an authed, paginated REST list of the /onsens collection (via the
+    shared publisher/firestore_rest helpers), decoding each doc's typed values at
+    the mapped camelCase paths back into the parser's snake_case field names, and
+    inverting onsen-id-map.json (kyuhachiId → hid) so the result keys line up with
+    load_snapshot(). Live docs whose kyuhachiId isn't in the id map are skipped —
+    they can't be tied back to a scrapeable hid. Writes nothing (locked contract).
+
+    Auth: gcloud Application Default Credentials (same token the publisher mints).
     """
-    raise NotImplementedError("catalog baseline adapter not implemented yet")
+    from firestore_rest import fetch_collection, field_at, token  # local: needs auth + network
+
+    idmap = json.loads(ID_MAP.read_text(encoding="utf-8"))
+    kid_to_hid = {kid: int(hid) for hid, kid in idmap.items()}
+    out: dict[int, dict] = {}
+    for kid, fields in fetch_collection("onsens", token()).items():
+        hid = kid_to_hid.get(kid)
+        if hid is None:
+            continue
+        out[hid] = {f: field_at(fields, path) for f, path in CATALOG_FIELD_PATH.items()}
+    return out
 
 
 def is_soft_removed(parsed: dict) -> bool:
@@ -162,7 +197,12 @@ def crawl_index(hard_cap: int = 60) -> set[int]:
     return ids
 
 
-def diff(baseline: dict, live: dict, idmap: dict, index_ids: set[int] | None = None) -> dict:
+def diff(baseline: dict, live: dict, idmap: dict, index_ids: set[int] | None = None,
+         fields: list[str] = FIELDS) -> dict:
+    """Diff a baseline against a live scrape over `fields`. `fields` narrows the
+    comparison for the catalog baseline (CATALOG_FIELDS — only the published
+    fields), so muted descriptive fields the catalog never stores don't fire as
+    spurious volatile changes; it defaults to the full FIELDS for the snapshot."""
     modified, removed, fetch_failed = [], [], []
     suppressed = 0  # onsens whose ONLY change was an as-of date-stamp refresh
     for hid, base in baseline.items():
@@ -179,7 +219,7 @@ def diff(baseline: dict, live: dict, idmap: dict, index_ids: set[int] | None = N
             continue
         changed = {
             f: {"old": base.get(f), "new": cur.get(f)}
-            for f in FIELDS
+            for f in fields
             if norm(f, base.get(f)) != norm(f, cur.get(f))
         }
         if changed:
@@ -194,7 +234,7 @@ def diff(baseline: dict, live: dict, idmap: dict, index_ids: set[int] | None = N
             })
         elif any(
             norm(f, base.get(f), strip_dates=False) != norm(f, cur.get(f), strip_dates=False)
-            for f in FIELDS
+            for f in fields
         ):
             suppressed += 1
     # `added` = ids on the source (live) but not in baseline, with real content.
@@ -272,7 +312,10 @@ def main() -> None:
     args = ap.parse_args()
 
     idmap = json.loads(ID_MAP.read_text(encoding="utf-8"))
-    baseline = load_snapshot() if args.baseline == "snapshot" else load_catalog()
+    if args.baseline == "catalog":
+        baseline, compare_fields = load_catalog(), CATALOG_FIELDS
+    else:
+        baseline, compare_fields = load_snapshot(), FIELDS
     ids = sorted(baseline)
 
     if args.sample:  # preflight: are the selectors (and the egress allowlist) still good?
@@ -295,7 +338,7 @@ def main() -> None:
 
     if args.limit:
         ids = ids[:args.limit]
-    changelog = diff(baseline, scrape_live(ids), idmap, index_ids=index_ids)
+    changelog = diff(baseline, scrape_live(ids), idmap, index_ids=index_ids, fields=compare_fields)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     counts = write_report(changelog, args.baseline, args.out / stamp)
     print(f"report → {args.out / stamp}\n{counts}")

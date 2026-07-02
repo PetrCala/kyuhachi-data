@@ -210,10 +210,6 @@ so they have their own idempotent backfill instead of riding the detect→apply 
 - **Challenge-pool membership** — adding a new onsen to a challenge pool lives in the
   **app** repo; always a separate hand-off. Creating a new onsen's catalog doc (now via
   `apply.py add`) makes it exist in the catalog, but it never auto-joins a challenge.
-- **`catalog` baseline adapter** — diffing against the *live published* Firestore
-  catalog (vs the local snapshot) is still a stub (`catalog_diff.load_catalog`).
-- **Shared Firestore REST helper** — `apply.py` / `backfill_*.py` still each carry a
-  copy (low-priority DRY cleanup).
 
 ## Related
 

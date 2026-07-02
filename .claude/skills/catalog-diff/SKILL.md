@@ -35,8 +35,9 @@ output is a changelog the operator acts on deliberately.
 2. **Full diff:** `python .claude/skills/catalog-diff/catalog_diff.py`
    (baseline = the last snapshot). Add **`--discover`** to crawl the source index
    first — this detects **ADDED** onsens and uses index membership as the
-   authoritative **REMOVED** signal. Add `--baseline catalog` to diff against the
-   live published catalog instead (adapter is a TODO — see below).
+   authoritative **REMOVED** signal. Add `--baseline catalog` to diff the live
+   **published** catalog against the source instead of the local snapshot (needs
+   gcloud ADC; read-only — see below).
 3. **Read `reports/<timestamp>/summary.md`.** Present the material changes;
    treat the low-signal section (image filenames, covid notes, recommendation)
    as noise.
@@ -88,8 +89,13 @@ rather than blind-overwriting, since the upstream `hid` can be reused.
   deciding), not treated as a removal.
 - **ADDED** requires `--discover`. New onsens are reported with prefecture +
   address; assigning their `kyuhachiId` is a manual step (this repo owns ids).
-- The `catalog` baseline adapter (`load_catalog()`) is still a TODO: authed REST
-  read of `/onsens`, mapping kyuhachiId back to hid.
+- The `catalog` baseline (`--baseline catalog`) diffs the **published** Firestore
+  `/onsens` against a live re-scrape: `load_catalog()` does an authed, paginated
+  REST read, decodes the typed values, projects each doc onto the seven published
+  MATERIAL fields (camelCase → snake_case, nested `businessHours.raw` flattened),
+  and maps `kyuhachiId` → `hid`. Needs gcloud ADC; strictly read-only. The compared
+  field set is narrowed to the published fields, so unpublished descriptive fields
+  and the rehosted `imageUrl` never show up as spurious low-signal drift.
 
 ## Guarantees
 

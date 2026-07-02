@@ -11,6 +11,7 @@ typed-value encoding, same PROJECT/BASE.
 import json
 import subprocess
 import urllib.error
+import urllib.parse
 import urllib.request
 
 PROJECT = "kyuhachi-fddcc"
@@ -65,6 +66,87 @@ def get_fields(path: str, tok: str):
         if e.code == 404:
             return None
         raise
+
+
+def decode_value(v):
+    """Decode one Firestore typed value into a Python scalar/container — the inverse
+    of the sval/ival/dval/bval encoders. Null/absent → None; maps/arrays recurse.
+    Only the scalar shapes we publish are round-tripped precisely; unknown shapes
+    fall through to None."""
+    if not v or "nullValue" in v:
+        return None
+    if "stringValue" in v:
+        return v["stringValue"]
+    if "integerValue" in v:
+        return int(v["integerValue"])
+    if "doubleValue" in v:
+        return v["doubleValue"]
+    if "booleanValue" in v:
+        return bool(v["booleanValue"])
+    if "timestampValue" in v:
+        return v["timestampValue"]
+    if "mapValue" in v:
+        return {k: decode_value(x) for k, x in v["mapValue"].get("fields", {}).items()}
+    if "arrayValue" in v:
+        return [decode_value(x) for x in v["arrayValue"].get("values", [])]
+    return None
+
+
+def field_at(fields: dict, path: str):
+    """Decode a (possibly nested, dotted) field path out of a `fields` dict.
+    'businessHours.raw' walks into the nested mapValue. A missing segment → None."""
+    cur, parts = fields, path.split(".")
+    for i, key in enumerate(parts):
+        if not isinstance(cur, dict) or key not in cur:
+            return None
+        if i == len(parts) - 1:
+            return decode_value(cur[key])
+        cur = cur[key].get("mapValue", {}).get("fields", {})
+    return None
+
+
+def list_documents(collection: str, tok: str, page_size: int = 300):
+    """Yield every raw document ({name, fields, ...}) in a collection, following
+    nextPageToken pagination. Read-only — a plain paginated GET, no writes."""
+    page_token = None
+    while True:
+        qs = f"pageSize={page_size}"
+        if page_token:
+            qs += f"&pageToken={urllib.parse.quote(page_token, safe='')}"
+        req = urllib.request.Request(
+            f"{BASE}/{collection}?{qs}", headers={"Authorization": f"Bearer {tok}"})
+        with _open(req) as r:
+            data = json.load(r)
+        for doc in data.get("documents", []):
+            yield doc
+        page_token = data.get("nextPageToken")
+        if not page_token:
+            break
+
+
+def fetch_collection(collection: str, tok: str, page_size: int = 300) -> dict:
+    """Read a whole collection into {docId: fields}, following pagination. Read-only.
+    `docId` is the last path segment of document.name (the kyuhachiId for /onsens).
+    One paginated list read instead of N per-doc GETs."""
+    return {doc["name"].rsplit("/", 1)[-1]: doc.get("fields", {})
+            for doc in list_documents(collection, tok, page_size)}
+
+
+def live_onsens(commit: bool, page_size: int = 300):
+    """(tok, {kid: fields}) for the whole /onsens collection — the shared no-op
+    detector the backfills read the current field values from before deciding what
+    to PATCH. On --commit a read failure propagates (writes need auth); on a dry-run
+    it degrades to (None, None) with a note, so the plan still prints offline (just
+    without change-vs-current detection). Read-only."""
+    try:
+        tok = token()
+        return tok, fetch_collection("onsens", tok, page_size)
+    except Exception as e:  # noqa: BLE001 — auth (gcloud) or network; both non-fatal for a dry-run
+        if commit:
+            raise
+        print(f"!! could not read live catalog ({type(e).__name__}: {e}); "
+              f"reporting the full plan without no-op detection")
+        return None, None
 
 
 def patch(path: str, fields: dict, mask: list, tok: str) -> int:
