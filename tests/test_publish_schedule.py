@@ -80,12 +80,17 @@ def test_curated_covers_every_snapshot_onsen():
 def test_curated_entries_wellformed():
     import re
     TIME = re.compile(r"^\d{2}:\d{2}$")
+
+    def ok_window(v):  # [o,c] or [[o,c], ...] — every time HH:MM
+        wins = bf.norm_windows(v)
+        return bool(wins) and all(len(w) == 2 and all(TIME.match(t) for t in w) for w in wins)
+
     for hid, e in CURATED.items():
         assert set(e["closed"]) <= set(bf._ABBR), hid
         if e["publish"]:
-            assert e["window"] and all(TIME.match(t) for t in e["window"]), hid
+            assert ok_window(e["window"]), hid
         for ov in e["overrides"].values():
-            assert ov is None or all(TIME.match(t) for t in ov), hid
+            assert ov is None or ok_window(ov), hid
 
 
 def test_expand_curated_open_all_and_weekday():
@@ -112,7 +117,7 @@ def test_curated_exceptions_wellformed():
     for hid, e in CURATED.items():
         assert isinstance(e["exceptions"], list), hid
         for x in e["exceptions"]:
-            assert set(x) == {"en", "ja"}, hid
+            assert set(x) - {"rule"} == {"en", "ja"}, hid
             assert x["en"].strip() and x["ja"].strip(), hid
 
 
@@ -171,6 +176,91 @@ def test_every_source_last_entry_is_captioned():
         and cap not in e["exceptions"]
     ]
     assert not missing, f"source states 最終受付 but no caption: {sorted(missing, key=int)}"
+
+
+# --- schema extension: windows / rule / lastEntry / confidence cap ------------ #
+# docs/hours-schema.md — all additive; a single-window, rule-less, no-lastEntry
+# entry must encode byte-identically to the pre-extension output.
+
+def test_single_window_encoding_unchanged():
+    # Legacy shape guarantee: no `windows` key on single-window days, no `rule`
+    # field on plain captions — the published docs stay byte-identical.
+    s = bf.expand_curated({"publish": True, "window": ["10:00", "21:30"],
+                           "closed": ["tue"], "overrides": {}})
+    assert s["monday"] == {"opens": "10:00", "closes": "21:30"}   # exactly, no windows key
+    fields = bf.sched_val(s)["mapValue"]["fields"]
+    assert set(fields["monday"]["mapValue"]["fields"]) == {"opens", "closes"}
+    exc = bf.exc_val([{"en": "Open on public holidays", "ja": "祝日は営業"}])
+    assert set(exc["arrayValue"]["values"][0]["mapValue"]["fields"]) == {"en", "ja"}
+
+
+def test_multi_window_expand_encode_roundtrip():
+    # hid-38 shape: two sessions + a MWF override with an exclusion gap.
+    e = {"publish": True, "window": [["07:00", "10:30"], ["14:30", "22:00"]],
+         "closed": ["sun"], "overrides": {"mon": [["08:30", "11:00"], ["13:00", "20:00"]]}}
+    s = bf.expand_curated(e)
+    # opens/closes mirror the FIRST window (legacy readers show one true window)…
+    assert s["tuesday"]["opens"] == "07:00" and s["tuesday"]["closes"] == "10:30"
+    # …and the full truth ships in `windows`.
+    assert s["tuesday"]["windows"] == [{"opens": "07:00", "closes": "10:30"},
+                                       {"opens": "14:30", "closes": "22:00"}]
+    assert s["monday"]["windows"][1] == {"opens": "13:00", "closes": "20:00"}
+    assert s["sunday"] is None
+    # Firestore encode → decode round-trips exactly.
+    assert bf.live_schedule({"schedule": bf.sched_val(s)}) == s
+
+
+def test_rule_encoding_roundtrip():
+    exceptions = [
+        {"en": "Closed the 1st Wednesday each month (2nd Wed in Jan & May)",
+         "ja": "毎月第1水曜休（1・5月は第2水曜）",
+         "rule": {"kind": "monthlyWeekday", "weeks": [1], "weekday": "wednesday",
+                  "exceptMonths": [1, 5]}},
+        {"en": "Closed the 5th, 15th & 25th each month", "ja": "毎月5・15・25日休",
+         "rule": {"kind": "monthlyDay", "days": [5, 15, 25]}},
+        {"en": "Irregular closing days — confirm before visiting",
+         "ja": "不定休 — 事前にご確認ください", "rule": {"kind": "irregular"}},
+        {"en": "Open on public holidays", "ja": "祝日は営業"},   # no rule → unchanged
+    ]
+    assert bf.live_exceptions({"exceptions": bf.exc_val(exceptions)}) == exceptions
+
+
+def test_published_confidence_caps_published_irregular_at_low():
+    # The cap engages exactly when an irregular entry claims a grid — an
+    # unpublished irregular entry (raw fallback + confirm caption) passes
+    # through, so extending the schema alone changes no published doc.
+    assert bf.published_confidence(
+        {"status": "irregular", "confidence": "high", "publish": True}) == "low"
+    assert bf.published_confidence(
+        {"status": "irregular", "confidence": "high", "publish": False}) == "high"
+    assert bf.published_confidence(
+        {"status": "structured", "confidence": "high", "publish": True}) == "high"
+    assert bf.published_confidence(
+        {"status": "monthly", "confidence": "medium", "publish": True}) == "medium"
+
+
+def test_last_entry_val_roundtrip():
+    assert bf.le_val("21:00") == {"stringValue": "21:00"}
+    assert bf.le_val(None) == {"nullValue": None}
+    assert bf.live_last_entry({"lastEntry": bf.le_val("21:00")}) == "21:00"
+    assert bf.live_last_entry({"lastEntry": bf.le_val(None)}) is None
+    assert bf.live_last_entry({}) is None
+
+
+def test_curated_last_entry_is_evidence_based():
+    # businessHours.lastEntry may only state what the source text states
+    # (docs/hours-schema.md): a curated `lastEntry` must equal the mechanically
+    # detected single 最終受付 cutoff. Vacuous until the lastEntry backfill lands,
+    # but locks the evidence gate from day one.
+    import sqlite3
+    from onsen_scraper.hours import single_last_entry
+    con = sqlite3.connect(f"file:{REPO/'data'/'snapshot.db'}?mode=ro", uri=True)
+    raws = {str(i): bh for i, bh in con.execute("select id, business_hours from onsens")}
+    con.close()
+    bad = [hid for hid, e in CURATED.items()
+           if e.get("lastEntry") is not None
+           and single_last_entry(raws.get(hid)) != e["lastEntry"]]
+    assert not bad, f"lastEntry without source evidence: {sorted(bad, key=int)}"
 
 
 def test_curated_fixes_known_bugs():

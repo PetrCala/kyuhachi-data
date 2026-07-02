@@ -1,8 +1,8 @@
 {
   "_meta": {
     "parsedBy": "claude-opus-4-8 (manual one-time parse of business_hours)",
-    "schema": "publish=true → expand schedule from window/closed/overrides (day = base window unless in closed[](=null) or overrides{}); publish=false → schedule null (raw fallback). days: mon..sun. times HH:MM (24+ = past midnight). status explains why not published.",
-    "policy": "無休/explicit weekly closure → structured. 第N曜/毎月N日/不定休 → monthly/irregular (null). multi-window or seasonal hours → null. annual-only closure (1/1, 元旦, dec maintenance) → deferred-annual (null for now; open-all-week candidate pending policy decision)."
+    "schema": "publish=true → expand schedule from window/closed/overrides (day = base window(s) unless in closed[](=null) or overrides{}); window/override values are [open,close] or [[o,c],[o,c],…] for split sessions (published opens/closes mirror the first window; the full list ships as DaySchedule.windows). publish=false → schedule null (raw fallback). optional lastEntry HH:MM (evidence-gated: single_last_entry must detect it in the source text). exceptions: {en,ja} + optional structured rule (monthlyWeekday/monthlyDay/irregular — docs/hours-schema.md). days: mon..sun. times HH:MM (24+ = past midnight). status explains the routing.",
+    "policy": "無休/explicit weekly closure → structured. 第N曜/毎月N日 → monthly: publish the base grid, caption carries a structured monthly rule. 不定休 → irregular: publish the base grid + {kind:irregular} rule; published confidence capped at low (call-ahead hint). multi-window → split sessions via window lists. seasonal → most-restrictive window, captions carry the variance. annual-only closure (1/1, 元旦, dec maintenance) → deferred-annual (null for now; open-all-week candidate pending policy decision)."
   },
   "onsens": {
     "1": {

@@ -162,8 +162,9 @@ def catalog_version(tok: str | None):
 
 
 def _business_hours_val(hid: int, raw):
-    """ParsedHours map {raw, schedule, exceptions?, confidence?} from the curated entry
-    (schedule via the curated parse, never the regex), or null when neither exists."""
+    """ParsedHours map {raw, schedule, exceptions?, confidence?, lastEntry?} from the
+    curated entry (schedule via the curated parse, never the regex), or null when
+    neither exists."""
     entry = curated_hours().get(str(hid))
     if raw is None and not entry:
         return {"nullValue": None}
@@ -173,7 +174,9 @@ def _business_hours_val(hid: int, raw):
         if entry.get("exceptions"):
             fields["exceptions"] = bsf.exc_val(entry["exceptions"])
         if entry.get("confidence"):
-            fields["confidence"] = bsf.conf_val(entry["confidence"])
+            fields["confidence"] = bsf.conf_val(bsf.published_confidence(entry))
+        if entry.get("lastEntry"):
+            fields["lastEntry"] = bsf.le_val(entry["lastEntry"])
     else:
         fields["schedule"] = {"nullValue": None}
     return {"mapValue": {"fields": fields}}
