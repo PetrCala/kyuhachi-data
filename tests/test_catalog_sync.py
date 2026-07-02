@@ -88,6 +88,23 @@ def test_promote_updates_changed_inserts_new_and_is_idempotent():
     assert (again["updated"], again["inserted"], again["unchanged"]) == (0, 0, 2)
 
 
+def test_promote_bumps_scraped_at_on_update_and_unchanged():
+    con = _db([(1, _fields(address="old")), (2, _fields(address="same"))])
+    staging = {"onsens": {
+        "1": _fields(address="NEW"),    # changed -> update branch
+        "2": _fields(address="same"),   # identical -> unchanged branch
+    }}
+    stats = cs.promote_into_db(con, staging, now="2026-06-25T00:00:00Z")
+    con.commit()
+    assert (stats["updated"], stats["unchanged"]) == (1, 1)
+    # both a content update AND a confirmed-identical re-scrape are verification
+    # events — landing in staging["onsens"] means this hid was freshly re-scraped.
+    assert con.execute("select scraped_at from onsens where id=1").fetchone()[0] \
+        == "2026-06-25T00:00:00Z"
+    assert con.execute("select scraped_at from onsens where id=2").fetchone()[0] \
+        == "2026-06-25T00:00:00Z"
+
+
 def test_promote_prune_only_with_flag():
     con = _db([(1, _fields(address="a")), (2, _fields(address="b"))])
     staging = {"onsens": {"1": _fields(address="a")}, "removed": [2]}

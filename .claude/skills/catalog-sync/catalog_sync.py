@@ -115,7 +115,11 @@ def promote_into_db(con: sqlite3.Connection, staging: dict, *, seed: dict | None
     carries that hid — so existing rows gain coordinates / sync coord drift and a
     brand-new onsen lands as a COMPLETE row, not detail-only. UPDATEs rows that
     changed, INSERTs new onsens (+ derived URL + scraped_at), and — only with
-    prune — DELETEs confirmed-removed rows. Idempotent. Returns per-action counts.
+    prune — DELETEs confirmed-removed rows. Idempotent (content-wise). Every hid
+    present in `staging["onsens"]` gets scraped_at bumped to `now`, even when its
+    managed fields are unchanged — landing in staging means it was freshly
+    re-scraped and reconciled this cycle, which is itself a verification event,
+    not just a content-change event. Returns per-action counts.
 
     `seed` defaults to staging["seed"] (written by `detect`); pass {} to skip.
     """
@@ -142,10 +146,11 @@ def promote_into_db(con: sqlite3.Connection, staging: dict, *, seed: dict | None
         if hid in existing:
             if existing[hid] == new:
                 unchanged += 1
+                con.execute("update onsens set scraped_at=? where id=?", (now, hid))
                 continue
             assigns = ",".join(f"{c}=?" for c in managed)
-            con.execute(f"update onsens set {assigns} where id=?",
-                        [new[c] for c in managed] + [hid])
+            con.execute(f"update onsens set {assigns},scraped_at=? where id=?",
+                        [new[c] for c in managed] + [now, hid])
             updated += 1
         else:
             allcols = ["id", *managed, "detail_page_url", "scraped_at"]
