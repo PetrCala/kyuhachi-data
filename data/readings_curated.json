@@ -1,0 +1,416 @@
+{
+  "_meta": {
+    "schema": "keyed by upstream 88onsen id. entry = {name, kana?, romaji?, note}. `name` = the snapshot facility_name the correction was verified against — kana_for()/romaji_for() ignore the entry (with a warning) if the live name drifts, so a reused hid can never inherit a stale reading. `kana` overrides the published nameKana (pure hiragana; the resolver re-folds defensively). `romaji` overrides nameRomaji. `note` = evidence/source so future reviews can re-verify.",
+    "policy": "Correct only what a source verifies: official facility sites, city/prefecture tourism pages, Wikipedia, or a reading printed in the name itself — never a guess. Romaji style: Japanese words keep the pipeline's macron-free modified Hepburn (long vowels doubled: Kujuu Hosshou), so corrected and generated names stay consistent; katakana loanwords restore the original Latin word (Samson Hotel, Seaside, Center, Sun Lupinus); particles are lowercase (no).",
+    "curatedBy": "2026-07 full-catalog reading review (161 onsens): session-model review of every generated reading + per-item web verification."
+  },
+  "onsens": {
+    "7": {
+      "name": "貴肌美人　緑の湯",
+      "kana": "きはだびじん　みどりのゆ",
+      "romaji": "Kihada Bijin Midori no Yu",
+      "note": "大川温泉・福岡県公式観光サイトのふりがな「おおかわおんせん　きはだびじん　みどりのゆ」 (crossroadfukuoka.jp/spot/16862)。analyzer read 貴 as たかし."
+    },
+    "10": {
+      "name": "鶴の恩返し よみがえりの宿　鶴霊泉（かくれいせん）",
+      "kana": "つるのおんがえし よみがえりのやど　かくれいせん（かくれいせん）",
+      "romaji": "Tsuru no Ongaeshi Yomigaeri no Yado Kakureisen (Kakureisen)",
+      "note": "鶴霊泉＝かくれいせん — the reading is printed in the name's own parenthetical; analyzer read つるれいせん."
+    },
+    "12": {
+      "name": "嬉泉館",
+      "kana": "きせんかん",
+      "romaji": "Kisenkan",
+      "note": "嬉野温泉 嬉泉館 official site kisenkan.com「嬉野温泉 嬉泉館」; Ureshino tourism assoc. 'Kisenkan' (spa-u.net). analyzer read きいずみだて."
+    },
+    "19": {
+      "name": "サムソンホテル なごみの湯",
+      "romaji": "Samson Hotel Nagomi no Yu",
+      "note": "Official samson-hotel.jp (X @samsonhotel1); named after the owner's boat 'Black Samson'. 平戸たびら温泉."
+    },
+    "24": {
+      "name": "雲仙小地獄温泉館",
+      "kana": "うんぜんこじごくおんせんかん",
+      "romaji": "Unzen Kojigoku Onsenkan",
+      "note": "小地獄温泉館＝こじごくおんせんかん (rurubu.jp/andmore/spot/80039697; 運営元・青雲荘 seiunso.jp/kojigoku). analyzer read しょうじごく."
+    },
+    "29": {
+      "name": "竹瓦温泉",
+      "kana": "たけがわらおんせん",
+      "romaji": "Takegawara Onsen",
+      "note": "竹瓦温泉＝たけがわらおんせん (kotobank; ja.wikipedia; beppu-tourism slug takegawara-onsen). analyzer missed the rendaku がわら."
+    },
+    "32": {
+      "name": "鉄輪むし湯",
+      "kana": "かんなわむしゆ",
+      "romaji": "Kannawa Mushiyu",
+      "note": "鉄輪＝かんなわ (鉄輪温泉公式 kannawaonsen.com; beppu-tourism slug kannawa-mushiyu). analyzer read てつりん."
+    },
+    "34": {
+      "name": "照湯温泉",
+      "kana": "てるゆおんせん",
+      "romaji": "Teruyu Onsen",
+      "note": "照湯温泉＝てるゆおんせん (TNC「照湯温泉(てるゆおんせん)」; beppu-tourism slug teruyu-onsen). analyzer read しょうゆおんいずみ."
+    },
+    "38": {
+      "name": "四の湯温泉",
+      "kana": "しのゆおんせん",
+      "romaji": "Shinoyu Onsen",
+      "note": "別府市観光サイト「四の湯（しのゆ）温泉」slug shinoyu-onsen (beppu-tourism.com); 別府八湯温泉道 第67番. analyzer read 温泉 as おんいずみ."
+    },
+    "43": {
+      "name": "ラムネ温泉館",
+      "romaji": "Lamune Onsenkan",
+      "note": "Official Latin spelling is Lamune: domain lamune-onsen.co.jp, logo assets 'lamune'. 長湯温泉."
+    },
+    "44": {
+      "name": "水神之森温泉",
+      "kana": "すいじんのもりおんせん",
+      "romaji": "Suijin no Mori Onsen",
+      "note": "水神之森＝すいじんのもり (jalan yad388720 kana スイジンノモリ; official suijinnomori.com). 長湯温泉. analyzer read 之 as ゆき."
+    },
+    "60": {
+      "name": "旅館　新清館",
+      "kana": "りょかん　しんせいかん",
+      "romaji": "Ryokan Shinseikan",
+      "note": "新清館＝しんせいかん (rurubu「旅館新清館 りょかんしんせいかん」spot/80041139). 筌の口温泉・九重町. analyzer read しんきよしかん."
+    },
+    "62": {
+      "name": "七里田温泉館",
+      "kana": "しちりだおんせんかん",
+      "romaji": "Shichirida Onsenkan",
+      "note": "七里田＝しちりだ (official しちりだ温泉館 konoha.sichirida-onsen.com; ja.wikipedia 七里田温泉). analyzer missed the rendaku だ."
+    },
+    "64": {
+      "name": "夷谷温泉",
+      "kana": "えびすだにおんせん",
+      "romaji": "Ebisudani Onsen",
+      "note": "夷谷＝えびすだに (rurubu「夷谷温泉 えびすだにおんせん」spot/80040880; ebisudani-spa domain). 豊後高田市. analyzer missed the rendaku だに."
+    },
+    "72": {
+      "name": "亀の甲温泉",
+      "kana": "かめのこうおんせん",
+      "romaji": "Kamenokou Onsen",
+      "note": "亀の甲＝かめのこう (NAVITIME かめのこうおんせん; official kamenokouonsen.com). 菊池市泗水町. analyzer read 甲 as かぶと."
+    },
+    "80": {
+      "name": "豊礼の湯",
+      "kana": "ほうれいのゆ",
+      "romaji": "Hourei no Yu",
+      "note": "豊礼＝ほうれい (tabirai「豊礼の湯（ほうれいのゆ）」; 併設宿 houreinoyuyado.com). わいた温泉郷. analyzer read ゆたかれい."
+    },
+    "88": {
+      "name": "青風荘",
+      "kana": "せいふうそう",
+      "romaji": "Seifuusou",
+      "note": "地獄温泉 青風荘＝せいふうそう — successor of pre-earthquake 清風荘, reading kept (minamiaso.info 'Jigoku Onsen Seifuso'; official booking slug jigoku-seifuso). 南阿蘇. analyzer read あおかぜそう."
+    },
+    "90": {
+      "name": "大洞窟の宿　湯楽亭",
+      "kana": "だいどうくつのやど　ゆらくてい",
+      "romaji": "Daidoukutsu no Yado Yurakutei",
+      "note": "日本秘湯を守る会のふりがな「だいどうくつのやど　ゆらくてい」 (hitou.or.jp providerId=666). 上天草. analyzer read おおほらくつ."
+    },
+    "95": {
+      "name": "青井岳温泉",
+      "kana": "あおいだけおんせん",
+      "romaji": "Aoidake Onsen",
+      "note": "青井岳＝あおいだけ (official domain aoidake.com; the mountain 青井岳). 都城市山之口. analyzer read あおいがく."
+    },
+    "96": {
+      "name": "べっぴんの湯の宿　丸新荘",
+      "kana": "べっぴんのゆのやど　まるしんそう",
+      "romaji": "Beppin no Yu no Yado Marushinsou",
+      "note": "荘 in inn names reads そう (cf. 山荘・別荘); analyzer emitted じょう. 平山温泉・山鹿."
+    },
+    "99": {
+      "name": "湯之元温泉",
+      "kana": "ゆのもとおんせん",
+      "romaji": "Yunomoto Onsen",
+      "note": "湯之元温泉＝ゆのもとおんせん (official yunomoto.org; townmiyazaki.ne.jp「湯之元温泉（ゆのもとおんせん）」). 高原町. analyzer read ゆゆきげんおんいずみ."
+    },
+    "104": {
+      "name": "霧島ホテル",
+      "romaji": "Kirishima Hotel",
+      "note": "霧島 is one proper noun (analyzer split 'Kiri Shima'); ホテル→Hotel (loanword)."
+    },
+    "105": {
+      "name": "霧島湯之谷山荘",
+      "romaji": "Kirishima Yunotani Sansou",
+      "note": "霧島 is one proper noun (analyzer split 'Kiri Shima')."
+    },
+    "106": {
+      "name": "霧島新燃荘",
+      "kana": "きりしましんもえそう",
+      "romaji": "Kirishima Shinmoesou",
+      "note": "新燃荘＝しんもえそう (@nifty温泉「霧島新燃荘(きりしましんもえそう)」onsen004792; 新燃岳＝しんもえだけ). analyzer read しんねんそう."
+    },
+    "115": {
+      "name": "城山長寿泉",
+      "kana": "しろやまちょうじゅせん",
+      "romaji": "Shiroyama Choujusen",
+      "note": "鹿児島県観光サイトの読み「城山長寿泉（シロヤマチョウジュセン）」 (kagoshima-kankou.com/guide/53460). analyzer read 泉 as いずみ."
+    },
+    "116": {
+      "name": "桜島シーサイドホテル",
+      "kana": "さくらじましーさいどほてる",
+      "romaji": "Sakurajima Seaside Hotel",
+      "note": "桜島＝さくらじま; Latin per booking/rurubu 'Sakurajima Seaside Hotel'. analyzer read さくらしま + romanized the loanword."
+    },
+    "127": {
+      "name": "浜之市ふれあいセンター富の湯",
+      "kana": "はまのいちふれあいせんたーとみのゆ",
+      "romaji": "Hamanoichi Fureai Center Tomi no Yu",
+      "note": "浜之市＝はまのいち (kotobank 浜之市村, 隼人町真孝); 富の湯＝とみのゆ (きりなび slug tominoyu). analyzer read はまゆきし."
+    },
+    "135": {
+      "name": "コスモス温泉",
+      "romaji": "Cosmos Onsen",
+      "note": "コスモス → Cosmos (loanword)."
+    },
+    "137": {
+      "name": "白鳥温泉上湯",
+      "kana": "しらとりおんせんうえゆ",
+      "romaji": "Shiratori Onsen Ueyu",
+      "note": "えびの市公式「白鳥温泉上湯(しらとりおんせんうえゆ)」 (city.ebino.lg.jp .../1758.html; official shiratori-onsen.com). analyzer read はくちょう."
+    },
+    "138": {
+      "name": "白鳥温泉下湯",
+      "kana": "しらとりおんせんしたゆ",
+      "romaji": "Shiratori Onsen Shitayu",
+      "note": "えびの市公式「白鳥温泉下湯(しらとりおんせんしたゆ)」 (city.ebino.lg.jp .../1553.html). analyzer read はくちょう…しもゆ."
+    },
+    "140": {
+      "name": "江之島温泉　共同浴場",
+      "kana": "えのしまおんせん　きょうどうよくじょう",
+      "romaji": "Enoshima Onsen Kyoudou Yokujou",
+      "note": "江之島＝えのしま (垂水市公式「江之島温泉（えのしまおんせん）」; sento47.com えのしまおんせんきょうどうよくじょう). analyzer read こうゆきしま."
+    },
+    "142": {
+      "name": "田之湯温泉",
+      "kana": "たのゆおんせん",
+      "romaji": "Tanoyu Onsen",
+      "note": "鹿児島県観光サイトの読み「田之湯温泉（タノユオンセン）」 (kagoshima-kankou.com/guide/53353). 日置市東市来. analyzer read たゆきゆおんいずみ."
+    },
+    "148": {
+      "name": "はさみ温泉 湯治楼",
+      "kana": "はさみおんせん ゆうじろう",
+      "romaji": "Hasami Onsen Yuujirou",
+      "note": "湯治楼＝ゆうじろう (ゆる～と「はさみ温泉 湯治楼（ゆうじろう）」yuru-to.net oid=1108; naradewa.com). analyzer read とうじろう."
+    },
+    "151": {
+      "name": "川の駅船小屋　恋ぼたる　温泉館",
+      "kana": "かわのえきふなごや　こいぼたる　おんせんかん",
+      "romaji": "Kawa no Eki Funagoya Koibotaru Onsenkan",
+      "note": "船小屋温泉＝ふなごや (ja.wikipedia 船小屋温泉; JR筑後船小屋駅＝ちくごふなごや). analyzer read ふねこや."
+    },
+    "155": {
+      "name": "京町観光ホテル",
+      "romaji": "Kyoumachi Kankou Hotel",
+      "note": "ホテル → Hotel (loanword); 京町観光＝きょうまちかんこう was already right."
+    },
+    "157": {
+      "name": "湯泉郷 温泉館 湯招花",
+      "kana": "とうせんきょう おんせんかん とうしょうか",
+      "romaji": "Tousenkyou Onsenkan Toushouka",
+      "note": "公式サイトに「湯泉郷 温泉館 湯招花（とうせんきょう おんせんかん とうしょうか）」 (toshoka.net, ©TOSHOKA). 佐賀市富士町・熊の川温泉. analyzer read ゆぜんさと…ゆしょうはな."
+    },
+    "161": {
+      "name": "丹生温泉施設 和みの湯",
+      "kana": "にゅうおんせんしせつ なごみのゆ",
+      "romaji": "Nyuu Onsen Shisetsu Nagomi no Yu",
+      "note": "大分市の地名 丹生＝にゅう (mapion よみがな「にゅうおんせん」; 運営法人 o-fukushi.net 'Nyu onsen'). analyzer read たんじょう."
+    },
+    "162": {
+      "name": "九重星生ホテル",
+      "kana": "くじゅうほっしょうほてる",
+      "romaji": "Kujuu Hosshou Hotel",
+      "note": "日本旅館協会「九重星生ホテル くじゅうほっしょうほてる」 (ryokan.or.jp/inn/77720); official hosshouhotel.co.jp, EN 'Kuju Hossho Hotel'. analyzer read ここのえほしなま."
+    },
+    "164": {
+      "name": "喜道庵",
+      "kana": "きどうあん",
+      "romaji": "Kidouan",
+      "note": "長崎温泉 喜道庵 official kidoan.com「長崎温泉 喜道庵【公式】」(長与町). analyzer read きみちいおり."
+    },
+    "165": {
+      "name": "HOTEL シーサイド島原",
+      "kana": "ほてるしーさいどしまばら",
+      "romaji": "Hotel Seaside Shimabara",
+      "note": "Official seaside-shimabara.com; rurubu 'Hotel Seaside Shimabara'. The generated kana kept ASCII 'HOTEL' — the yomi is ほてる."
+    },
+    "167": {
+      "name": "ホテルグランスパアベニュー 幸楽の湯",
+      "romaji": "Hotel Grand Spa Avenue Kouraku no Yu",
+      "note": "Latin 'Grand Spa Avenue' per APA partner booking page + own Instagram @hotel_grandspa_avenue; 幸楽の湯＝こうらくのゆ (sauna-ikitai). 朝倉市."
+    },
+    "169": {
+      "name": "旅館ふくせんか みるきいの湯",
+      "romaji": "Ryokan Fukusenka Milky no Yu",
+      "note": "みるきい ＝ the loanword milky; analyzer fused the particle ('Mirukiino Yu')."
+    },
+    "176": {
+      "name": "屋久島 尾之間温泉",
+      "kana": "やくしま おのあいだおんせん",
+      "romaji": "Yakushima Onoaida Onsen",
+      "note": "尾之間＝おのあいだ (ja.wikipedia「尾之間温泉（おのあいだおんせん）」). analyzer read おゆきかん."
+    },
+    "183": {
+      "name": "旅館 幸ケ丘",
+      "kana": "りょかん さちがおか",
+      "romaji": "Ryokan Sachigaoka",
+      "note": "幸ケ丘＝さちがおか (純温泉協会 realonsen.com/ryokan-sachigaoka; kumagary slug satigaoka). 日奈久温泉・八代. analyzer read さちけおか."
+    },
+    "188": {
+      "name": "別府のお宿　加賀屋",
+      "romaji": "Beppu no Oyado Kagaya",
+      "note": "analyzer fused の＋お as 'Noo' ('Beppu Noo Yado')."
+    },
+    "189": {
+      "name": "新冨町温泉健康センター「サン・ルピナス」",
+      "kana": "しんとみちょうおんせんけんこうせんたー「さん・るぴなす」",
+      "romaji": "Shintomichou Onsen Kenkou Center (Sun Lupinus)",
+      "note": "新富町＝しんとみちょう (ja.wikipedia); official sun-lupinus.com (Instagram @sunlupinus23) → Sun Lupinus. analyzer read しんとみまち + romanized the loanword."
+    },
+    "193": {
+      "name": "新青山荘",
+      "kana": "しんせいざんそう",
+      "romaji": "Shinseizansou",
+      "note": "新青山荘＝しんせいざんそう (official shinseizansou.jp; @nifty温泉「山鹿温泉 新青山荘（しんせいざんそう）」). analyzer read しんあおやまそう."
+    },
+    "200": {
+      "name": "加久藤温泉",
+      "romaji": "Kakutou Onsen",
+      "note": "加久藤＝かくとう is one place name (えびの市); analyzer split it 'Ka Kutou'. The kana was already right."
+    },
+    "202": {
+      "name": "瀧日和",
+      "kana": "たきびより",
+      "romaji": "Takibiyori",
+      "note": "垂玉温泉 瀧日和＝たきびより (official Instagram @tarutama_onsen_takibiyori; tarutama.jp). analyzer missed the rendaku びより."
+    },
+    "205": {
+      "name": "ほのかの湯　加江田店",
+      "kana": "ほのかのゆ　かえだてん",
+      "romaji": "Honoka no Yu Kaeda-ten",
+      "note": "加江田＝かえだ (official honokanoyu.com/kaeda; 宮崎市の地名・加江田川). analyzer read かえたみせ."
+    },
+    "217": {
+      "name": "テイエム牧場温泉",
+      "romaji": "TM Bokujou Onsen",
+      "note": "テイエム ＝ TM (鹿児島市EN観光ガイド 'TM Ranch Hot Springs'; 垂水市slug tmbokuzyo)."
+    },
+    "218": {
+      "name": "ニュー筑水荘",
+      "romaji": "New Chikusuisou",
+      "note": "ニュー → New (loanword)."
+    },
+    "219": {
+      "name": "奥壱岐の千年湯　平山旅館",
+      "kana": "おくいきのせんねんゆ　ひらやまりょかん",
+      "romaji": "Oku Iki no Sennenyu Hirayama Ryokan",
+      "note": "壱岐＝いき (the island 壱岐島; the ryokan is on Iki). analyzer read いちし."
+    },
+    "220": {
+      "name": "雲海薬師温泉",
+      "kana": "うんかいやくしおんせん",
+      "romaji": "Unkai Yakushi Onsen",
+      "note": "薬師＝やくし (薬師如来 — the standard reading in onsen names). analyzer read くすりし."
+    },
+    "229": {
+      "name": "永石温泉",
+      "kana": "なげしおんせん",
+      "romaji": "Nageshi Onsen",
+      "note": "大分県公式観光サイト「市営 永石温泉（なげしおんせん）」 (visit-oita.jp/spots/detail/6102; 由来は弘法大師の投石). analyzer read ながいし."
+    },
+    "235": {
+      "name": "十三奉行（じゅさぶろ）温泉",
+      "kana": "じゅさぶろ（じゅさぶろ）おんせん",
+      "romaji": "Jusaburo (Jusaburo) Onsen",
+      "note": "十三奉行＝じゅさぶろ — the reading is printed in the name's own parenthetical; analyzer read じゅうさんぶぎょう."
+    },
+    "236": {
+      "name": "砂むし会館「砂楽」",
+      "kana": "すなむしかいかん「さらく」",
+      "romaji": "Sunamushi Kaikan (Saraku)",
+      "note": "砂楽＝さらく (指宿市観光協会「砂楽（さらく）」— 鹿児島弁で歩き回る意; official ibusuki-saraku.jp). analyzer read すならく."
+    },
+    "238": {
+      "name": "宗像王丸 天然温泉 やまつばさ",
+      "romaji": "Munakata Oumaru Tennen Onsen Yamatsubasa",
+      "note": "王丸＝おうまる is one place name (宗像市王丸); analyzer split it 'Ou Maru'."
+    },
+    "239": {
+      "name": "ホテル花景色 虹の湯",
+      "kana": "ほてるはなげしき にじのゆ",
+      "romaji": "Hotel Hanageshiki Niji no Yu",
+      "note": "花景色＝はなげしき (official domain hanagesiki.jp; rurubu 'Hotel Hanageshiki'). 筑後川温泉・うきは市. analyzer read はなけしき unvoiced."
+    },
+    "241": {
+      "name": "ホテル アマンディ",
+      "romaji": "Hotel Amandi",
+      "note": "Official nagasaki.amandi.jp「ホテルAmandi（アマンディ）」. 稲佐山温泉."
+    },
+    "243": {
+      "name": "湯亭 上弦の月",
+      "kana": "ゆてい じょうげんのつき",
+      "romaji": "Yutei Jougen no Tsuki",
+      "note": "上弦の月＝じょうげんのつき (月＝がつ only in month names); analyzer read がつ."
+    },
+    "246": {
+      "name": "青島フィッシャーマンズ ビーチサイド ホステル&スパ「神話の湯」",
+      "romaji": "Aoshima Fisherman's Beachside Hostel & Spa (Shinwa no Yu)",
+      "note": "Official aoshima-hostel.com — Aoshima Fisherman's Beachside Hostel & Spa."
+    },
+    "249": {
+      "name": "新湯温泉旅館",
+      "kana": "しんゆおんせんりょかん",
+      "romaji": "Shinyu Onsen Ryokan",
+      "note": "日置市吹上の新湯温泉＝しんゆ (yukoyuko.net/onsen/0332; official shinyuonsen.com). analyzer read あらゆ (the Tochigi 新湯's reading)."
+    },
+    "250": {
+      "name": "山川砂むし温泉「砂湯里」",
+      "kana": "やまかわすなむしおんせん「さゆり」",
+      "romaji": "Yamakawa Sunamushi Onsen (Sayuri)",
+      "note": "砂湯里＝さゆり (指宿市観光協会「砂湯里～さゆり～」); facility-level sources read 山川＝やまかわ (kagoshima-kankou EN 'Yamakawa…Sayuri'; 秘湯宿.com やまかわすなむしおんせん). analyzer read すなゆさと."
+    },
+    "254": {
+      "name": "雲仙福田屋/山照別邸",
+      "kana": "うんぜんふくだや/やまてらすべってい",
+      "romaji": "Unzen Fukudaya / Yamaterasu Bettei",
+      "note": "別邸「山照」＝やまてらす — official fukudaya.co.jp annex page 'yamaterrace' (照らす×terrace wordplay); gltjp.com 'Yamaterasu bettei'. analyzer read やましょう."
+    },
+    "256": {
+      "name": "下田温泉センター白鷺館",
+      "romaji": "Shimoda Onsen Center Shirasagikan",
+      "note": "センター → Center (loanword); 白鷺館＝しらさぎかん is one word."
+    },
+    "258": {
+      "name": "大分キャセイホテル",
+      "romaji": "Ooita Cathay Hotel",
+      "note": "キャセイ ＝ Cathay (official cathay-hotel.com)."
+    },
+    "259": {
+      "name": "まるた屋温泉西方の湯",
+      "kana": "まるたやおんせんさいほうのゆ",
+      "romaji": "Marutaya Onsen Saihou no Yu",
+      "note": "西方の湯＝さいほうのゆ (ekitan ふりがな「さいほうのゆ」; own Instagram @saihonoyu_official). 大分市. analyzer read せいほう."
+    },
+    "262": {
+      "name": "天然温泉サンチェリーきたごう",
+      "romaji": "Tennen Onsen Sun Cherry Kitagou",
+      "note": "サンチェリー ＝ Sun Cherry (旧公式 suncherry-kitago.com; ロゴ 'SUN CHERRY 北郷'). 日南市北郷."
+    },
+    "263": {
+      "name": "紫尾湯の宿くすのき",
+      "kana": "しびゆのやどくすのき",
+      "romaji": "Shibi Yu no Yado Kusunoki",
+      "note": "紫尾＝しび (official shibiyunoyado-kusunoki.jp「紫尾温泉 湯の宿 くすのき」; 紫尾神社). さつま町. analyzer read むらさきお."
+    },
+    "264": {
+      "name": "たまて箱温泉ヘルシーランド露天風呂",
+      "romaji": "Tamatebako Onsen Healthy Land Rotenburo",
+      "note": "ヘルシーランド ＝ Healthy Land (指宿市の公園施設のEN表記); たまて箱温泉 is one name 'Tamatebako'."
+    }
+  }
+}

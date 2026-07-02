@@ -23,16 +23,26 @@ is modified Hepburn, macron-free (pykakasi's default — long vowels stay double
 e.g. ou/oo). See app PR PetrCala/kyuhachi#183.
 
 Locked decisions (do not re-litigate — see CLAUDE.md):
-  * **Auto-generated, no hand-correction.** Some proper-noun / place-name
-    readings will be imperfect (e.g. 嬉泉館 → きいずみだて); that is the agreed
-    tradeoff for keeping readings in the automated pipeline.
+  * **Auto-generated + curated corrections overlay.** pykakasi authors every
+    reading by default; where it misreads a proper noun (e.g. 嬉泉館 →
+    きいずみだて instead of きせんかん) the verified reading lives in
+    `data/readings_curated.json` and wins via `kana_for()`/`romaji_for()` — the
+    same per-id override pattern as `fees.CORRECTIONS`. Every entry records its
+    evidence in a `note`. Corrections are curated against sources (official
+    sites, tourism pages), never invented.
   * **Onsens only** — area names are never given readings.
 
-Both `name_kana()` and `name_romaji()` import pykakasi lazily, so importing this
-module (and `onsen_scraper`) stays dependency-free until a reading is actually
-generated — the same lazy discipline the fetcher/parser use for requests/bs4.
+`kana_for()`/`romaji_for()` are the id-aware entry points the publisher uses
+(backfills and `apply.py` add); `name_kana()`/`name_romaji()` stay analyzer-only.
+Both import pykakasi lazily, so importing this module (and `onsen_scraper`)
+stays dependency-free until a reading is actually generated — the same lazy
+discipline the fetcher/parser use for requests/bs4.
 """
 from __future__ import annotations
+
+import json
+import warnings
+from pathlib import Path
 
 # Katakana syllable block → hiragana is a fixed −0x60 offset (U+30A1‥U+30F6 →
 # U+3041‥U+3096). The prolonged sound mark ー (U+30FC), middle dot ・ (U+30FB)
@@ -42,7 +52,10 @@ _KATAKANA_START = 0x30A1
 _KATAKANA_END = 0x30F6
 _FOLD_OFFSET = 0x60
 
+_CURATED_PATH = Path(__file__).resolve().parents[1] / "data" / "readings_curated.json"
+
 _analyzer_cache = None
+_curated_cache = None
 
 
 def to_hiragana(text: str) -> str:
@@ -116,3 +129,62 @@ def name_romaji(name: str | None) -> str | None:
     hepburn = " ".join(token["hepburn"] for token in _analyzer().convert(name))
     romaji = " ".join(word[:1].upper() + word[1:] for word in hepburn.split())
     return romaji or None
+
+
+# --- curated corrections overlay ----------------------------------------------
+
+def curated_readings() -> dict:
+    """The `onsens` map of data/readings_curated.json, loaded once.
+
+    Keyed by upstream 88onsen id (string); each entry carries the facility
+    `name` it was curated against, the verified `kana` and/or `romaji`, and a
+    `note` recording the evidence so future reviews can re-verify."""
+    global _curated_cache
+    if _curated_cache is None:
+        _curated_cache = json.loads(_CURATED_PATH.read_text())["onsens"]
+    return _curated_cache
+
+
+def _curated_entry(onsen_id, name: str | None):
+    """The overlay entry for *onsen_id*, or None when absent or stale.
+
+    An entry only applies while the snapshot still carries the exact name it
+    was curated against (upstream hids are unstable and names drift); on a
+    mismatch it is ignored with a warning so the analyzer fallback — never a
+    stale correction — is what gets published."""
+    entry = curated_readings().get(str(onsen_id))
+    if not entry:
+        return None
+    if name is None or entry.get("name", "").strip() != name.strip():
+        warnings.warn(
+            f"readings_curated.json entry {onsen_id} was curated for "
+            f"{entry.get('name')!r} but the snapshot name is {name!r} — "
+            "ignoring the stale override (analyzer fallback applies); re-verify the entry.",
+            stacklevel=3,
+        )
+        return None
+    return entry
+
+
+def kana_for(onsen_id, name: str | None) -> str | None:
+    """Hiragana reading for an onsen, curated override first, else `name_kana`.
+
+    The id-aware entry point the publisher uses (`backfill_name_kana.py` and
+    `apply.py` add). The override is folded through `to_hiragana` so a curated
+    value can never break the app's gojūon sort contract."""
+    entry = _curated_entry(onsen_id, name)
+    if entry and entry.get("kana"):
+        return to_hiragana(entry["kana"]).strip()
+    return name_kana(name)
+
+
+def romaji_for(onsen_id, name: str | None) -> str | None:
+    """Romaji reading for an onsen, curated override first, else `name_romaji`.
+
+    Curated romaji restores the original Latin word for katakana loanwords
+    (サムソンホテル → "Samson Hotel", never "Samusonhoteru") and fixes
+    mis-segmented proper nouns; otherwise the analyzer's modified Hepburn."""
+    entry = _curated_entry(onsen_id, name)
+    if entry and entry.get("romaji"):
+        return entry["romaji"].strip()
+    return name_romaji(name)

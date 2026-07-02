@@ -2,7 +2,7 @@
 the /map seed + detail scrape + curated hours + generated reading.
 
 Fully offline: the network sources (map seed, detail fetch) and the reading
-generator are monkeypatched, and the dry-run path (tok=None) performs no Firestore
+resolvers are monkeypatched, and the dry-run path (tok=None) performs no Firestore
 or Storage write — so nothing here scrapes, authenticates, or writes."""
 import sys
 from pathlib import Path
@@ -35,7 +35,8 @@ def patched(monkeypatch):
     monkeypatch.setattr(apply, "curated_hours", lambda: {"999": dict(_OPEN_ALL)})
     monkeypatch.setattr(apply, "fetch_detail_page", lambda hid: "<html/>")
     monkeypatch.setattr(apply, "parse_detail_page", lambda html, hid: dict(FAKE_DETAIL))
-    monkeypatch.setattr(apply, "name_kana", lambda name: "てすとゆ")
+    monkeypatch.setattr(apply, "kana_for", lambda hid, name: "てすとゆ")
+    monkeypatch.setattr(apply, "romaji_for", lambda hid, name: "Tesuto Yu")
     monkeypatch.setitem(apply.IDMAP, "999", "kid-999")
 
 

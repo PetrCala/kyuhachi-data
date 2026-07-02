@@ -2,17 +2,31 @@
 yomi, `nameRomaji` Hepburn) the catalog publisher writes for the app: the kana is
 the gojūon sort key, the romaji a pronunciation aid for non-Japanese users.
 
+The readings are analyzer-generated with a curated corrections overlay
+(data/readings_curated.json): `kana_for`/`romaji_for` prefer a verified per-id
+override and fall back to pykakasi. Tested here: the fold contract, the analyzer
+fallback, the overlay winning, its staleness guard, and the publisher plans
+carrying the overlay.
+
 `to_hiragana` is pure stdlib and always tested. The analyzer-backed `name_kana` /
 `name_romaji` and the publisher plans need pykakasi (a declared dependency); those
 tests `importorskip` it so a bare environment still runs the fold tests. Offline
 throughout — no network, no auth, no writes.
 """
+import sqlite3
 import sys
 from pathlib import Path
 
 import pytest
 
-from onsen_scraper.readings import name_kana, name_romaji, to_hiragana
+from onsen_scraper.readings import (
+    curated_readings,
+    kana_for,
+    name_kana,
+    name_romaji,
+    romaji_for,
+    to_hiragana,
+)
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "publisher"))
@@ -111,6 +125,86 @@ def test_name_romaji_capitalises_each_word():
         assert romaji is not None
         for word in romaji.split(" "):
             assert word[:1] == word[:1].upper(), romaji
+
+
+# --- curated corrections overlay (data/readings_curated.json) ----------------
+
+def _snapshot_name(oid: int) -> str:
+    con = sqlite3.connect(f"file:{REPO / 'data' / 'snapshot.db'}?mode=ro", uri=True)
+    try:
+        row = con.execute("select facility_name from onsens where id=?", (oid,)).fetchone()
+    finally:
+        con.close()
+    assert row, f"onsen {oid} not in snapshot"
+    return row[0]
+
+
+def test_curated_entries_are_wellformed_and_match_snapshot():
+    # Every entry: a digit key that is a snapshot onsen, a `name` that still
+    # matches the snapshot (the staleness guard the resolver enforces), a `note`
+    # recording the evidence, and at least one of kana/romaji. A curated kana
+    # must honor the hiragana contract: fold-idempotent, no kanji.
+    entries = curated_readings()
+    assert entries, "overlay file exists but has no entries"
+    for key, entry in entries.items():
+        assert key.isdigit(), key
+        assert entry.get("note"), f"{key}: every correction records its evidence"
+        assert entry.get("kana") or entry.get("romaji"), key
+        assert _snapshot_name(int(key)).strip() == entry["name"].strip(), (
+            f"{key}: snapshot name drifted from the curated entry — re-verify it")
+        kana = entry.get("kana")
+        if kana:
+            assert kana == to_hiragana(kana), f"{key}: curated kana must be hiragana"
+            assert not any(0x4E00 <= ord(ch) <= 0x9FFF for ch in kana), (
+                f"{key}: kanji left in curated kana")
+
+
+def test_overlay_wins_and_analyzer_remains_the_fallback():
+    pytest.importorskip("pykakasi")
+    # The override wins for every curated entry...
+    for key, entry in curated_readings().items():
+        if entry.get("kana"):
+            assert kana_for(int(key), entry["name"]) == entry["kana"].strip()
+        if entry.get("romaji"):
+            assert romaji_for(int(key), entry["name"]) == entry["romaji"].strip()
+    # ...and an uncorrected onsen still gets the analyzer reading, byte-for-byte.
+    assert "1" not in curated_readings()
+    assert kana_for(1, "博多湯") == name_kana("博多湯") == "はかたゆ"
+    assert romaji_for(1, "博多湯") == name_romaji("博多湯") == "Hakata Yu"
+
+
+def test_confirmed_misreads_are_corrected():
+    pytest.importorskip("pykakasi")
+    # The review's seed examples, verified against official/tourism sources.
+    assert kana_for(164, _snapshot_name(164)) == "きどうあん"            # 喜道庵
+    assert kana_for(12, _snapshot_name(12)) == "きせんかん"              # 嬉泉館
+    assert kana_for(7, _snapshot_name(7)) == "きはだびじん　みどりのゆ"  # 貴肌美人　緑の湯
+    assert kana_for(32, _snapshot_name(32)) == "かんなわむしゆ"          # 鉄輪むし湯
+    # Katakana loanwords romanize back to the original Latin words.
+    assert romaji_for(19, _snapshot_name(19)) == "Samson Hotel Nagomi no Yu"
+    assert romaji_for(116, _snapshot_name(116)) == "Sakurajima Seaside Hotel"
+
+
+def test_stale_override_is_ignored_with_warning():
+    pytest.importorskip("pykakasi")
+    # Upstream hids are unstable: if the snapshot name no longer matches what the
+    # entry was curated against, the override must NOT apply.
+    with pytest.warns(UserWarning, match="stale"):
+        assert kana_for(12, "全く別の施設名") == name_kana("全く別の施設名")
+
+
+def test_backfill_plans_reflect_the_overlay():
+    pytest.importorskip("pykakasi")
+    import backfill_name_kana as bk  # noqa: E402  (publisher/ is non-package)
+    import backfill_name_romaji as br  # noqa: E402
+
+    kana_plan = {oid: kana for oid, _kid, _name, kana in bk.build_plan()}
+    romaji_plan = {oid: romaji for oid, _kid, _name, romaji in br.build_plan()}
+    for key, entry in curated_readings().items():
+        if entry.get("kana"):
+            assert kana_plan[int(key)] == entry["kana"].strip()
+        if entry.get("romaji"):
+            assert romaji_plan[int(key)] == entry["romaji"].strip()
 
 
 # --- publisher backfill plans (offline, over the snapshot) -------------------

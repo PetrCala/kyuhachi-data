@@ -47,9 +47,9 @@ sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
 from onsen_scraper import (  # noqa: E402
     fee_for,
     fetch_detail_page,
-    name_kana,
-    name_romaji,
+    kana_for,
     parse_detail_page,
+    romaji_for,
 )
 import catalog_diff as cd  # noqa: E402
 import image_processor as ip  # noqa: E402  (publisher/image_processor.py — photo rehosting)
@@ -267,8 +267,8 @@ def build_add(hid: int, tok: str | None):
     adult = fee_for(hid, live.get("admission_fee"))[0]
     fields = {
         "name": sval(name),
-        "nameKana": sval(name_kana(name)),
-        "nameRomaji": sval(name_romaji(name)),
+        "nameKana": sval(kana_for(hid, name)),
+        "nameRomaji": sval(romaji_for(hid, name)),
         "areaName": sval(seed.get("areaName")),
         "address": sval(live.get("address") or seed.get("address")),
         "prefecture": sval(live.get("prefecture")),

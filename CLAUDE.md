@@ -23,8 +23,11 @@ concerns here, or catalog/id concerns into the app repo.
 - **Be a polite scraper.** Delay, exponential backoff, browser UA. Sample, don't hammer.
 - **The regex never authors hours.** The published weekly schedule comes only from the
   LLM-curated hours, never from the fallback parser.
-- **Name readings are generated, never hand-edited.** Each onsen's `nameKana` reading
-  has no upstream source — it's machine-generated and folded to **hiragana**, the hard
+- **Name readings are generated + a curated corrections overlay.** Each onsen's
+  reading has no upstream source — pykakasi authors it by default, and verified
+  per-onsen corrections live in `data/readings_curated.json` (applied everywhere
+  readings are published via `kana_for`/`romaji_for`; every entry records its
+  evidence in a `note`). `nameKana` is always folded to **hiragana**, the hard
   contract the app's gojūon name sort relies on (katakana/kanji/romaji would break it).
 - **Visit, not soak/bank.** The unit of challenge progress is a **visit** — the app's
   challenge model is "completion = unique eligible *visits* ≥ 88" (see the
