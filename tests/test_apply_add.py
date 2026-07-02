@@ -44,6 +44,7 @@ def test_build_add_matches_onsen_doc_contract(patched):
     fields, _summary = apply.build_add(999, tok=None)   # dry-run: no upload / version read
     fields["createdAt"] = {"timestampValue": "t"}        # added by apply_decision
     fields["updatedAt"] = {"timestampValue": "t"}
+    fields["dataVerifiedAt"] = {"timestampValue": "t"}
     assert set(fields) == apply.ONSEN_DOC_KEYS           # exact OnsenDocument shape
 
     assert fields["name"] == {"stringValue": "テスト湯"}
@@ -97,3 +98,4 @@ def test_add_decision_dry_run_previews_without_writing(patched, capsys):
     assert "ADD (new onsen)" in out
     assert "would create" in out
     assert "created." not in out
+    assert "dataVerifiedAt" in out                        # stamped at the same instant as createdAt

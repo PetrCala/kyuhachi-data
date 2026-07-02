@@ -7,7 +7,7 @@ deletes an onsen, and never touches /users/**.
 
 It is driven by a reviewed *decisions* file (one adjudicated change per onsen):
   - {"hid": N, "action": "update"} → fetch the live page and merge the changed
-    MATERIAL fields (+ updatedAt) into /onsens/{kyuhachiId}.
+    MATERIAL fields (+ updatedAt + dataVerifiedAt) into /onsens/{kyuhachiId}.
   - {"hid": N, "action": "retire"} → set isActive:false (+ updatedAt). Onsen
     docs are never deleted; existing visits + frozen challenge snapshots keep
     counting.
@@ -17,6 +17,14 @@ It is driven by a reviewed *decisions* file (one adjudicated change per onsen):
     create (vs PATCH) write; idempotent (skips if the doc already exists) and gated.
     Requires a minted kyuhachiId (catalog-sync mint) and a curated-hours entry.
   - {"hid": N, "action": "skip"}   → no-op (explicitly reviewed, no change).
+
+`dataVerifiedAt` is the app's freshness cue ("data last verified 2026-06"): both
+`update` and `add` re-fetch the live detail page before writing, so the run's own
+`now` genuinely is the moment this onsen's data was confirmed against the source —
+the same timestamp already used for `updatedAt`/`createdAt`. Onsens that already
+exist in the catalog get their *first* `dataVerifiedAt` from the one-time
+`publisher/backfill_data_verified_at.py` (seeded from `data/snapshot.db`'s
+per-row `scraped_at`); every `apply.py` write after that keeps it current.
 
 The decisions file is normally scaffolded from a catalog-diff changelog.json
 (--from-changelog), then hand-reviewed before applying.
@@ -233,6 +241,7 @@ ONSEN_DOC_KEYS = {
     "name", "nameKana", "nameRomaji", "areaName", "address", "prefecture", "lat", "lng",
     "phone", "businessHours", "admissionFee", "adultFee", "springQuality", "websiteUrl",
     "imageUrl", "blurhash", "isActive", "catalogVersion", "createdAt", "updatedAt",
+    "dataVerifiedAt",
 }
 
 
@@ -309,6 +318,7 @@ def apply_decision(d: dict, now: str, tok: str | None, commit: bool) -> None:
             print(f"    {k}: {v!r}")
         fields["createdAt"] = {"timestampValue": now}
         fields["updatedAt"] = {"timestampValue": now}
+        fields["dataVerifiedAt"] = {"timestampValue": now}
         validate_add_schema(fields, tok)
         if commit:
             create("onsens", kid, fields, tok)
@@ -328,6 +338,8 @@ def apply_decision(d: dict, now: str, tok: str | None, commit: bool) -> None:
             return
         fields["updatedAt"] = {"timestampValue": now}
         mask.append("updatedAt")
+        fields["dataVerifiedAt"] = {"timestampValue": now}
+        mask.append("dataVerifiedAt")
         print(f"hid {hid} → /onsens/{kid}  UPDATE   # {note}")
         for pf, old, new in summary:
             print(f"    {pf}:  {old!r}\n           → {new!r}")
