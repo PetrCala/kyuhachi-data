@@ -20,6 +20,7 @@ What's in place:
 | **`kyuhachiId` assignment for new onsens** — mints UUIDs, writes `onsen-id-map.json` (human-gated) | `catalog-sync mint` |
 | **New-onsen name + coordinates** baselined as complete rows | `catalog-sync promote` (overlays the map-seed columns) |
 | Surgical, changelog-driven publisher — `--from-changelog` scaffolds `decisions.json`; `--decisions [--commit]` MERGE-PATCHes only named fields; `update` / `retire` (→ `isActive:false`) / `skip`; never deletes, dry-run by default | `publisher/apply.py` |
+| **Shared Firestore REST helpers** — `token` / `_open` / `patch` / `get_fields` / `sval` / `ival` / `dval` / `bval` / `create` / `bump_catalog_version` extracted once, no longer copy-pasted across `apply.py` + the four `backfill_*.py` scripts | `publisher/firestore_rest.py` |
 | Numeric `adultFee` — shared parser + publish-time recompute hook + one-time backfill | `onsen_scraper/fees.py`, `apply.py` `build_update()`, `publisher/backfill_fees.py` |
 | `営業時間` → `WeeklySchedule` — LLM-curated `data/hours_curated.json` is the source of truth; `backfill_schedule.py --from-curated` owns the published `businessHours.schedule` + `exceptions` + `confidence`; `recurate-hours` skill refreshes drifted hours | `onsen_scraper/hours.py`, `publisher/backfill_schedule.py`, `.claude/skills/recurate-hours/` |
 | Generated `nameKana` (hiragana reading, gojūon sort key) — auto + curated corrections overlay (`data/readings_curated.json`, evidence per entry); consumed by app PR kyuhachi#143 | `onsen_scraper/readings.py`, `publisher/backfill_name_kana.py` |
@@ -28,15 +29,15 @@ What's in place:
 | **GitHub-native automation** — monthly `catalog-detect` cron → `catalog-drift` issue → human-prepared `catalog-publish` PR → `catalog-dry-run` posts the live Firestore diff → merge gates the write behind a `production` environment approval | `.github/workflows/{catalog-detect,catalog-dry-run,catalog-publish}.yml`, `.github/CATALOG_AUTOMATION.md` |
 | Cost estimator (read-only admission-fee Monte Carlo + bounds) | `.claude/skills/cost-analysis/` |
 
-Data: `data/snapshot.db` = 148 onsens (raw fields + `raw_html`); `data/onsen-id-map.json` =
-148 `hid`→`kyuhachiId`. Live catalog carries `admissionFee` (text) + `adultFee` (numeric yen),
+Data: `data/snapshot.db` = 161 onsens (raw fields + `raw_html`); `data/onsen-id-map.json` =
+161 `hid`→`kyuhachiId`. Live catalog carries `admissionFee` (text) + `adultFee` (numeric yen),
 `businessHours.schedule`, `nameKana`, and `nameRomaji` per onsen.
 
-Tests: **100 passing** across eight files — `test_fees.py` (12), `test_hours.py` (20),
+Tests: **112 passing** across nine files — `test_fees.py` (12), `test_hours.py` (20),
 `test_catalog_sync.py` (11), `test_catalog_diff_soft_removal.py` (14),
 `test_publish_schedule.py` (14), `test_apply_add.py` (5), `test_image_processor.py` (10),
-`test_readings.py` (14). Run with `pytest -q` (needs Python ≥3.12 and the `dev` extra:
-`pip install -e '.[dev]'`).
+`test_readings.py` (21), `test_firestore_rest.py` (5). Run with `pytest -q` (needs Python
+≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
 
 ## Remaining roadmap
 
@@ -57,11 +58,14 @@ decode Firestore typed values, project onto `FIELDS`, map `kyuhachiId`→`hid`. 
 lets the diff catch drift between the snapshot and what's actually live. Risk: field-shape
 mismatch (camelCase + nested `businessHours.raw` vs the parser's snake_case).
 
-### C. DRY the Firestore REST helpers into `publisher/firestore_rest.py` — Small; mechanical
-`token` / `_open` / `patch` / `ival` / `sval` are copy-pasted across `apply.py`,
-`backfill_fees.py`, `backfill_name_kana.py`, `backfill_name_romaji.py`, and `backfill_schedule.py`. Now safe to extract —
-the `apply.py` rewrite that used to collide with it has merged. Low-risk; ship with a smoke test
-that each script still authenticates.
+### C. ✅ Shipped — DRY the Firestore REST helpers into `publisher/firestore_rest.py`
+`token` / `_open` / `patch` / `get_fields` / `sval` / `ival` / `dval` / `bval` / `create` /
+`bump_catalog_version` were copy-pasted across `apply.py`, `backfill_fees.py`,
+`backfill_name_kana.py`, `backfill_name_romaji.py`, and `backfill_schedule.py`. Extracted into
+`publisher/firestore_rest.py`; every script now imports the shared copy instead of
+redefining it. Mechanical — no behavior change, every script's CLI and dry-run/`--commit`
+semantics are identical. `tests/test_firestore_rest.py` covers the typed-value encoders and
+that each script still imports and builds its plan offline.
 
 ### Operational — live-write smoke test under WIF — release gate, not a coding item
 The publisher's fetch → derive → PATCH path and the `gcloud`-minted access token have never run
@@ -72,19 +76,16 @@ editing `data/hours_curated.json` and confirm `catalog-dry-run` authenticates an
 is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling out to `gcloud`.
 
 ### Cross-cutting
-- New work in A/B/C should ship with tests — the suite already covers fees, hours, sync,
-  soft-removal, schedule publish, and readings.
+- New work in B should ship with tests — the suite already covers fees, hours, sync,
+  soft-removal, schedule publish, readings, and the shared Firestore REST helpers.
 - Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, `nameKana`, and
   `nameRomaji` from the published catalog; coordinate any schema change with it.
 
 ## Recommended order
 
-1. **C — extract `publisher/firestore_rest.py`.** Small and mechanical; no longer blocked now
-   that the changelog-driven `apply.py` has merged. Good to land before B adds more duplication —
-   and `apply.py`'s new `add` path widened the copy-paste (it now reuses `backfill_schedule`'s
-   helpers), so the extraction is more worthwhile.
-2. **B — `catalog` baseline adapter.** Independent enrichment; gives the diff a published-truth
-   baseline alongside the local snapshot.
+1. **B — `catalog` baseline adapter.** The only open item; independent enrichment that gives the
+   diff a published-truth baseline alongside the local snapshot.
 - **A — `apply.py` `add` action.** ✅ Shipped (see above).
+- **C — extract `publisher/firestore_rest.py`.** ✅ Shipped (see above).
 - **Operational smoke test:** do opportunistically from an allowlisted env / under WIF before the
   first real automated publish. It's a release gate.

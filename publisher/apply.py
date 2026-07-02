@@ -34,10 +34,7 @@ Usage:
 """
 import argparse
 import json
-import subprocess
 import sys
-import urllib.error
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -54,9 +51,8 @@ from onsen_scraper import (  # noqa: E402
 import catalog_diff as cd  # noqa: E402
 import image_processor as ip  # noqa: E402  (publisher/image_processor.py — photo rehosting)
 import backfill_schedule as bsf  # noqa: E402  (reuse the curated-hours encoders + Firestore GET)
+from firestore_rest import PROJECT, bval, create, dval, ival, patch, sval, token  # noqa: E402
 
-PROJECT = "kyuhachi-fddcc"
-BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
 IDMAP = json.loads((REPO / "data/onsen-id-map.json").read_text())
 CURATED_HOURS = REPO / "data" / "hours_curated.json"
 
@@ -70,80 +66,9 @@ FIELD_PATH = {
 ACTIONS = ("update", "retire", "skip", "add")  # `add` creates the live doc for a new onsen (needs a kyuhachiId)
 
 
-def token() -> str:
-    return subprocess.check_output(
-        ["gcloud", "auth", "application-default", "print-access-token"], text=True
-    ).strip()
-
-
-def sval(v):
-    return {"stringValue": v} if v else {"nullValue": None}
-
-
-def ival(n):
-    return {"nullValue": None} if n is None else {"integerValue": str(n)}
-
-
-def dval(x):
-    return {"nullValue": None} if x is None else {"doubleValue": float(x)}
-
-
-def bval(b):
-    return {"booleanValue": bool(b)}
-
-
 # Schedule encoding lives in backfill_schedule.py (sched_val), which solely owns
 # businessHours.schedule via the curated parse. apply.py no longer encodes
 # schedules — see build_update.
-
-
-def _open(req, timeout=30, retries=3):
-    """urlopen with a timeout, retrying transient network errors / 429 / 5xx.
-    A single hung connection must not stall a 100+ doc publish loop forever."""
-    for attempt in range(retries + 1):
-        try:
-            return urllib.request.urlopen(req, timeout=timeout)
-        except urllib.error.HTTPError as e:
-            if attempt < retries and e.code in (429, 500, 502, 503):
-                continue
-            raise
-        except (urllib.error.URLError, TimeoutError):
-            if attempt < retries:
-                continue
-            raise
-
-
-def patch(kid: str, fields: dict, mask: list[str], tok: str) -> int:
-    qs = "&".join(f"updateMask.fieldPaths={m}" for m in mask)
-    req = urllib.request.Request(
-        f"{BASE}/onsens/{kid}?{qs}", data=json.dumps({"fields": fields}).encode(),
-        method="PATCH",
-        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
-    )
-    try:
-        with _open(req) as r:
-            return r.status
-    except urllib.error.HTTPError as e:
-        print(f"    HTTP {e.code}: {e.read().decode()[:300]}")
-        raise
-
-
-def create(kid: str, fields: dict, tok: str) -> int:
-    """Create /onsens/{kid} with the full field set. Server rejects (409) if it
-    already exists — but apply_decision checks existence first, so this is the
-    sole *create* (vs PATCH) write in the publisher and is reached only for a
-    genuinely new doc."""
-    req = urllib.request.Request(
-        f"{BASE}/onsens?documentId={kid}", data=json.dumps({"fields": fields}).encode(),
-        method="POST",
-        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
-    )
-    try:
-        with _open(req) as r:
-            return r.status
-    except urllib.error.HTTPError as e:
-        print(f"    HTTP {e.code}: {e.read().decode()[:300]}")
-        raise
 
 
 def build_update(hid: int, tok: str | None = None):
@@ -383,7 +308,7 @@ def apply_decision(d: dict, now: str, tok: str | None, commit: bool) -> None:
         fields["updatedAt"] = {"timestampValue": now}
         validate_add_schema(fields, tok)
         if commit:
-            create(kid, fields, tok)
+            create("onsens", kid, fields, tok)
             print("    created.")
         else:
             print(f"    would create ({len(fields)} fields): {', '.join(sorted(fields))}")
@@ -405,7 +330,7 @@ def apply_decision(d: dict, now: str, tok: str | None, commit: bool) -> None:
             print(f"    {pf}:  {old!r}\n           → {new!r}")
     print(f"    mask: {mask}")
     if commit:
-        patch(kid, fields, mask, tok)
+        patch(f"onsens/{kid}", fields, mask, tok)
         print("    committed.")
     print()
 

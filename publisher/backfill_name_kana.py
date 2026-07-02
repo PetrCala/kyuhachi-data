@@ -36,76 +36,17 @@ Usage:
 import argparse
 import json
 import sqlite3
-import subprocess
 import sys
-import urllib.error
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from onsen_scraper.readings import curated_readings, kana_for  # noqa: E402
+from firestore_rest import PROJECT, bump_catalog_version, patch, sval, token  # noqa: E402
 
-PROJECT = "kyuhachi-fddcc"
-BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
 SNAPSHOT_DB = REPO / "data" / "snapshot.db"
 IDMAP = json.loads((REPO / "data/onsen-id-map.json").read_text())
-
-
-# --- Firestore REST (mirrors apply.py / backfill_fees.py; DRY into
-#     publisher/firestore_rest.py later — see roadmap item D) -------------------
-
-def token() -> str:
-    return subprocess.check_output(
-        ["gcloud", "auth", "application-default", "print-access-token"], text=True
-    ).strip()
-
-
-def sval(v):
-    return {"stringValue": v} if v else {"nullValue": None}
-
-
-def _open(req, timeout=30, retries=3):
-    """urlopen with a timeout, retrying transient network errors / 429 / 5xx.
-    Without this a single hung connection stalls the 148-doc loop forever."""
-    for attempt in range(retries + 1):
-        try:
-            return urllib.request.urlopen(req, timeout=timeout)
-        except urllib.error.HTTPError as e:
-            if attempt < retries and e.code in (429, 500, 502, 503):
-                continue
-            raise
-        except (urllib.error.URLError, TimeoutError):
-            if attempt < retries:
-                continue
-            raise
-
-
-def get_fields(path: str, tok: str):
-    """Return the doc's `fields` dict, or None on 404."""
-    req = urllib.request.Request(f"{BASE}/{path}", headers={"Authorization": f"Bearer {tok}"})
-    try:
-        with _open(req) as r:
-            return json.load(r).get("fields", {})
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return None
-        raise
-
-
-def patch(path: str, fields: dict, mask: list, tok: str) -> int:
-    qs = "&".join(f"updateMask.fieldPaths={m}" for m in mask)
-    req = urllib.request.Request(
-        f"{BASE}/{path}?{qs}", data=json.dumps({"fields": fields}).encode(), method="PATCH",
-        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
-    )
-    try:
-        with _open(req) as r:
-            return r.status
-    except urllib.error.HTTPError as e:
-        print(f"    HTTP {e.code}: {e.read().decode()[:300]}")
-        raise
 
 
 # --- backfill -----------------------------------------------------------------
@@ -120,19 +61,6 @@ def build_plan():
     finally:
         con.close()
     return [(oid, IDMAP.get(str(oid)), name, kana_for(oid, name)) for oid, name in rows]
-
-
-def bump_catalog_version(now: str, tok: str):
-    fields = get_fields("catalog_meta/current", tok)
-    if fields is None:
-        print("catalog_meta/current does not exist yet — skipping version bump "
-              "(the first full publish will create it).")
-        return
-    cur = int(fields.get("version", {}).get("integerValue", 0))
-    patch("catalog_meta/current",
-          {"version": {"integerValue": str(cur + 1)}, "publishedAt": {"timestampValue": now}},
-          ["version", "publishedAt"], tok)
-    print(f"catalog_meta/current: version {cur} → {cur + 1}  (bumped)")
 
 
 def main() -> None:
