@@ -41,6 +41,7 @@ discipline the fetcher/parser use for requests/bs4.
 from __future__ import annotations
 
 import json
+import re
 import warnings
 from pathlib import Path
 
@@ -53,6 +54,17 @@ _KATAKANA_END = 0x30F6
 _FOLD_OFFSET = 0x60
 
 _CURATED_PATH = Path(__file__).resolve().parents[1] / "data" / "readings_curated.json"
+
+# Typographic tidy for the generated romaji, applied after the capitalisation
+# join. pykakasi emits punctuation as its own token (（）/「」 → ASCII parens,
+# ・ passes through raw), so the space-join pads it like a word. Strictly
+# formatting — a reading is never changed here; misread segmentation belongs to
+# the curated overlay, not a regex.
+_ROMAJI_TIDY = (
+    (re.compile(r"\(\s+"), "("),      # "( Kinkonkan"  → "(Kinkonkan"
+    (re.compile(r"\s+\)"), ")"),      # "Kinkonkan )"  → "Kinkonkan)"
+    (re.compile(r"\s*・\s*"), " "),   # ・ has no Latin form; the word gap is its meaning
+)
 
 _analyzer_cache = None
 _curated_cache = None
@@ -117,7 +129,9 @@ def name_romaji(name: str | None) -> str | None:
     `name_kana()`, read off each token's `hepburn` field; the per-token output is
     re-split on whitespace to collapse the analyzer's segmentation (including the
     single space pykakasi emits for a full-width space between name parts) into
-    clean word boundaries, and each word is capitalised.
+    clean word boundaries, and each word is capitalised. A final typographic pass
+    (`_ROMAJI_TIDY`) unpads parentheses and maps the ・ separator to a plain word
+    gap so no Japanese glyph leaks into the Latin line.
 
     Returns ``None`` for an empty/whitespace-only name or when the analyzer yields
     nothing — the app shows the kanji alone on null. Display-only, so (unlike
@@ -128,7 +142,9 @@ def name_romaji(name: str | None) -> str | None:
         return None
     hepburn = " ".join(token["hepburn"] for token in _analyzer().convert(name))
     romaji = " ".join(word[:1].upper() + word[1:] for word in hepburn.split())
-    return romaji or None
+    for pat, repl in _ROMAJI_TIDY:
+        romaji = pat.sub(repl, romaji)
+    return romaji.strip() or None
 
 
 # --- curated corrections overlay ----------------------------------------------
