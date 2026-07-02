@@ -39,18 +39,19 @@ or writing any field other than the structured hours.
 ## The schema (read this first)
 
 [docs/hours-schema.md](../../../docs/hours-schema.md) is canonical. The published
-model is `businessHours = { raw, schedule, exceptions:[{en,ja}], confidence }`.
-Each curated entry expands into that via `publisher/backfill_schedule.py`:
+model is `businessHours = { raw, schedule, exceptions:[{en,ja,rule?}], confidence,
+lastEntry? }`. Each curated entry expands into that via `publisher/backfill_schedule.py`:
 
 | Field | Meaning |
 |---|---|
 | `publish` | `true` → expand a `schedule` grid; `false` → `schedule` null, `raw` only. |
-| `status` | why it is/isn't published: `structured`, `irregular`, `monthly`, `multi-window`, `seasonal`, `deferred-annual`. |
-| `window` | `[open, close]` base daily window (`HH:MM`, `24+` = past midnight). `null` when not published. |
+| `status` | the routing label: `structured`, `irregular`, `monthly`, `multi-window`, `seasonal`, `deferred-annual`. |
+| `window` | base daily window(s): `[open, close]` or `[[o,c], [o,c], …]` for split sessions (`HH:MM`, `24+` = past midnight; chronological, non-overlapping). `null` when not published. |
 | `closed` | weekday abbrevs (`mon…sun`) that are fully closed in the base week. |
-| `overrides` | `{weekday: [open,close] | null}` for days that differ from `window`. |
-| `exceptions` | display-only `{en, ja}` captions (holidays, monthly closures, seasonal notes…). |
-| `confidence` | `high` / `medium` / `low` — drives a "hours may vary" hint in the app. |
+| `overrides` | `{weekday: [open,close] | [[o,c],…] | null}` for days that differ from `window`. |
+| `lastEntry` | optional `HH:MM` — the facility-wide 最終受付 cutoff. **Evidence-gated**: valid only when `single_last_entry` detects exactly that time in the source text. |
+| `exceptions` | `{en, ja}` captions (holidays, monthly closures, seasonal notes…), each optionally carrying its machine-readable `rule` twin (`monthlyWeekday` / `monthlyDay` / `irregular` — see the schema doc). |
+| `confidence` | `high` / `medium` / `low` parse confidence. Published value is capped at `low` for `irregular` entries (drives the app's call-ahead hint). |
 | `note` | internal-only rationale (NOT published). |
 
 **Guiding principle: never claim *open* when actually closed.** Encode the
@@ -60,14 +61,20 @@ as a visible exception, never a silent assumption. Status routing:
 - `無休` / explicit weekly closure (`火曜休`, `火・金曜休`, `月～木曜休`) → `structured`,
   `publish:true`.
 - **pure** `第N曜` / `毎月N日` monthly closure (no weekly 定休日) → `monthly`,
-  `publish:false`, with the closure as a caption. When a monthly closure is
+  `publish:true` with the base grid; the closure caption carries a
+  `monthlyWeekday`/`monthlyDay` rule (validated). When a monthly closure is
   *layered on top of* a weekly closure, keep `structured`/`publish:true` (the
-  weekly day in `closed`) and add the monthly as an exception caption — the
-  weekday stays open in the grid (e.g. hid 202: `closed:[wed]` + "Also closed the
-  2nd & 4th Thursday").
-- `不定休` irregular → `irregular`, `publish:false`, honest "confirm before visiting".
-- multi-window (2部制) / strong seasonal swings → `multi-window` / `seasonal`,
-  `publish:false`, `window:null`.
+  weekly day in `closed`) and add the monthly caption+rule — the weekday stays
+  open in the grid (e.g. hid 202: `closed:[wed]` + "Also closed the 2nd & 4th
+  Thursday").
+- `不定休` irregular → `irregular`, `publish:true` with the base grid; the
+  "confirm before visiting" caption carries `{"kind": "irregular"}` (validated),
+  and the published confidence is capped at `low`.
+- multi-window (2部制) → `multi-window`, `publish:true` with window **lists**
+  (per-bath splits are curation calls: publish the facility-level
+  can-you-bathe-at-all window, keep per-bath detail as captions).
+- strong seasonal swings → `seasonal`, `publish:true` with the most-restrictive
+  window (latest open, earliest close); captions carry the variance.
 - annual-only closure (`1/1`, `元旦`, Dec maintenance) → `deferred-annual`,
   `publish:false` (open-all-week policy pending).
 

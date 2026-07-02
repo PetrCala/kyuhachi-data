@@ -56,17 +56,28 @@ CURATED = REPO_ROOT / "data" / "hours_curated.json"
 # sys.path so this skill script can import the package.
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
-from onsen_scraper.hours import last_entry_caption  # noqa: E402
+from onsen_scraper.hours import last_entry_caption, single_last_entry  # noqa: E402
 
 # Weekday abbreviations used in `closed` / `overrides` (Mon-first), matching
 # publisher/backfill_schedule.py._ABBR and the app's WeeklySchedule key order.
 ABBR = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+WEEKDAYS_FULL = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 STATUSES = {"structured", "irregular", "monthly", "multi-window", "seasonal", "deferred-annual"}
 CONFIDENCE = {"high", "medium", "low"}
 # Canonical key order for a curated entry — `set` re-emits in this order so the
 # file stays uniform regardless of how the model ordered its keys.
-ENTRY_KEYS = ("publish", "status", "window", "closed", "overrides", "confidence", "note", "exceptions")
+ENTRY_KEYS = ("publish", "status", "window", "closed", "overrides", "lastEntry",
+              "confidence", "note", "exceptions")
 _TIME = re.compile(r"^\d{1,2}:\d{2}$")  # HH:MM, 24+ allowed for past-midnight (e.g. 25:00)
+
+# Structured closure rules — the machine-readable twin an exception caption may
+# carry (docs/hours-schema.md). Keyed by rule kind → its allowed fields.
+RULE_FIELDS = {
+    "monthlyWeekday": {"kind", "weeks", "weekday", "holidayPolicy", "exceptMonths", "onlyMonths"},
+    "monthlyDay": {"kind", "days"},
+    "irregular": {"kind"},
+}
+HOLIDAY_POLICIES = {"nextDay", "nextWeekday", "skip", "varies"}
 
 
 # --- snapshot + curated I/O ---------------------------------------------------
@@ -109,6 +120,62 @@ def changelog_hours(path: Path) -> dict:
 
 # --- validation (mirrors tests/test_publish_schedule.py invariants) -----------
 
+def _mins(t: str) -> int:
+    h, m = str(t).split(":")
+    return int(h) * 60 + int(m)
+
+
+def _window_problems(hid: str, label: str, v) -> list:
+    """Problems with one window value: ["HH:MM","HH:MM"] or [[o,c], [o,c], …]
+    (each window opens before it closes; multi-windows chronological and
+    non-overlapping). Null is NOT accepted here — callers handle it."""
+    wins = [v] if (isinstance(v, list) and v and isinstance(v[0], str)) else v
+    if not (isinstance(wins, list) and wins and all(
+            isinstance(w, list) and len(w) == 2 and all(_TIME.match(str(t)) for t in w)
+            for w in wins)):
+        return [f"id {hid}: {label} must be [HH:MM, HH:MM] or a list of such windows, got {v!r}"]
+    errs, prev_close = [], None
+    for o, c in wins:
+        if _mins(o) >= _mins(c):
+            errs.append(f"id {hid}: {label} window {o}–{c} must open before it closes")
+        if prev_close is not None and _mins(o) < prev_close:
+            errs.append(f"id {hid}: {label} windows must be chronological and non-overlapping")
+        prev_close = _mins(c)
+    return errs
+
+
+def _rule_problems(hid: str, i: int, r) -> list:
+    """Problems with one exception's structured `rule` (docs/hours-schema.md)."""
+    where = f"id {hid}: exceptions[{i}].rule"
+    if not isinstance(r, dict) or r.get("kind") not in RULE_FIELDS:
+        return [f"{where}: kind must be one of {sorted(RULE_FIELDS)}, got {r!r}"]
+    errs, kind = [], r["kind"]
+    unknown = set(r) - RULE_FIELDS[kind]
+    if unknown:
+        errs.append(f"{where}: unknown key(s) {sorted(unknown)} for kind {kind}")
+    if kind == "monthlyWeekday":
+        weeks = r.get("weeks")
+        if not (isinstance(weeks, list) and weeks
+                and all(isinstance(w, int) and 1 <= w <= 5 for w in weeks)):
+            errs.append(f"{where}: weeks must be a non-empty list of 1..5, got {weeks!r}")
+        if r.get("weekday") not in WEEKDAYS_FULL:
+            errs.append(f"{where}: weekday must be one of {list(WEEKDAYS_FULL)}, got {r.get('weekday')!r}")
+        if "holidayPolicy" in r and r["holidayPolicy"] not in HOLIDAY_POLICIES:
+            errs.append(f"{where}: holidayPolicy must be one of {sorted(HOLIDAY_POLICIES)}")
+        for k in ("exceptMonths", "onlyMonths"):
+            if k in r and not (isinstance(r[k], list) and r[k]
+                               and all(isinstance(m, int) and 1 <= m <= 12 for m in r[k])):
+                errs.append(f"{where}: {k} must be a non-empty list of months 1..12")
+        if "exceptMonths" in r and "onlyMonths" in r:
+            errs.append(f"{where}: exceptMonths and onlyMonths are mutually exclusive")
+    elif kind == "monthlyDay":
+        days = r.get("days")
+        if not (isinstance(days, list) and days
+                and all(isinstance(d, int) and 1 <= d <= 31 for d in days)):
+            errs.append(f"{where}: days must be a non-empty list of 1..31, got {days!r}")
+    return errs
+
+
 def validate_entry(hid: str, e) -> list:
     """Return a list of human-readable problems with one curated entry ([] = ok)."""
     errs = []
@@ -135,12 +202,12 @@ def validate_entry(hid: str, e) -> list:
 
     window = e.get("window")
     if e.get("publish"):
-        if not (isinstance(window, list) and len(window) == 2 and all(_TIME.match(str(t)) for t in window)):
-            errs.append(f"id {hid}: publish=true requires window [HH:MM, HH:MM], got {window!r}")
-    elif window is not None and not (
-        isinstance(window, list) and len(window) == 2 and all(_TIME.match(str(t)) for t in window)
-    ):
-        errs.append(f"id {hid}: window must be null or [HH:MM, HH:MM], got {window!r}")
+        if window is None:
+            errs.append(f"id {hid}: publish=true requires a window")
+        else:
+            errs += _window_problems(hid, "window", window)
+    elif window is not None:
+        errs += _window_problems(hid, "window", window)
 
     ov = e.get("overrides", {})
     if not isinstance(ov, dict):
@@ -149,20 +216,38 @@ def validate_entry(hid: str, e) -> list:
         for day, slot in ov.items():
             if day not in ABBR:
                 errs.append(f"id {hid}: override day {day!r} not in {list(ABBR)}")
-            if slot is not None and not (
-                isinstance(slot, list) and len(slot) == 2 and all(_TIME.match(str(t)) for t in slot)
-            ):
-                errs.append(f"id {hid}: override {day} must be null or [HH:MM, HH:MM], got {slot!r}")
+            if slot is not None:
+                errs += _window_problems(hid, f"override {day}", slot)
+
+    le = e.get("lastEntry")
+    if le is not None and not (isinstance(le, str) and _TIME.match(le)):
+        errs.append(f"id {hid}: lastEntry must be \"HH:MM\" or absent, got {le!r}")
 
     exc = e.get("exceptions", [])
+    rule_kinds = []
     if not isinstance(exc, list):
         errs.append(f"id {hid}: exceptions must be a list")
     else:
-        for x in exc:
-            if not (isinstance(x, dict) and set(x) == {"en", "ja"}):
-                errs.append(f"id {hid}: each exception must be exactly {{en, ja}}, got {x!r}")
-            elif not (str(x["en"]).strip() and str(x["ja"]).strip()):
+        for i, x in enumerate(exc):
+            if not (isinstance(x, dict) and set(x) - {"rule"} == {"en", "ja"}):
+                errs.append(f"id {hid}: each exception must be {{en, ja}} (+ optional rule), got {x!r}")
+                continue
+            if not (str(x["en"]).strip() and str(x["ja"]).strip()):
                 errs.append(f"id {hid}: exception en/ja must both be non-empty: {x!r}")
+            if "rule" in x:
+                errs += _rule_problems(hid, i, x["rule"])
+                if isinstance(x["rule"], dict):
+                    rule_kinds.append(x["rule"].get("kind"))
+
+    # A published grid whose status implies a caveat must carry the matching
+    # machine-readable rule — the caption alone is invisible to computing
+    # consumers (the route planner), which would otherwise trust the grid.
+    if e.get("publish"):
+        if e.get("status") == "monthly" and not any(
+                k in ("monthlyWeekday", "monthlyDay") for k in rule_kinds):
+            errs.append(f"id {hid}: published monthly entry needs a monthlyWeekday/monthlyDay rule")
+        if e.get("status") == "irregular" and "irregular" not in rule_kinds:
+            errs.append(f"id {hid}: published irregular entry needs an {{\"kind\": \"irregular\"}} rule")
     return errs
 
 
@@ -234,9 +319,10 @@ def cmd_show(args) -> int:
         else:
             print("current curated entry: (none — parse from scratch)")
         print()
-    print("Re-parse each per docs/hours-schema.md (bilingual {en,ja} captions; window/"
-          "closed/overrides for the base week; status routing 第N曜→monthly, 不定休→"
-          "irregular, multi-window/seasonal→raw; never assert open from silence),")
+    print("Re-parse each per docs/hours-schema.md (bilingual {en,ja} captions + rule twins; "
+          "window/closed/overrides for the base week — window lists for split sessions; "
+          "evidence-gated lastEntry; 第N曜→monthly, 不定休→irregular (grid + rule); "
+          "never assert open from silence),")
     print("then merge with:  python recurate_hours.py set --file <refreshed.json>")
     return 0
 
@@ -258,7 +344,7 @@ def _entry_summary(hid: str, old, new) -> str:
     if old is None:
         return f"  + id {hid}: NEW  publish={new['publish']} status={new['status']}"
     bits = []
-    for k in ("publish", "status", "window", "closed", "confidence"):
+    for k in ("publish", "status", "window", "closed", "lastEntry", "confidence"):
         if old.get(k) != new.get(k):
             bits.append(f"{k} {old.get(k)!r}→{new.get(k)!r}")
     if old.get("exceptions") != new.get("exceptions"):
@@ -323,6 +409,22 @@ def cmd_validate(args) -> int:
         print("  add it via recurate-hours `set` (en 'Last entry by HH:MM', ja '最終受付 HH:MM').")
         return 1
     print("  last-entry: every stated 最終受付 cutoff is surfaced as a caption.")
+
+    # Structured-lastEntry evidence gate: businessHours.lastEntry may only state
+    # what the source text states — never inferred (docs/hours-schema.md). An
+    # entry's `lastEntry` must equal the mechanically-detected single 最終受付
+    # cutoff. (Once the lastEntry backfill lands, this tightens to REQUIRE the
+    # field wherever the cutoff is detectable.)
+    le_bad = [
+        hid for hid, e in onsens.items()
+        if e.get("lastEntry") is not None
+        and single_last_entry(snap.get(hid, {}).get("business_hours")) != e["lastEntry"]
+    ]
+    if le_bad:
+        print(f"UNSUPPORTED lastEntry — {len(le_bad)} onsen(s) carry a structured "
+              f"lastEntry the source text doesn't state: {sorted(le_bad, key=int)}")
+        print("  lastEntry is evidence-based only; drop it or fix the time to match the source.")
+        return 1
 
     # Coverage vs the snapshot is informational here (the pytest suite enforces an
     # exact match); a freshly-added onsen is expected to be missing until curated.

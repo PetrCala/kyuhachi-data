@@ -45,39 +45,81 @@ DAYS_FULL = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
 _ABBR = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
 
+def norm_windows(v):
+    """Normalize a curated window value — ["HH:MM","HH:MM"] or [[o,c], [o,c], …]
+    (chronological) — to a list of [opens, closes] pairs; None stays None."""
+    if v is None:
+        return None
+    return [list(v)] if isinstance(v[0], str) else [list(w) for w in v]
+
+
+def _day_slot(windows):
+    """DaySchedule from normalized windows. `opens`/`closes` mirror the FIRST
+    window — the one true window legacy readers display (false-closed direction
+    only, never false-open); the full list ships in `windows` only when ≥2."""
+    slot = {"opens": windows[0][0], "closes": windows[0][1]}
+    if len(windows) > 1:
+        slot["windows"] = [{"opens": o, "closes": c} for o, c in windows]
+    return slot
+
+
 def expand_curated(entry: dict):
     """Expand a curated entry into an app WeeklySchedule, or None if not published.
-    Each day = the base window, unless listed in `closed` (→ null) or overridden."""
+    Each day = the base window(s), unless listed in `closed` (→ null) or overridden."""
     if not entry.get("publish"):
         return None
-    o, c = entry["window"]
+    base = norm_windows(entry["window"])
     sched = {}
     for abbr, day in zip(_ABBR, DAYS_FULL):
         if abbr in entry["closed"]:
             sched[day] = None
         elif abbr in entry["overrides"]:
-            ov = entry["overrides"][abbr]
-            sched[day] = None if ov is None else {"opens": ov[0], "closes": ov[1]}
+            ov = norm_windows(entry["overrides"][abbr])
+            sched[day] = None if ov is None else _day_slot(ov)
         else:
-            sched[day] = {"opens": o, "closes": c}
+            sched[day] = _day_slot(base)
     return sched
+
+
+def published_confidence(entry: dict) -> str:
+    """The published businessHours.confidence for a curated entry. The curated
+    `confidence` records PARSE confidence; irregular closure (不定休) is a
+    schedule-reliability problem on top of a confident parse, so an irregular
+    entry that publishes a grid caps it at "low" — which drives the app's
+    call-ahead hint (docs/hours-schema.md). Unpublished entries pass through:
+    with no grid claimed, the caption already carries the caveat."""
+    if entry["status"] == "irregular" and entry.get("publish"):
+        return "low"
+    return entry["confidence"]
+
+
+def _win_val(w: dict) -> dict:
+    return {"mapValue": {"fields": {"opens": {"stringValue": w["opens"]},
+                                    "closes": {"stringValue": w["closes"]}}}}
+
+
+def _slot_val(slot: dict) -> dict:
+    fields = {"opens": {"stringValue": slot["opens"]},
+              "closes": {"stringValue": slot["closes"]}}
+    if "windows" in slot:
+        fields["windows"] = {"arrayValue": {"values": [_win_val(w) for w in slot["windows"]]}}
+    return {"mapValue": {"fields": fields}}
 
 
 def sched_val(schedule):
     """Encode a WeeklySchedule (or None) as a Firestore typed value (null day = closed;
-    whole-null when unstructured)."""
+    whole-null when unstructured; multi-window days carry a `windows` array)."""
     if schedule is None:
         return {"nullValue": None}
     days = {}
     for day, slot in schedule.items():
-        days[day] = ({"nullValue": None} if slot is None else
-                     {"mapValue": {"fields": {"opens": {"stringValue": slot["opens"]},
-                                              "closes": {"stringValue": slot["closes"]}}}})
+        days[day] = {"nullValue": None} if slot is None else _slot_val(slot)
     return {"mapValue": {"fields": days}}
 
 
 def live_schedule(bhf: dict):
-    """Decode a live businessHours.schedule typed-value into {day: {opens,closes}|None}|None."""
+    """Decode a live businessHours.schedule typed-value into
+    {day: {opens, closes, windows?} | None} | None."""
     s = bhf.get("schedule")
     if not s or "nullValue" in s:
         return None
@@ -89,20 +131,48 @@ def live_schedule(bhf: dict):
             out[day] = None
         else:
             sf = v["mapValue"]["fields"]
-            out[day] = {"opens": sf["opens"]["stringValue"], "closes": sf["closes"]["stringValue"]}
+            slot = {"opens": sf["opens"]["stringValue"], "closes": sf["closes"]["stringValue"]}
+            wins = sf.get("windows", {}).get("arrayValue", {}).get("values", [])
+            if wins:
+                slot["windows"] = [
+                    {"opens": w["mapValue"]["fields"]["opens"]["stringValue"],
+                     "closes": w["mapValue"]["fields"]["closes"]["stringValue"]}
+                    for w in wins]
+            out[day] = slot
     return out
 
 
+def _rule_val(rule: dict) -> dict:
+    """Encode a structured closure rule: strings as-is, int lists (weeks / days /
+    exceptMonths / onlyMonths) as integer arrays."""
+    fields = {}
+    for k, v in rule.items():
+        if isinstance(v, str):
+            fields[k] = {"stringValue": v}
+        else:
+            fields[k] = {"arrayValue": {"values": [{"integerValue": str(i)} for i in v]}}
+    return {"mapValue": {"fields": fields}}
+
+
 def exc_val(exceptions: list) -> dict:
-    """Encode exceptions [{en,ja}] as a Firestore arrayValue of {en,ja} maps."""
-    return {"arrayValue": {"values": [
-        {"mapValue": {"fields": {"en": {"stringValue": e["en"]},
-                                 "ja": {"stringValue": e["ja"]}}}}
-        for e in exceptions]}}
+    """Encode exceptions [{en, ja, rule?}] as a Firestore arrayValue. `rule` is
+    the optional machine-readable twin of the caption (docs/hours-schema.md)."""
+    values = []
+    for e in exceptions:
+        fields = {"en": {"stringValue": e["en"]}, "ja": {"stringValue": e["ja"]}}
+        if e.get("rule"):
+            fields["rule"] = _rule_val(e["rule"])
+        values.append({"mapValue": {"fields": fields}})
+    return {"arrayValue": {"values": values}}
 
 
 def conf_val(confidence: str) -> dict:
     return {"stringValue": confidence}
+
+
+def le_val(last_entry) -> dict:
+    """Encode businessHours.lastEntry ("HH:MM" or None)."""
+    return {"stringValue": last_entry} if last_entry else {"nullValue": None}
 
 
 def live_exceptions(bhf: dict) -> list:
@@ -110,13 +180,23 @@ def live_exceptions(bhf: dict) -> list:
     out = []
     for v in vals:
         f = v.get("mapValue", {}).get("fields", {})
-        out.append({"en": f.get("en", {}).get("stringValue", ""),
-                    "ja": f.get("ja", {}).get("stringValue", "")})
+        x = {"en": f.get("en", {}).get("stringValue", ""),
+             "ja": f.get("ja", {}).get("stringValue", "")}
+        rf = f.get("rule", {}).get("mapValue", {}).get("fields")
+        if rf:
+            x["rule"] = {k: (rv["stringValue"] if "stringValue" in rv else
+                             [int(i["integerValue"]) for i in rv.get("arrayValue", {}).get("values", [])])
+                         for k, rv in rf.items()}
+        out.append(x)
     return out
 
 
 def live_confidence(bhf: dict):
     return bhf.get("confidence", {}).get("stringValue")
+
+
+def live_last_entry(bhf: dict):
+    return bhf.get("lastEntry", {}).get("stringValue")
 
 
 # --- backfill -----------------------------------------------------------------
@@ -153,9 +233,9 @@ def _closed_str(s) -> str:
 
 
 def run_curated(commit: bool, show: bool) -> None:
-    """Backfill from data/hours_curated.json: read each live doc, diff the three
-    structured sub-fields (schedule, exceptions, confidence) against the curated
-    target, and PATCH only the fields that changed."""
+    """Backfill from data/hours_curated.json: read each live doc, diff the four
+    structured sub-fields (schedule, exceptions, confidence, lastEntry) against
+    the curated target, and PATCH only the fields that changed."""
     cur = json.loads(CURATED.read_text(encoding="utf-8"))["onsens"]
     names = _names()
     tok = token()
@@ -164,7 +244,7 @@ def run_curated(commit: bool, show: bool) -> None:
           f"project={PROJECT}   onsens={len(cur)}\nreading live docs…")
 
     changed = []          # (hid, bh_fields, mask, summary)
-    n = {"schedule": 0, "clear": 0, "exceptions": 0, "confidence": 0}
+    n = {"schedule": 0, "clear": 0, "exceptions": 0, "confidence": 0, "lastEntry": 0}
     deferred, skipped = [], []
     for hid, entry in cur.items():
         if entry["status"] == "deferred-annual":
@@ -195,18 +275,25 @@ def run_curated(commit: bool, show: bool) -> None:
             n["exceptions"] += 1
             summary.append(f"exc {len(l_exc)}→{len(t_exc)}")
 
-        t_conf, l_conf = entry["confidence"], live_confidence(bhf)
+        t_conf, l_conf = published_confidence(entry), live_confidence(bhf)
         if t_conf != l_conf:
             bh["confidence"] = conf_val(t_conf)
             mask.append("businessHours.confidence")
             n["confidence"] += 1
             summary.append(f"conf {l_conf}→{t_conf}")
 
+        t_le, l_le = entry.get("lastEntry"), live_last_entry(bhf)
+        if t_le != l_le:
+            bh["lastEntry"] = le_val(t_le)
+            mask.append("businessHours.lastEntry")
+            n["lastEntry"] += 1
+            summary.append(f"lastEntry {l_le}→{t_le}")
+
         if mask:
             changed.append((hid, kid, {"businessHours": {"mapValue": {"fields": bh}}}, mask, summary))
 
     print(f"\n  docs to PATCH: {len(changed)}   (schedule {n['schedule']}, clears {n['clear']}, "
-          f"exceptions {n['exceptions']}, confidence {n['confidence']})")
+          f"exceptions {n['exceptions']}, confidence {n['confidence']}, lastEntry {n['lastEntry']})")
     print(f"  deferred-annual (left raw): {len(deferred)}   skipped (no kid/doc): {len(skipped)}")
     # schedule changes are the interesting ones — always list those; field-only writes are uniform.
     if show or not commit:
