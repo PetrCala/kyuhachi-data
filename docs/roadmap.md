@@ -21,6 +21,7 @@ What's in place:
 | **New-onsen name + coordinates** baselined as complete rows | `catalog-sync promote` (overlays the map-seed columns) |
 | Surgical, changelog-driven publisher — `--from-changelog` scaffolds `decisions.json`; `--decisions [--commit]` MERGE-PATCHes only named fields; `update` / `retire` (→ `isActive:false`) / `skip`; never deletes, dry-run by default | `publisher/apply.py` |
 | **Shared Firestore REST helpers** — `token` / `_open` / `patch` / `get_fields` / `sval` / `ival` / `dval` / `bval` / `create` / `bump_catalog_version` extracted once, no longer copy-pasted across `apply.py` + the four `backfill_*.py` scripts | `publisher/firestore_rest.py` |
+| **`catalog` baseline (diff vs published truth) + no-op-aware backfills** — paginated authed `/onsens` read, typed-value decode, `kyuhachiId`→`hid`; backfills PATCH only the docs that changed and bump the version only on a real write | `catalog_diff.py` `load_catalog()`, `publisher/firestore_rest.py` (`fetch_collection` / `field_at` / `decode_value` / `live_onsens`), `publisher/backfill_*.py` |
 | Numeric `adultFee` — shared parser + publish-time recompute hook + one-time backfill | `onsen_scraper/fees.py`, `apply.py` `build_update()`, `publisher/backfill_fees.py` |
 | `営業時間` → `WeeklySchedule` — LLM-curated `data/hours_curated.json` is the source of truth; `backfill_schedule.py --from-curated` owns the published `businessHours.schedule` + `exceptions` + `confidence`; `recurate-hours` skill refreshes drifted hours | `onsen_scraper/hours.py`, `publisher/backfill_schedule.py`, `.claude/skills/recurate-hours/` |
 | Generated `nameKana` (hiragana reading, gojūon sort key) — auto + curated corrections overlay (`data/readings_curated.json`, evidence per entry); consumed by app PR kyuhachi#143 | `onsen_scraper/readings.py`, `publisher/backfill_name_kana.py` |
@@ -33,11 +34,11 @@ Data: `data/snapshot.db` = 161 onsens (raw fields + `raw_html`); `data/onsen-id-
 161 `hid`→`kyuhachiId`. Live catalog carries `admissionFee` (text) + `adultFee` (numeric yen),
 `businessHours.schedule`, `nameKana`, and `nameRomaji` per onsen.
 
-Tests: **112 passing** across nine files — `test_fees.py` (12), `test_hours.py` (20),
+Tests: **128 passing** across ten files — `test_fees.py` (12), `test_hours.py` (20),
 `test_catalog_sync.py` (11), `test_catalog_diff_soft_removal.py` (14),
 `test_publish_schedule.py` (14), `test_apply_add.py` (5), `test_image_processor.py` (10),
-`test_readings.py` (21), `test_firestore_rest.py` (5). Run with `pytest -q` (needs Python
-≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
+`test_readings.py` (21), `test_firestore_rest.py` (11), `test_catalog_baseline.py` (10). Run
+with `pytest -q` (needs Python ≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
 
 ## Remaining roadmap
 
@@ -51,12 +52,20 @@ and guarded by a key-set check against the app's `OnsenDocument` contract (plus 
 warning) before any write. Challenge-pool membership still lives in the app repo, and the live doc
 itself only appears once the gated `catalog-publish` run is approved.
 
-### B. `catalog` baseline adapter (diff vs live Firestore) — Medium; independent
-`load_catalog()` is still `raise NotImplementedError`, so the diff can only run against the
-local `snapshot.db`, not published truth. Scope: authed REST read of `/onsens` (paginated),
-decode Firestore typed values, project onto `FIELDS`, map `kyuhachiId`→`hid`. Why it matters:
-lets the diff catch drift between the snapshot and what's actually live. Risk: field-shape
-mismatch (camelCase + nested `businessHours.raw` vs the parser's snake_case).
+### B. ✅ Shipped — `catalog` baseline adapter (diff vs live Firestore)
+`load_catalog()` now does an authed, paginated REST read of `/onsens` (via the shared
+`publisher/firestore_rest.py` list helpers), decodes the Firestore typed values, projects each
+doc onto the diff's snake_case `CATALOG_FIELDS` — the seven source-authored MATERIAL fields,
+camelCase → snake_case with the nested `businessHours.raw` pulled out flat — and inverts
+`onsen-id-map.json` to key the result by `hid`. `catalog_diff.py --baseline catalog` diffs the
+published catalog against a live re-scrape; the compared field set is narrowed to the published
+fields so the unpublished muted descriptive fields (covid/efficacy/…) and the *rehosted*
+`imageUrl` never fire as spurious volatile noise. Strictly read-only (the locked contract). The
+same live read makes the four `backfill_*.py` scripts no-op aware: each reads the current field
+value first and PATCHes only the docs that actually differ, bumping `catalog_meta/current.version`
+only when at least one write happens — so their "republishes only what changed" docstrings are now
+true. `tests/test_catalog_baseline.py` + the expanded `tests/test_firestore_rest.py` mock the REST
+layer to cover pagination, typed-value decoding, id mapping, and the no-op skip path.
 
 ### C. ✅ Shipped — DRY the Firestore REST helpers into `publisher/firestore_rest.py`
 `token` / `_open` / `patch` / `get_fields` / `sval` / `ival` / `dval` / `bval` / `create` /
@@ -76,15 +85,16 @@ editing `data/hours_curated.json` and confirm `catalog-dry-run` authenticates an
 is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling out to `gcloud`.
 
 ### Cross-cutting
-- New work in B should ship with tests — the suite already covers fees, hours, sync,
-  soft-removal, schedule publish, readings, and the shared Firestore REST helpers.
+- New work should ship with tests — the suite already covers fees, hours, sync, soft-removal,
+  schedule publish, readings, the shared Firestore REST helpers, and the catalog baseline
+  adapter + no-op backfill path.
 - Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, `nameKana`, and
   `nameRomaji` from the published catalog; coordinate any schema change with it.
 
 ## Recommended order
 
-1. **B — `catalog` baseline adapter.** The only open item; independent enrichment that gives the
-   diff a published-truth baseline alongside the local snapshot.
+- **B — `catalog` baseline adapter.** ✅ Shipped (see above) — a published-truth baseline for the
+  diff alongside the local snapshot, plus no-op-aware backfills.
 - **A — `apply.py` `add` action.** ✅ Shipped (see above).
 - **C — extract `publisher/firestore_rest.py`.** ✅ Shipped (see above).
 - **Operational smoke test:** do opportunistically from an allowlisted env / under WIF before the

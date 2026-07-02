@@ -29,9 +29,15 @@ fill AND the ongoing path: it is idempotent, so re-running it after a new onsen'
 name lands (or a curated correction) republishes only what changed. The
 `apply.py` `add` action calls the same `romaji_for()` when it mints a new doc.
 
+"Republishes only what changed": before writing, the current `nameRomaji` of every
+doc is read once (a paginated /onsens list), so docs already carrying the target
+reading are skipped and `catalog_meta/current.version` is bumped only when at least
+one doc is actually written.
+
 Auth: gcloud Application Default Credentials (same as `publisher/apply.py`).
-Run `gcloud auth application-default login` if 401. Dry-run needs no auth — the
-plan is computed entirely from the local snapshot.
+Run `gcloud auth application-default login` if 401. A dry-run reads live to report
+how many docs would change vs. are already current; with no auth it degrades to the
+offline plan (every writable doc counted as a change) instead of erroring.
 
 Usage:
   python publisher/backfill_name_romaji.py            # dry-run (default): print plan, write nothing
@@ -48,7 +54,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from onsen_scraper.readings import curated_readings, romaji_for  # noqa: E402
-from firestore_rest import PROJECT, bump_catalog_version, patch, sval, token  # noqa: E402
+from firestore_rest import (  # noqa: E402
+    PROJECT, bump_catalog_version, field_at, live_onsens, patch, sval,
+)
 
 SNAPSHOT_DB = REPO / "data" / "snapshot.db"
 IDMAP = json.loads((REPO / "data/onsen-id-map.json").read_text())
@@ -66,6 +74,21 @@ def build_plan():
     finally:
         con.close()
     return [(oid, IDMAP.get(str(oid)), name, romaji_for(oid, name)) for oid, name in rows]
+
+
+def split_writes(writable, live):
+    """Partition writable rows into (to_write, current) by whether `nameRomaji` would
+    actually change the live doc. `live` is {kid: fields}; None (live unread) → treat
+    every row as a write. Mirrors sval's falsy→null encoding so a null reading already
+    published reads as 'current', not a spurious rewrite."""
+    if live is None:
+        return list(writable), []
+    to_write, current = [], []
+    for row in writable:
+        target = row[3] or None
+        cur = field_at(live.get(row[1], {}), "nameRomaji")
+        (current if cur == target else to_write).append(row)
+    return to_write, current
 
 
 def main() -> None:
@@ -103,19 +126,28 @@ def main() -> None:
             mark = " (c)" if oid in curated else ""
             print(f"  id={oid:<4} {(name or ''):<32} → {romaji}{mark}")
 
+    # Read current nameRomaji once and skip docs already carrying the target reading.
+    tok, live = live_onsens(args.commit)
+    to_write, current = split_writes(writable, live)
+    unknown = " (live unread — counted as changes)" if live is None else ""
+    print(f"\nwould change: {len(to_write)}   already current: {len(current)}{unknown}")
+
     if not args.commit:
-        print(f"\nDry-run only — nothing written. Would PATCH nameRomaji on {len(writable)} "
-              f"onsens and bump catalog_meta/current.version. Re-run with --commit.")
+        print(f"\nDry-run only — nothing written. Would PATCH nameRomaji on {len(to_write)} "
+              f"onsens" + (" and bump catalog_meta/current.version" if to_write else
+              " (none — version would NOT be bumped)") + ". Re-run with --commit.")
         return
 
-    tok = token()
+    if not to_write:
+        print("\nAll docs already current — nothing written, version not bumped.")
+        return
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    print(f"\n-- writing nameRomaji on {len(writable)} onsens --")
-    for oid, kid, _name, romaji in writable:
+    print(f"\n-- writing nameRomaji on {len(to_write)} changed onsens --")
+    for oid, kid, _name, romaji in to_write:
         patch(f"onsens/{kid}",
               {"nameRomaji": sval(romaji), "updatedAt": {"timestampValue": now}},
               ["nameRomaji", "updatedAt"], tok)
-    print(f"    wrote {len(writable)}.")
+    print(f"    wrote {len(to_write)}.")
     bump_catalog_version(now, tok)
 
 

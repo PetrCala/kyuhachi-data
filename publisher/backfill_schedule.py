@@ -35,7 +35,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from onsen_scraper.hours import parse_hours, parsed_hours_doc  # noqa: E402
-from firestore_rest import PROJECT, bump_catalog_version, get_fields, patch, token  # noqa: E402
+from firestore_rest import (  # noqa: E402
+    PROJECT, bump_catalog_version, get_fields, live_onsens, patch, token,
+)
 
 SNAPSHOT_DB = REPO / "data" / "snapshot.db"
 IDMAP = json.loads((REPO / "data/onsen-id-map.json").read_text())
@@ -137,6 +139,19 @@ def build_plan():
     return plan
 
 
+def split_writes(writable, live):
+    """Partition writable rows into (to_write, current) by whether the structured
+    businessHours.schedule would actually change the live doc. `live` is {kid:
+    fields} from firestore_rest; None (live unread) → treat every row as a write."""
+    if live is None:
+        return list(writable), []
+    to_write, current = [], []
+    for row in writable:
+        bhf = live.get(row[1], {}).get("businessHours", {}).get("mapValue", {}).get("fields", {})
+        (current if live_schedule(bhf) == row[3] else to_write).append(row)
+    return to_write, current
+
+
 def _names() -> dict:
     con = sqlite3.connect(f"file:{SNAPSHOT_DB}?mode=ro", uri=True)
     try:
@@ -220,6 +235,9 @@ def run_curated(commit: bool, show: bool) -> None:
         print("\nDry-run only — nothing written. Re-run with --commit.")
         return
 
+    if not changed:
+        print("\nAll docs already current — nothing written, version not bumped.")
+        return
     print(f"\n-- patching {len(changed)} docs --")
     for _hid, kid, fields, mask, _s in changed:
         fields["updatedAt"] = {"timestampValue": now}
@@ -260,20 +278,29 @@ def main() -> None:
             closed = ",".join(d[:2] for d, s in sched.items() if s is None) if sched else "-"
             print(f"  [{mark}] id={oid:<4} {reason:<17} closed={closed:<11} {name}")
 
+    # Read current businessHours.schedule once and skip docs already carrying it.
+    tok, live = live_onsens(args.commit)
+    to_write, current = split_writes(writable, live)
+    unknown = " (live unread — counted as changes)" if live is None else ""
+    print(f"\nwould change: {len(to_write)}   already current: {len(current)}{unknown}")
+
     if not args.commit:
         print(f"\nDry-run only — nothing written. Would PATCH businessHours.schedule on "
-              f"{len(writable)} onsens and bump catalog_meta/current.version. Re-run with --commit.")
+              f"{len(to_write)} onsens" + (" and bump catalog_meta/current.version" if to_write
+              else " (none — version would NOT be bumped)") + ". Re-run with --commit.")
         return
 
-    tok = token()
+    if not to_write:
+        print("\nAll docs already current — nothing written, version not bumped.")
+        return
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    print(f"\n-- writing businessHours.schedule on {len(writable)} onsens --")
-    for oid, kid, _name, sched, _reason in writable:
+    print(f"\n-- writing businessHours.schedule on {len(to_write)} changed onsens --")
+    for oid, kid, _name, sched, _reason in to_write:
         patch(f"onsens/{kid}",
               {"businessHours": {"mapValue": {"fields": {"schedule": sched_val(sched)}}},
                "updatedAt": {"timestampValue": now}},
               ["businessHours.schedule", "updatedAt"], tok)
-    print(f"    wrote {len(writable)}.")
+    print(f"    wrote {len(to_write)}.")
     bump_catalog_version(now, tok)
 
 
