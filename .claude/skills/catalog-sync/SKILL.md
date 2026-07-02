@@ -163,7 +163,7 @@ so they have their own idempotent backfill instead of riding the detect→apply 
   folded to hiragana is the fallback):
   ```bash
   python publisher/backfill_name_kana.py            # DRY-RUN: plan + sample readings
-  python publisher/backfill_name_kana.py --show     # also list all 148 readings
+  python publisher/backfill_name_kana.py --show     # also list all 161 readings
   python publisher/backfill_name_kana.py --commit   # writes nameKana; bumps version
   ```
   Idempotent, so re-run it after a new onsen's name lands (or a curated correction) to

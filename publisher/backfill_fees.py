@@ -22,10 +22,7 @@ Usage:
 import argparse
 import json
 import sqlite3
-import subprocess
 import sys
-import urllib.error
-import urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,68 +30,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from onsen_scraper.fees import fee_for  # noqa: E402
+from firestore_rest import PROJECT, bump_catalog_version, ival, patch, token  # noqa: E402
 
-PROJECT = "kyuhachi-fddcc"
-BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents"
 SNAPSHOT_DB = REPO / "data" / "snapshot.db"
 IDMAP = json.loads((REPO / "data/onsen-id-map.json").read_text())
 
 # Anything other than a clean 大人 match gets surfaced for human review before commit.
 REVIEW_METHODS = {"jhs+", "free", "fallback", "corrected", "none"}
-
-
-# --- Firestore REST (mirrors apply.py; DRY into publisher/firestore_rest.py later) ---
-
-def token() -> str:
-    return subprocess.check_output(
-        ["gcloud", "auth", "application-default", "print-access-token"], text=True
-    ).strip()
-
-
-def ival(n):
-    return {"nullValue": None} if n is None else {"integerValue": str(n)}
-
-
-def _open(req, timeout=30, retries=3):
-    """urlopen with a timeout, retrying transient network errors / 429 / 5xx.
-    Without this a single hung connection stalls the 148-doc loop forever."""
-    for attempt in range(retries + 1):
-        try:
-            return urllib.request.urlopen(req, timeout=timeout)
-        except urllib.error.HTTPError as e:
-            if attempt < retries and e.code in (429, 500, 502, 503):
-                continue
-            raise
-        except (urllib.error.URLError, TimeoutError):
-            if attempt < retries:
-                continue
-            raise
-
-
-def get_fields(path: str, tok: str):
-    """Return the doc's `fields` dict, or None on 404."""
-    req = urllib.request.Request(f"{BASE}/{path}", headers={"Authorization": f"Bearer {tok}"})
-    try:
-        with _open(req) as r:
-            return json.load(r).get("fields", {})
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return None
-        raise
-
-
-def patch(path: str, fields: dict, mask: list, tok: str) -> int:
-    qs = "&".join(f"updateMask.fieldPaths={m}" for m in mask)
-    req = urllib.request.Request(
-        f"{BASE}/{path}?{qs}", data=json.dumps({"fields": fields}).encode(), method="PATCH",
-        headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"},
-    )
-    try:
-        with _open(req) as r:
-            return r.status
-    except urllib.error.HTTPError as e:
-        print(f"    HTTP {e.code}: {e.read().decode()[:300]}")
-        raise
 
 
 # --- backfill -----------------------------------------------------------------
@@ -113,19 +55,6 @@ def build_plan():
         fee, method = fee_for(oid, raw)
         plan.append((oid, IDMAP.get(str(oid)), name, fee, method))
     return plan
-
-
-def bump_catalog_version(now: str, tok: str):
-    fields = get_fields("catalog_meta/current", tok)
-    if fields is None:
-        print("catalog_meta/current does not exist yet — skipping version bump "
-              "(the first full publish will create it).")
-        return
-    cur = int(fields.get("version", {}).get("integerValue", 0))
-    patch("catalog_meta/current",
-          {"version": {"integerValue": str(cur + 1)}, "publishedAt": {"timestampValue": now}},
-          ["version", "publishedAt"], tok)
-    print(f"catalog_meta/current: version {cur} → {cur + 1}  (bumped)")
 
 
 def main() -> None:
