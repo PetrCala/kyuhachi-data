@@ -127,6 +127,27 @@ def test_name_romaji_capitalises_each_word():
             assert word[:1] == word[:1].upper(), romaji
 
 
+def test_name_romaji_unpads_parentheses():
+    pytest.importorskip("pykakasi")
+    # pykakasi emits （）/「」 as standalone ASCII-paren tokens; the space-join
+    # must not pad them ("( Kinkonkan )"). The reading itself is untouched.
+    for name in ("おたっしゃん湯（脇浜温泉浴場）", "温泉付貸別荘「きんこんかん」"):
+        romaji = name_romaji(name)
+        assert romaji is not None
+        assert "( " not in romaji and " )" not in romaji, romaji
+        assert "(" in romaji and romaji.endswith(")"), romaji
+
+
+def test_name_romaji_maps_middle_dot_to_word_gap():
+    pytest.importorskip("pykakasi")
+    # ・ has no Latin form; it must become a plain single space, never leak into
+    # the Latin line (the kana keeps it — the sort key is untouched by this).
+    romaji = name_romaji("瀬音・湯音の宿　浮羽")
+    assert romaji is not None
+    assert "・" not in romaji and "  " not in romaji, romaji
+    assert romaji.startswith("Seoto Yuoto"), romaji
+
+
 # --- curated corrections overlay (data/readings_curated.json) ----------------
 
 def _snapshot_name(oid: int) -> str:
