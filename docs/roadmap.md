@@ -26,19 +26,21 @@ What's in place:
 | `営業時間` → `WeeklySchedule` — LLM-curated `data/hours_curated.json` is the source of truth; `backfill_schedule.py --from-curated` owns the published `businessHours.schedule` + `exceptions` + `confidence`; `recurate-hours` skill refreshes drifted hours | `onsen_scraper/hours.py`, `publisher/backfill_schedule.py`, `.claude/skills/recurate-hours/` |
 | Generated `nameKana` (hiragana reading, gojūon sort key) — auto + curated corrections overlay (`data/readings_curated.json`, evidence per entry); consumed by app PR kyuhachi#143 | `onsen_scraper/readings.py`, `publisher/backfill_name_kana.py` |
 | Generated `nameRomaji` (Hepburn, proper-noun-cased) — display-only pronunciation aid for non-JP users; auto + curated overlay (restores Latin loanwords, e.g. サムソンホテル → "Samson Hotel"); consumed by app PR kyuhachi#183 | `onsen_scraper/readings.py`, `publisher/backfill_name_romaji.py` |
+| Per-onsen `dataVerifiedAt` freshness cue — `apply.py` `update`/`add` stamp it at write time (a genuine live-verification instant, reusing `now`); a one-time backfill seeds existing onsens from `data/snapshot.db`'s per-row `scraped_at`. Schema + known limitation (backfill inherits `scraped_at`'s "first scraped, not last verified" gap for pre-existing rows) documented in `docs/onsen-schema.md` | `publisher/apply.py`, `publisher/backfill_data_verified_at.py`, `docs/onsen-schema.md` |
 | **Baseline advance after publish** — `snapshot.db` is no longer frozen | `catalog-sync promote` |
 | **GitHub-native automation** — monthly `catalog-detect` cron → `catalog-drift` issue → human-prepared `catalog-publish` PR → `catalog-dry-run` posts the live Firestore diff → merge gates the write behind a `production` environment approval | `.github/workflows/{catalog-detect,catalog-dry-run,catalog-publish}.yml`, `.github/CATALOG_AUTOMATION.md` |
 | Cost estimator (read-only admission-fee Monte Carlo + bounds) | `.claude/skills/cost-analysis/` |
 
 Data: `data/snapshot.db` = 161 onsens (raw fields + `raw_html`); `data/onsen-id-map.json` =
 161 `hid`→`kyuhachiId`. Live catalog carries `admissionFee` (text) + `adultFee` (numeric yen),
-`businessHours.schedule`, `nameKana`, and `nameRomaji` per onsen.
+`businessHours.schedule`, `nameKana`, `nameRomaji`, and `dataVerifiedAt` per onsen.
 
-Tests: **128 passing** across ten files — `test_fees.py` (12), `test_hours.py` (20),
+Tests: **152 passing** across twelve files — `test_fees.py` (12), `test_hours.py` (20),
 `test_catalog_sync.py` (11), `test_catalog_diff_soft_removal.py` (14),
-`test_publish_schedule.py` (14), `test_apply_add.py` (5), `test_image_processor.py` (10),
-`test_readings.py` (21), `test_firestore_rest.py` (11), `test_catalog_baseline.py` (10). Run
-with `pytest -q` (needs Python ≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
+`test_publish_schedule.py` (20), `test_recurate_validate.py` (8), `test_apply_add.py` (5),
+`test_image_processor.py` (10), `test_readings.py` (21), `test_firestore_rest.py` (11),
+`test_catalog_baseline.py` (10), `test_backfill_data_verified_at.py` (10). Run with
+`pytest -q` (needs Python ≥3.12 and the `dev` extra: `pip install -e '.[dev]'`).
 
 ## Remaining roadmap
 
@@ -76,6 +78,19 @@ redefining it. Mechanical — no behavior change, every script's CLI and dry-run
 semantics are identical. `tests/test_firestore_rest.py` covers the typed-value encoders and
 that each script still imports and builds its plan offline.
 
+### D. ✅ Shipped — per-onsen `dataVerifiedAt` freshness cue
+The app can now show "data last verified 2026-06" instead of implying the catalog is live.
+`apply.py`'s `update`/`add` actions stamp `dataVerifiedAt` with the same `now` used for
+`updatedAt`/`createdAt` — both re-fetch the live page first, so it's a genuine verification
+instant, not a proxy. `publisher/backfill_data_verified_at.py` seeds existing onsens offline
+from `data/snapshot.db`'s per-row `scraped_at` (dry-run by default, `--show`, `--commit`,
+no-op-aware version bump — same shape as the other backfills, plus a **monotonic guard**: a
+doc is only written when the seed would move its live `dataVerifiedAt` *forward*, so a re-run
+can never regress a fresher `apply.py`-stamped value). Full contract + a documented limitation
+(pre-existing rows' `scraped_at` reflects the original baseline scrape, not the latest
+re-verification, until `catalog-sync promote` is taught to refresh it on UPDATE too) live in
+`docs/onsen-schema.md`. App-side display is a separate hand-off in the `kyuhachi` repo.
+
 ### Operational — live-write smoke test under WIF — release gate, not a coding item
 The publisher's fetch → derive → PATCH path and the `gcloud`-minted access token have never run
 against live Firestore from CI — 88onsen.com 403s from sandboxes, and Workload Identity
@@ -88,8 +103,9 @@ is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling
 - New work should ship with tests — the suite already covers fees, hours, sync, soft-removal,
   schedule publish, readings, the shared Firestore REST helpers, and the catalog baseline
   adapter + no-op backfill path.
-- Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, `nameKana`, and
-  `nameRomaji` from the published catalog; coordinate any schema change with it.
+- Cross-repo: the app (`kyuhachi`) consumes `adultFee`, `businessHours.schedule`, `nameKana`,
+  `nameRomaji`, and (once wired up app-side) `dataVerifiedAt` from the published catalog;
+  coordinate any schema change with it.
 
 ## Recommended order
 
@@ -97,5 +113,6 @@ is a small shim that reads `$GOOGLE_APPLICATION_CREDENTIALS` instead of shelling
   diff alongside the local snapshot, plus no-op-aware backfills.
 - **A — `apply.py` `add` action.** ✅ Shipped (see above).
 - **C — extract `publisher/firestore_rest.py`.** ✅ Shipped (see above).
+- **D — `dataVerifiedAt` freshness cue.** ✅ Shipped (see above).
 - **Operational smoke test:** do opportunistically from an allowlisted env / under WIF before the
   first real automated publish. It's a release gate.

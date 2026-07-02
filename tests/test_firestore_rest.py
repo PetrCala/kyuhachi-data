@@ -1,9 +1,9 @@
 """Tests for the shared Firestore REST helpers (publisher/firestore_rest.py) and
 that every publisher script that used to copy-paste them (apply.py,
 backfill_fees.py, backfill_name_kana.py, backfill_name_romaji.py,
-backfill_schedule.py — roadmap item C) still imports cleanly and builds its
-offline plan against the shared module. Fully offline — no network, no auth, no
-writes."""
+backfill_schedule.py, backfill_data_verified_at.py — roadmap item C) still
+imports cleanly and builds its offline plan against the shared module. Fully
+offline — no network, no auth, no writes."""
 import json
 import sqlite3
 import sys
@@ -152,21 +152,23 @@ def test_every_publisher_script_shares_firestore_rest():
     """Importing must not re-define a local copy — each script's shared helpers must
     literally be firestore_rest's (not a copy-pasted redefinition)."""
     import apply  # noqa: E402
+    import backfill_data_verified_at  # noqa: E402
     import backfill_fees  # noqa: E402
     import backfill_name_kana  # noqa: E402
     import backfill_name_romaji  # noqa: E402
     import backfill_schedule  # noqa: E402
 
-    backfills = (backfill_fees, backfill_name_kana, backfill_name_romaji, backfill_schedule)
+    backfills = (backfill_data_verified_at, backfill_fees, backfill_name_kana,
+                 backfill_name_romaji, backfill_schedule)
     # patch is shared by every writer.
     for mod in (apply, *backfills):
         assert mod.patch is fr.patch
-    # the four backfills share the version bump + the no-op live read.
+    # the five backfills share the version bump + the no-op live read.
     for mod in backfills:
         assert mod.bump_catalog_version is fr.bump_catalog_version
         assert mod.live_onsens is fr.live_onsens
     # the scalar-field backfills read live values through the shared decoder.
-    for mod in (backfill_fees, backfill_name_kana, backfill_name_romaji):
+    for mod in (backfill_data_verified_at, backfill_fees, backfill_name_kana, backfill_name_romaji):
         assert mod.field_at is fr.field_at
     # apply + the curated-schedule read still mint tokens directly.
     assert apply.token is fr.token and backfill_schedule.token is fr.token
@@ -180,6 +182,7 @@ def test_backfill_scripts_build_their_plan_offline():
     """Each backfill's build_plan() reads only the local snapshot DB — no
     network, no auth — and covers every onsen in it."""
     pytest.importorskip("pykakasi")
+    import backfill_data_verified_at  # noqa: E402
     import backfill_fees  # noqa: E402
     import backfill_name_kana  # noqa: E402
     import backfill_name_romaji  # noqa: E402
@@ -189,7 +192,8 @@ def test_backfill_scripts_build_their_plan_offline():
     snap_ids = {r[0] for r in con.execute("select id from onsens")}
     con.close()
 
-    for mod in (backfill_fees, backfill_name_kana, backfill_name_romaji, backfill_schedule):
+    for mod in (backfill_data_verified_at, backfill_fees, backfill_name_kana,
+                backfill_name_romaji, backfill_schedule):
         plan = mod.build_plan()
         assert {p[0] for p in plan} == snap_ids
 
