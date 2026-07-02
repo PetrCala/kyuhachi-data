@@ -51,13 +51,16 @@ one-time `publisher/backfill_data_verified_at.py`, sourced from
 `data/snapshot.db`'s per-row `scraped_at` (the best per-onsen signal available
 without re-fetching all 161 detail pages just to stamp a date).
 
-**Known limitation.** `scraped_at` is only refreshed by `catalog-sync promote`
-when a row is *inserted* (a brand-new onsen) — the `promote_into_db` UPDATE path
-does not currently touch it. So for most pre-existing onsens, the seeded
-`dataVerifiedAt` reflects the *original* baseline scrape, not the most recent
-re-verification, until either an `apply.py` write on that onsen lands (which
-refreshes it correctly) or `promote_into_db` is taught to bump `scraped_at` on
-every promoted row (tracked as a follow-up, not yet done).
+**Freshness.** `catalog-sync promote`'s `promote_into_db` bumps `scraped_at` to
+`now` on every hid present in that cycle's staging — both an UPDATE (fields
+changed) and a confirmed-identical re-scrape (unchanged), since landing in
+staging means the hid was freshly re-scraped and reconciled, which is itself a
+verification event. `apply.py`'s `update`/`add` actions refresh the live
+`dataVerifiedAt` directly the same way. Note this only advances a row's
+`scraped_at` from its next `promote` onward — the one-time seed backfill still
+reflects each row's *last-promoted* timestamp as of when it ran, which for
+rows not touched by a promote cycle since this fix landed is the original
+baseline scrape.
 
 **Monotonic guard.** Like the other backfills, the seed is no-op aware — but
 with a forward-only rule instead of plain equality: a doc is written only when
