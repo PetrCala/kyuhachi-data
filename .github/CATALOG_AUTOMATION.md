@@ -24,7 +24,8 @@ live write behind a merge + an environment approval.
    operator reviews the PR → MERGE
                               ▼
    catalog-publish: dry_run job → [production environment approval] → publish job
-        detect → apply --commit → backfill --commit → promote --commit → tests
+        detect → apply --commit → hours backfill --commit → promote --commit
+        → dataVerifiedAt backfill --commit → tests
         → bot-pushes the advanced snapshot.db baseline to master
 ```
 
@@ -34,7 +35,7 @@ live write behind a merge + an environment approval.
 |---|---|---|---|
 | `catalog-detect.yml` | monthly cron + manual | **none** | scrape + diff; opens/refreshes the `catalog-drift` nudge on material change; alerts via `catalog-pipeline-broken` on selector drift / blocked egress / unreachable map seed |
 | `catalog-dry-run.yml` | PR touching `decisions.json` / `hours_curated.json` / `onsen-id-map.json` | WIF **read-only** | runs the publish dry-runs + tests, posts the live-Firestore diff as a sticky PR comment |
-| `catalog-publish.yml` | push to `master` on those paths + manual | WIF **read-only** (preview) then **write** (gated) | dry-run preview → `production` approval → `apply`/`backfill`/`promote --commit` → push advanced `snapshot.db` |
+| `catalog-publish.yml` | push to `master` on those paths + manual | WIF **read-only** (preview) then **write** (gated) | dry-run preview → `production` approval → `apply`/`hours backfill`/`promote`/`dataVerifiedAt backfill` `--commit` → push advanced `snapshot.db` |
 
 `catalog-detect` works the moment this is merged — **no setup required**. The other two are
 **inert until Workload Identity Federation is configured** (each job is guarded by

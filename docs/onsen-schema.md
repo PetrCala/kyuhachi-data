@@ -56,11 +56,15 @@ without re-fetching all 161 detail pages just to stamp a date).
 changed) and a confirmed-identical re-scrape (unchanged), since landing in
 staging means the hid was freshly re-scraped and reconciled, which is itself a
 verification event. `apply.py`'s `update`/`add` actions refresh the live
-`dataVerifiedAt` directly the same way. Note this only advances a row's
-`scraped_at` from its next `promote` onward — the one-time seed backfill still
-reflects each row's *last-promoted* timestamp as of when it ran, which for
-rows not touched by a promote cycle since this fix landed is the original
-baseline scrape.
+`dataVerifiedAt` directly the same way — but only for materially-changed
+onsens. For the confirmed-unchanged rest of the cycle, the gated
+`catalog-publish` workflow runs `publisher/backfill_data_verified_at.py
+--commit` immediately after promote, propagating the refreshed `scraped_at`
+into the live `dataVerifiedAt` — every publish advances the freshness cue for
+the whole re-verified cycle, not just the rows that changed. Rows absent from
+a cycle's staging keep their prior `scraped_at`, and the monotonic backfill
+leaves their live value alone; for rows never re-promoted since the
+`scraped_at` fix landed, that is still the original baseline scrape.
 
 **Monotonic guard.** Like the other backfills, the seed is no-op aware — but
 with a forward-only rule instead of plain equality: a doc is written only when

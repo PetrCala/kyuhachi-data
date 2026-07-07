@@ -106,6 +106,14 @@ jobs:
       - name: Advance the baseline (promote)
         run: uv run --python 3.12 python .claude/skills/catalog-sync/catalog_sync.py promote --commit
 
+      # Propagate the scraped_at timestamps promote just refreshed into the live
+      # dataVerifiedAt freshness cue. apply.py only stamps dataVerifiedAt on
+      # materially-changed onsens; this covers the confirmed-unchanged rest of the
+      # cycle. Must run AFTER promote (it reads snapshot.db's scraped_at). No-op
+      # aware with a monotonic guard — never regresses a fresher live value.
+      - name: Backfill dataVerifiedAt (freshness cue)
+        run: uv run --python 3.12 python publisher/backfill_data_verified_at.py --commit
+
       - name: Tests
         run: uv run --python 3.12 --with pytest python -m pytest tests/
 
