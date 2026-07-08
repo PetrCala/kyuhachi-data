@@ -1,0 +1,700 @@
+{
+  "_meta": {
+    "schema": "Generated region model for the area-guides feature. One entry per region: stable areaId (from data/area-id-map.json), English label, prefecture, center (centroid of member onsen lat/lng), and member lists (memberOnsenIds = published kyuhachiIds; memberHids / memberAreaNames for human review). Regenerate with `python -m onsen_scraper.regions --build` after a catalog change. Editorial name/tagline/sections live in data/area_guides_curated.json.",
+    "generatedBy": "onsen_scraper.regions.build_region_model"
+  },
+  "version": 1,
+  "regions": [
+    {
+      "key": "oita-beppu",
+      "areaId": "7fe5ceb9-b92c-4480-bdf8-0e2d97a85ae3",
+      "label": "Beppu",
+      "prefecture": "大分県",
+      "center": {
+        "lat": 33.276968,
+        "lng": 131.522082
+      },
+      "memberCount": 15,
+      "memberOnsenIds": [
+        "0b961dc8-afbf-48d6-9044-0f0226ff59b5",
+        "0cf9891c-ecfc-45dd-ac5d-6f651a2751bb",
+        "21b9ef3e-a214-4b54-a325-631d549b2284",
+        "2f777d25-6d1f-4e23-86cb-09e2165456dc",
+        "5983f5b5-306e-4580-aebf-5b7795ffdf1c",
+        "6c43bc32-560c-493b-8a3e-6de318a9c176",
+        "6c9507e4-6041-4bfc-ae7b-10c205a27a54",
+        "7993cf3b-682b-4a94-b284-76077b221bdc",
+        "7ca60fdb-fd02-469f-998e-c1c57cc1b79a",
+        "947e435e-a50e-4dd1-8d4f-c91246dbff68",
+        "9ef1bca0-e968-40c5-abbf-faebb769a8a8",
+        "a480812f-82b2-4b0f-8acd-3b34ff9e59b3",
+        "a73ab544-adaa-426e-9728-f40a541e9e4a",
+        "b276ce6d-f151-4593-90cd-d80b4c8a2707",
+        "ff8df821-a4f8-49ea-8e08-4c16a9aaa0d3"
+      ],
+      "memberHids": [
+        29,
+        31,
+        32,
+        34,
+        36,
+        38,
+        41,
+        66,
+        161,
+        177,
+        188,
+        216,
+        229,
+        258,
+        259
+      ],
+      "memberAreaNames": [
+        "丹生温泉",
+        "亀川温泉",
+        "別府温泉",
+        "府内温泉",
+        "明礬温泉",
+        "浜脇温泉",
+        "生石温泉",
+        "賀来温泉",
+        "鉄輪温泉",
+        "高崎山温泉"
+      ]
+    },
+    {
+      "key": "oita-yufuin",
+      "areaId": "7d606144-d133-4e22-94ce-360ba705078a",
+      "label": "Yufuin & Yufu",
+      "prefecture": "大分県",
+      "center": {
+        "lat": 33.264237,
+        "lng": 131.368148
+      },
+      "memberCount": 5,
+      "memberOnsenIds": [
+        "1a7531ea-73cd-4615-bf51-ffe69fe2387e",
+        "25286e49-222a-4da0-9e99-31e217ec115c",
+        "4e1bef5e-ad2f-4d80-b996-e3f80e46dd41",
+        "b3f33904-9883-409e-a9fc-4bbeb3971f69",
+        "edbc1897-3c90-4e92-bcb9-90ec10629ad4"
+      ],
+      "memberHids": [
+        42,
+        47,
+        48,
+        203,
+        260
+      ],
+      "memberAreaNames": [
+        "塚原温泉",
+        "湯平温泉",
+        "由布院温泉"
+      ]
+    },
+    {
+      "key": "oita-kuju",
+      "areaId": "658a7138-688f-4c8d-aa32-3542a0842a5a",
+      "label": "Kuju Highlands & Taketa",
+      "prefecture": "大分県",
+      "center": {
+        "lat": 33.130569,
+        "lng": 131.296814
+      },
+      "memberCount": 12,
+      "memberOnsenIds": [
+        "19044db7-a362-42da-9356-84a025b39465",
+        "1d0bb796-1084-4b93-b9b4-8413eed7f646",
+        "27d1e2f2-0ffb-4de9-a7c4-6bfee64a4ab5",
+        "3e76f04e-1d88-426d-8bff-9d2ee2357d9f",
+        "4efdc694-2994-4594-8725-9914bf4ded96",
+        "7dc174f4-3983-46da-866c-03e804f67565",
+        "91d20e57-e4ed-4a18-b972-367fc3ba2f2f",
+        "c2aa6bc0-357e-4802-ac52-af026fd97502",
+        "cb5d2dcc-0593-485a-8a1a-7d25c90dbe3a",
+        "d9ab9264-66e5-45e6-8638-6e682eeaa833",
+        "e47ef824-1208-4f00-b1c2-bc397510e019",
+        "e85a5e3e-b834-4bcc-b653-7f075b046aa4"
+      ],
+      "memberHids": [
+        43,
+        44,
+        59,
+        60,
+        61,
+        62,
+        65,
+        143,
+        162,
+        222,
+        223,
+        261
+      ],
+      "memberAreaNames": [
+        "七里田温泉",
+        "九酔渓温泉",
+        "星生温泉",
+        "法華院温泉",
+        "筋湯温泉",
+        "筌の口温泉",
+        "赤川温泉",
+        "赤松温泉",
+        "長湯温泉"
+      ]
+    },
+    {
+      "key": "oita-hita",
+      "areaId": "0cf51afb-6b94-4f2d-b050-fe1e92288fc8",
+      "label": "Hita, Kokonoe & Yabakei",
+      "prefecture": "大分県",
+      "center": {
+        "lat": 33.267497,
+        "lng": 131.068913
+      },
+      "memberCount": 6,
+      "memberOnsenIds": [
+        "1ce34616-0014-4b20-811e-ddd204c359af",
+        "41742041-7c51-431e-9578-df32b8326d66",
+        "435b7de7-1a6c-4076-8d23-3f2c5de4af32",
+        "6cd354ac-5fb4-4dda-82fb-15ce603510aa",
+        "b77a8ffb-cff8-4db6-9de6-54af1abd6572",
+        "de00b33f-e2ef-4a42-b49d-65f8e242fdfa"
+      ],
+      "memberHids": [
+        57,
+        132,
+        184,
+        204,
+        230,
+        245
+      ],
+      "memberAreaNames": [
+        "壁湯天然洞窟温泉",
+        "夜明温泉",
+        "天ヶ瀬温泉",
+        "川底温泉",
+        "深耶馬渓温泉"
+      ]
+    },
+    {
+      "key": "oita-kunisaki",
+      "areaId": "27110e0f-d339-4d4d-984b-07c050f925ea",
+      "label": "Kunisaki Peninsula & Usa",
+      "prefecture": "大分県",
+      "center": {
+        "lat": 33.557129,
+        "lng": 131.499904
+      },
+      "memberCount": 4,
+      "memberOnsenIds": [
+        "964c7dc4-5489-4d89-b3be-fdfdf1079ea9",
+        "e710eaf6-12ff-4bd8-aec9-00f4b4c37ad4",
+        "ec218b61-9eb8-48d3-bc79-ef99d6923eeb",
+        "f746fbb2-e09f-4bab-aa62-7613b4d19e80"
+      ],
+      "memberHids": [
+        64,
+        152,
+        160,
+        244
+      ],
+      "memberAreaNames": [
+        "くにさき六郷温泉",
+        "夷谷温泉",
+        "山香温泉"
+      ]
+    },
+    {
+      "key": "kumamoto-aso",
+      "areaId": "fad65c15-fe08-4ea1-9543-7eba4e2f1f93",
+      "label": "Aso & Oguni Highlands",
+      "prefecture": "熊本県",
+      "center": {
+        "lat": 33.042842,
+        "lng": 131.071067
+      },
+      "memberCount": 10,
+      "memberOnsenIds": [
+        "1f48a92e-1451-4ce2-8d9a-5100966756a0",
+        "24df06a1-50c4-4d20-818a-811f15082155",
+        "4917cef1-3a31-47f6-9d4e-a75cb95f15d0",
+        "576f03fa-a109-4262-9873-1deba4749223",
+        "83d80b57-7029-4062-9716-46b810def1f0",
+        "b17a05d6-e9d8-4f7a-8d99-f341cdd4d307",
+        "becdc9de-3587-4221-97f7-012f23dcf4c9",
+        "ce3d0c57-382f-4b01-b5f9-1c8dbac63e24",
+        "d65d2a2e-2760-4c63-bcc3-46d5d8af5482",
+        "e1eff409-4b1c-4102-8587-69bcb6282fd2"
+      ],
+      "memberHids": [
+        76,
+        80,
+        81,
+        86,
+        88,
+        182,
+        201,
+        202,
+        220,
+        242
+      ],
+      "memberAreaNames": [
+        "地獄温泉",
+        "垂玉温泉",
+        "大阿蘇　火の山温泉",
+        "小田温泉",
+        "岳の湯温泉",
+        "杖立温泉",
+        "阿蘇内牧温泉",
+        "黒川温泉"
+      ]
+    },
+    {
+      "key": "kumamoto-yamaga-kikuchi",
+      "areaId": "acb0740a-0261-4431-8394-fe1ee9630d01",
+      "label": "Yamaga & Kikuchi",
+      "prefecture": "熊本県",
+      "center": {
+        "lat": 32.995742,
+        "lng": 130.756413
+      },
+      "memberCount": 11,
+      "memberOnsenIds": [
+        "2075bc7b-d231-4c86-b8d8-f0f8b458b837",
+        "27b3ad71-20f2-4a80-90ba-96da45a356b4",
+        "30588cb8-b61a-4ade-8e2f-a9cf617a4626",
+        "6c22a467-a106-403c-a25b-2dcccaf96310",
+        "7755a7d7-2066-440d-921d-4c004da247d2",
+        "796fca92-622a-4a44-ba5e-a7a2be595aea",
+        "97392180-ad51-4e7a-b483-3e122fc5d030",
+        "9c8062f2-5981-4b41-81f9-00ceab4d0935",
+        "a9f0f29a-64d7-4169-ae07-6480185612ea",
+        "de8f3743-c784-4d86-b578-99051ec218ba",
+        "e80ffaea-0be8-4d61-b1d7-d79e4df6993d"
+      ],
+      "memberHids": [
+        68,
+        72,
+        74,
+        133,
+        171,
+        172,
+        193,
+        221,
+        243,
+        251,
+        255
+      ],
+      "memberAreaNames": [
+        "三加和温泉",
+        "亀の甲温泉",
+        "宝田温泉",
+        "山鹿温泉",
+        "平山温泉",
+        "日平温泉",
+        "植木温泉",
+        "泗水温泉",
+        "菊池温泉",
+        "辰頭温泉"
+      ]
+    },
+    {
+      "key": "kumamoto-hitoyoshi",
+      "areaId": "43987844-7173-4005-a91a-c843c8873015",
+      "label": "Hitoyoshi & Kuma",
+      "prefecture": "熊本県",
+      "center": {
+        "lat": 32.220949,
+        "lng": 130.745181
+      },
+      "memberCount": 3,
+      "memberOnsenIds": [
+        "20eb7147-4b63-477c-8020-506b3abce369",
+        "6be7e6c0-1d55-431c-ac28-e3cebc0097e7",
+        "be936da6-e88a-4612-a329-0e4863a2b298"
+      ],
+      "memberHids": [
+        83,
+        84,
+        209
+      ],
+      "memberAreaNames": [
+        "人吉温泉"
+      ]
+    },
+    {
+      "key": "kumamoto-amakusa",
+      "areaId": "08248740-9d63-40c6-ba17-ccc6095518ac",
+      "label": "Amakusa & Ashikita Coast",
+      "prefecture": "熊本県",
+      "center": {
+        "lat": 32.351919,
+        "lng": 130.391685
+      },
+      "memberCount": 6,
+      "memberOnsenIds": [
+        "2c9404bf-c450-44bd-96b5-5c56e80922b3",
+        "6ac3b6cc-85b3-4cb7-956f-a6f0a6a39ef5",
+        "96bf2b6e-a758-4a36-afaa-144043a3a3ca",
+        "9f06d1fa-9010-4cb6-99f8-33eac8409904",
+        "aaf40952-b62a-4734-9c8b-5f9731dad2b0",
+        "e19bdecf-6902-49a9-ae47-bcb7333e7168"
+      ],
+      "memberHids": [
+        89,
+        90,
+        183,
+        208,
+        256,
+        257
+      ],
+      "memberAreaNames": [
+        "下田温泉",
+        "弓ヶ浜温泉",
+        "日奈久温泉",
+        "湯の児温泉",
+        "湯の鶴温泉",
+        "湯浦温泉"
+      ]
+    },
+    {
+      "key": "fukuoka",
+      "areaId": "b128c6d2-64b0-424a-915d-3103a469cd43",
+      "label": "Fukuoka",
+      "prefecture": "福岡県",
+      "center": {
+        "lat": 33.41393,
+        "lng": 130.617648
+      },
+      "memberCount": 18,
+      "memberOnsenIds": [
+        "1d7e4ab2-3c45-46cc-b63d-b65497a0f3e8",
+        "1f2414d9-1326-4c95-9ea8-32941782a26b",
+        "4cf033f1-c1ea-4554-86f5-acf73b21bcb9",
+        "5b63272b-ae2f-461c-a60c-1d86d44f065b",
+        "62472b27-69c5-4a9e-b7ee-de1f031178ce",
+        "67aa58a2-2e7e-4a0c-b66b-66d8020f6d9b",
+        "69e85230-7551-410e-af1c-9c0c40f04ded",
+        "750dfed4-983f-410d-bfcf-79875cd3ff63",
+        "79bf49bb-1399-46eb-b43e-57659282a79b",
+        "a50754f8-3020-47cd-a308-5751691b580d",
+        "af1803ba-c977-418b-94f2-906a95b7c776",
+        "b8969089-a304-438b-b798-a49da6896926",
+        "c2e8b85f-b8a7-4e2a-87c5-29179c63c68b",
+        "cb966795-52ae-40ff-97d8-31cf22e259a0",
+        "cc7d59d6-08d5-40c2-b445-cee390c73df4",
+        "e0a781ff-0ada-4606-a1a6-60cd0a8366c1",
+        "fa495454-bf3a-41cb-934a-944f1bbc3a5e",
+        "fab07d28-bb69-4f71-bd16-6a9712f746ed"
+      ],
+      "memberHids": [
+        1,
+        5,
+        7,
+        8,
+        9,
+        150,
+        151,
+        167,
+        169,
+        178,
+        191,
+        192,
+        196,
+        218,
+        227,
+        238,
+        239,
+        253
+      ],
+      "memberAreaNames": [
+        "あさくら温泉",
+        "久留米温泉",
+        "二日市温泉",
+        "博多温泉",
+        "原鶴温泉",
+        "吉井温泉",
+        "大川温泉",
+        "奥原鶴温泉 とよとみの湯",
+        "林田温泉",
+        "王丸温泉",
+        "甘木温泉",
+        "筑後川温泉",
+        "船小屋温泉",
+        "遠賀川温泉"
+      ]
+    },
+    {
+      "key": "saga",
+      "areaId": "cb6d7d36-ec94-4ccf-9202-4fc4126e934f",
+      "label": "Saga",
+      "prefecture": "佐賀県",
+      "center": {
+        "lat": 33.301843,
+        "lng": 130.205538
+      },
+      "memberCount": 7,
+      "memberOnsenIds": [
+        "14f5c5c8-70f7-498a-95c9-bbf83d67efe3",
+        "3517cd58-a269-46f1-8a23-10ed911463a5",
+        "388c1e83-7aca-4af4-b9d0-98451efb7de3",
+        "44803e96-effc-4ed7-96dc-ed2cb5eb1faf",
+        "884dcbe7-fe5e-4437-89c2-3ccf848d906a",
+        "b6823e48-8853-437e-a597-cec49177bd93",
+        "e3bb6165-de4f-43ef-a50b-128786da41be"
+      ],
+      "memberHids": [
+        10,
+        11,
+        12,
+        15,
+        157,
+        240,
+        241
+      ],
+      "memberAreaNames": [
+        "佐賀大和温泉",
+        "古湯温泉",
+        "嬉野温泉",
+        "武雄温泉",
+        "熊の川温泉",
+        "鳥栖温泉"
+      ]
+    },
+    {
+      "key": "nagasaki",
+      "areaId": "adf71b00-3d0d-4596-ae7d-b8064fc44b69",
+      "label": "Nagasaki",
+      "prefecture": "長崎県",
+      "center": {
+        "lat": 33.053643,
+        "lng": 129.998073
+      },
+      "memberCount": 11,
+      "memberOnsenIds": [
+        "01f458f8-e4ca-46fb-80c1-a2417c9da59b",
+        "0d701023-9a89-4e64-853b-e56a55268b45",
+        "282ca386-3dcc-4e29-b20b-e0b0b8dea83c",
+        "2c5105d2-897b-4bf8-af92-1a36beb3ecf8",
+        "3c2a4667-b246-46f9-a00e-92b16f3954ce",
+        "59af5fc5-b760-470e-b55e-178c3126a512",
+        "6cacc02c-f4f7-4714-a9bb-f9f08f84c591",
+        "85f5ae3b-0237-4d95-b4ca-c82842d0dc2a",
+        "9330a16b-e1df-4ed2-bc29-c6043928a3f4",
+        "94aa2139-6f6f-4fa1-b7e6-87ab6633c11e",
+        "eca0bf03-c456-4b7f-b749-cddb38189344"
+      ],
+      "memberHids": [
+        19,
+        21,
+        24,
+        130,
+        148,
+        164,
+        165,
+        175,
+        219,
+        228,
+        254
+      ],
+      "memberAreaNames": [
+        "小浜温泉",
+        "島原温泉",
+        "平戸たびら温泉",
+        "波佐見温泉",
+        "湯ノ本温泉",
+        "湯本温泉",
+        "長崎温泉",
+        "雲仙・小地獄温泉",
+        "雲仙温泉",
+        "龍神温泉"
+      ]
+    },
+    {
+      "key": "miyazaki",
+      "areaId": "a544d213-2cce-4f66-b366-0b830319184c",
+      "label": "Miyazaki",
+      "prefecture": "宮崎県",
+      "center": {
+        "lat": 31.955077,
+        "lng": 131.136941
+      },
+      "memberCount": 18,
+      "memberOnsenIds": [
+        "019cfcb7-d062-4eec-8e08-61ab80a6c132",
+        "026c7db5-909e-4820-9d03-a1c957f7a1e3",
+        "0dd11055-9b41-4d68-9db4-97c5dd0fd240",
+        "1e499737-059a-43b8-9faa-c496748bbb5b",
+        "29f39988-71de-43b0-ba5d-401de127159b",
+        "2a4d07d7-b7ed-4709-91d3-59b681b1d43b",
+        "38f7b54e-3318-41de-a6bf-fd8ba8717350",
+        "48458f20-f973-4135-bba7-34feb21497e9",
+        "48766ea8-6801-4330-83cb-e7d14c3bfc99",
+        "4d898295-139b-4327-a04e-88fa4baafd19",
+        "70966554-d13d-4890-b7b6-2b9690d08df8",
+        "7444f999-ac15-4eb3-930e-4d85de20eb24",
+        "90f571df-01c9-4408-b1d8-f6f71c69c644",
+        "a0eb9792-ca40-4747-996d-a389b11febf6",
+        "c3668b74-eea4-42f8-b999-f7f3d3c48254",
+        "de8e8647-69c9-43da-b1be-067cf189f4a4",
+        "f8058c8a-c5d3-4e0f-a568-3fb43e928081",
+        "fee8a302-5e0e-4d58-8bca-65a48f99d409"
+      ],
+      "memberHids": [
+        95,
+        96,
+        97,
+        99,
+        100,
+        135,
+        137,
+        138,
+        155,
+        189,
+        200,
+        205,
+        224,
+        231,
+        232,
+        246,
+        247,
+        262
+      ],
+      "memberAreaNames": [
+        "あきしげゆ温泉",
+        "さいと温泉",
+        "ひなもり温泉",
+        "京町温泉",
+        "加久藤温泉",
+        "北郷温泉",
+        "南郷温泉",
+        "小林温泉",
+        "新富温泉",
+        "曽山寺温泉",
+        "湯之元温泉",
+        "白鳥温泉",
+        "皇子原温泉",
+        "青井岳温泉",
+        "青島温泉",
+        "高屋温泉"
+      ]
+    },
+    {
+      "key": "kagoshima",
+      "areaId": "76c6eba7-0534-4e8d-81e9-7566486fa175",
+      "label": "Kagoshima",
+      "prefecture": "鹿児島県",
+      "center": {
+        "lat": 31.643005,
+        "lng": 130.6037
+      },
+      "memberCount": 35,
+      "memberOnsenIds": [
+        "00a3716d-aa0e-4f1f-9ac4-89e6e5d4c986",
+        "036a45e6-e938-4791-aea1-b830f99495b6",
+        "065ca242-2eff-47f3-ac21-c2a0cf0f199a",
+        "0c354aa2-fd0c-45a0-a222-c534b576c897",
+        "1791fbee-cf10-4388-a8e4-76c793c0d0a3",
+        "2e45b22e-92be-4dcc-a0c2-f0f032e6e2a8",
+        "3049d418-0c64-4904-98de-a47ad4d7285e",
+        "33f24277-590c-410b-835e-cc208908f5e1",
+        "3cf4367b-0436-46e2-95b8-228f00e1fe87",
+        "3f5bc5e0-46d3-42fc-9fad-50bbe76adf1d",
+        "4c23d72a-9923-4657-94ff-7d1ff2fd0e66",
+        "54033864-b03c-40c8-9433-84e5447d1f50",
+        "54b459b3-d330-4bb9-b2b5-bf2462b13c28",
+        "563242bf-adba-42d3-907a-134203a7af1a",
+        "5c0ca3ce-a4f5-4b2a-9965-7804863d424b",
+        "5e9e164e-143c-4324-aa53-08fff6df0cc8",
+        "604bf66d-c26f-4306-9be3-52fd2e4c5b59",
+        "6a6fa3c8-4b8c-48ed-a5e3-06c392d3f9ba",
+        "6ce45efc-ed11-4538-9b8d-e06b0a24d920",
+        "7331f823-beca-41d9-968f-4d1fddeb6a5c",
+        "7730511e-7312-439e-b8a2-9ac2f336609a",
+        "8e0f905f-8c0c-4d6c-aa51-833ebcf5d184",
+        "90e94b58-78da-40bf-86bf-018c63294435",
+        "9c36ffa8-78c0-471e-bf6b-150443a669bd",
+        "9fb73205-9eac-45fc-9eaf-57359a3d3c26",
+        "a61908e7-2d2d-45d8-88d9-2a1258eb6bdd",
+        "bc421531-fff6-4b1f-8f3f-52d2e5d78077",
+        "be0f8271-fd30-400d-94ed-d3aab46379cf",
+        "cbfcbea4-7663-4c19-9797-5802f3a4894c",
+        "d13ca316-5aba-4791-8de0-db171890f810",
+        "d2f26f05-e48c-4e07-abb9-851d49ba6790",
+        "d336a52f-b597-4c82-b948-f23e8c4608f1",
+        "d82f43f0-86c1-439a-b6c5-a63bcbdfcb0f",
+        "e9f0fd98-e718-48bc-8934-c5e56114a7f9",
+        "f47e639a-6aad-43fa-9915-a855ba1388d2"
+      ],
+      "memberHids": [
+        104,
+        105,
+        106,
+        107,
+        108,
+        110,
+        111,
+        115,
+        116,
+        117,
+        119,
+        122,
+        124,
+        125,
+        127,
+        128,
+        140,
+        142,
+        159,
+        176,
+        195,
+        206,
+        207,
+        217,
+        233,
+        234,
+        235,
+        236,
+        237,
+        248,
+        249,
+        250,
+        263,
+        264,
+        265
+      ],
+      "memberAreaNames": [
+        "テイエム牧場温泉",
+        "入来温泉",
+        "十三奉行温泉",
+        "古里温泉",
+        "吉松温泉",
+        "吹上温泉",
+        "大黒温泉",
+        "妙見温泉",
+        "安楽温泉",
+        "宮之城温泉",
+        "尾之間温泉",
+        "川内高城温泉",
+        "市比野温泉",
+        "弥次ヶ湯温泉",
+        "指宿温泉",
+        "日の出温泉",
+        "日当山温泉",
+        "海潟温泉",
+        "湯之元温泉",
+        "滝の湯",
+        "硫黄谷温泉",
+        "種子島温泉",
+        "紫尾温泉",
+        "船津温泉",
+        "阿久根温泉",
+        "隼人温泉",
+        "霧島新湯温泉",
+        "霧島温泉",
+        "鹿児島温泉"
+      ]
+    }
+  ],
+  "unassigned": []
+}

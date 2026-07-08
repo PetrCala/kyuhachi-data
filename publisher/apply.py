@@ -56,6 +56,7 @@ from onsen_scraper import (  # noqa: E402
     parse_detail_page,
     romaji_for,
 )
+from onsen_scraper.regions import area_id_for, region_for  # noqa: E402
 import catalog_diff as cd  # noqa: E402
 import image_processor as ip  # noqa: E402  (publisher/image_processor.py — photo rehosting)
 import backfill_schedule as bsf  # noqa: E402  (reuse the curated-hours encoders + Firestore GET)
@@ -201,11 +202,16 @@ def build_add(hid: int, tok: str | None):
     live = parse_detail_page(fetch_detail_page(hid), hid)
     name = seed.get("name")
     adult = fee_for(hid, live.get("admission_fee"))[0]
+    # Region rollup: resolve the coarse tourism region (for area guides) from the
+    # seed's areaName + the scraped prefecture, via the shared region model. null
+    # if the region model can't place it yet (backfill_area_id surfaces those).
+    area_id = area_id_for(region_for(seed.get("areaName"), live.get("prefecture")))
     fields = {
         "name": sval(name),
         "nameKana": sval(kana_for(hid, name)),
         "nameRomaji": sval(romaji_for(hid, name)),
         "areaName": sval(seed.get("areaName")),
+        "areaId": sval(area_id),
         "address": sval(live.get("address") or seed.get("address")),
         "prefecture": sval(live.get("prefecture")),
         "lat": dval(seed.get("lat")),
@@ -228,7 +234,7 @@ def build_add(hid: int, tok: str | None):
         fields["imageUrl"] = sval(ip.upload(ip.to_webp(rawimg), kid, ip.DEFAULT_BUCKET, tok))
         fields["blurhash"] = sval(ip.blurhash_of(rawimg))
     summary = [("name", name), ("areaName", seed.get("areaName")),
-               ("prefecture", live.get("prefecture")),
+               ("areaId", area_id), ("prefecture", live.get("prefecture")),
                ("coords", f"{seed.get('lat')}, {seed.get('lng')}"),
                ("adultFee", adult), ("source_image", src_img)]
     return fields, summary
@@ -238,10 +244,10 @@ def build_add(hid: int, tok: str | None):
 # contract). A new doc must match this exactly — validated before the first create
 # so a renamed/added field on the app side aborts instead of writing a bad doc.
 ONSEN_DOC_KEYS = {
-    "name", "nameKana", "nameRomaji", "areaName", "address", "prefecture", "lat", "lng",
-    "phone", "businessHours", "admissionFee", "adultFee", "springQuality", "websiteUrl",
-    "imageUrl", "blurhash", "isActive", "catalogVersion", "createdAt", "updatedAt",
-    "dataVerifiedAt",
+    "name", "nameKana", "nameRomaji", "areaName", "areaId", "address", "prefecture",
+    "lat", "lng", "phone", "businessHours", "admissionFee", "adultFee", "springQuality",
+    "websiteUrl", "imageUrl", "blurhash", "isActive", "catalogVersion", "createdAt",
+    "updatedAt", "dataVerifiedAt",
 }
 
 

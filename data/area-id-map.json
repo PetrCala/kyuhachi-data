@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "schema": "regionKey → areaId (UUID). The stable id ledger for the area-guides feature; mirrors data/onsen-id-map.json. Ids are assigned once and never changed or reused; a retired region keeps its id. Region membership + centroids live in data/area-regions.json, editorial content in data/area_guides_curated.json."
+  },
+  "oita-beppu": "7fe5ceb9-b92c-4480-bdf8-0e2d97a85ae3",
+  "oita-yufuin": "7d606144-d133-4e22-94ce-360ba705078a",
+  "oita-kuju": "658a7138-688f-4c8d-aa32-3542a0842a5a",
+  "oita-hita": "0cf51afb-6b94-4f2d-b050-fe1e92288fc8",
+  "oita-kunisaki": "27110e0f-d339-4d4d-984b-07c050f925ea",
+  "kumamoto-aso": "fad65c15-fe08-4ea1-9543-7eba4e2f1f93",
+  "kumamoto-yamaga-kikuchi": "acb0740a-0261-4431-8394-fe1ee9630d01",
+  "kumamoto-hitoyoshi": "43987844-7173-4005-a91a-c843c8873015",
+  "kumamoto-amakusa": "08248740-9d63-40c6-ba17-ccc6095518ac",
+  "fukuoka": "b128c6d2-64b0-424a-915d-3103a469cd43",
+  "saga": "cb6d7d36-ec94-4ccf-9202-4fc4126e934f",
+  "nagasaki": "adf71b00-3d0d-4596-ae7d-b8064fc44b69",
+  "miyazaki": "a544d213-2cce-4f66-b366-0b830319184c",
+  "kagoshima": "76c6eba7-0534-4e8d-81e9-7566486fa175"
+}
