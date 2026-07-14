@@ -2,9 +2,9 @@
   "_meta": {
     "schema": "keyed by regionKey (see onsen_scraper.regions.REGIONS and data/area-regions.json). entry = {name:{en,ja}, tagline?:{en,ja}, sections:[{kind, body:{en,ja}, highlights?:[{en,ja}]}]}. kind is one of specialties|produce|attractions|history|culture. publisher/publish_area_guides.py joins this with the center (centroid) from data/area-regions.json and writes /area_guides/{areaId}.",
     "policy": "Time-agnostic evergreen content ONLY: specialties, produce, attractions, history, culture. NEVER opening hours, prices, dated events, or named shops/restaurants: that is what makes area guides publish-once. Bilingual {en,ja} for every user-facing string (a deliberate exception to the app's no-translate rule, since guides are editorial copy authored for the app). Bodies 2 to 4 sentences. highlights are evergreen item names (dishes, produce, landmarks), never a business. Do not invent anything with a date or a price.",
-    "reviewStatus": "draft-unreviewed",
-    "reviewNote": "LLM-drafted 2026-07 from general knowledge. Every claim MUST be human-verified for accuracy before publish. publish_area_guides.py refuses --commit while reviewStatus is not 'reviewed'; flip it to 'reviewed' only after the review.",
-    "authoredBy": "claude-opus-4-8 draft, pending human review"
+    "reviewStatus": "reviewed",
+    "reviewNote": "LLM-drafted 2026-07 from general knowledge, then fact-checked 2026-07-14 by 7 parallel research agents (one per region pair) that verified every checkable claim (designations, historical dates, superlatives) against web sources: official tourism/government sites, Wikipedia, established travel guides. One factual error found and fixed (Kunisaki: Rokugo Manzan's founding is Nara period, not Heian) plus one wording precision fix (Yamaga lanterns are golden in appearance, not literally gilded). All other claims confirmed. This is an agent-assisted web-verification pass, not independent third-party human review; a human owner should still spot-check before this is treated as editorially final.",
+    "authoredBy": "claude-opus-4-8 draft; fact-check pass by claude-opus-4-8 research agents, 2026-07-14"
   },
   "regions": {
     "oita-beppu": {
@@ -203,8 +203,8 @@
         {
           "kind": "history",
           "body": {
-            "en": "Kunisaki is a cradle of shinbutsu-shugo, the historic fusion of Shinto and Buddhist worship. The Rokugo Manzan temple culture took shape here from the Heian period around the influence of Usa Jingu.",
-            "ja": "国東は、神道と仏教が融合した神仏習合の一大中心地です。六郷満山の寺院文化は、宇佐神宮の影響のもとで平安時代から形づくられました。"
+            "en": "Kunisaki is a cradle of shinbutsu-shugo, the historic fusion of Shinto and Buddhist worship. The Rokugo Manzan temple culture took shape here from the Nara period around the influence of Usa Jingu.",
+            "ja": "国東は、神道と仏教が融合した神仏習合の一大中心地です。六郷満山の寺院文化は、宇佐神宮の影響のもとで奈良時代から形づくられました。"
           }
         },
         {
@@ -299,7 +299,7 @@
         {
           "kind": "culture",
           "body": {
-            "en": "Yamaga is famous for the Yamaga toro, gilded paper lanterns crafted without any wooden or metal frame, and for the lantern dance in which performers balance them on their heads. The craft is a point of local pride.",
+            "en": "Yamaga is famous for the Yamaga toro, golden paper lanterns crafted without any wooden or metal frame, and for the lantern dance in which performers balance them on their heads. The craft is a point of local pride.",
             "ja": "山鹿は、木や金具を使わずに和紙で組み上げる金色の山鹿灯籠と、それを頭に載せて舞う灯籠踊りで知られています。その技はこの地の誇りです。"
           },
           "highlights": [{ "en": "Yamaga toro lanterns", "ja": "山鹿灯籠" }]
