@@ -6,12 +6,13 @@ the **pre-human-review spot-check** for the area-guides feature. Source of truth
 (areaId, prefecture): [`data/area-regions.json`](../data/area-regions.json);
 schema and policy: [`docs/area-guides-schema.md`](area-guides-schema.md).
 
-**Status:** content is already live at publish version 1. Nothing here has been
-re-published. Two clear internal-consistency fixes were applied to the curated
-JSON in the same PR (marked ✎ below); everything else is left as a flagged
-finding for a human owner to decide. To roll out the fixes, a human runs
-`python publisher/publish_area_guides.py` (dry-run) then `--commit`, which bumps
-the version and writes production.
+**Status:** all 16 findings have been applied to `data/area_guides_curated.json`,
+and the guides were published to Firestore as **version 2** on 2026-07-14 (the
+content owner approved the flagged findings; the two internal-consistency fixes
+had already landed). Ten regions changed (Beppu, Yufuin, Kuju & Taketa, Hita &
+Yabakei, Kunisaki & Usa, Aso & Oguni, Yamaga & Kikuchi, Amakusa & Ashikita,
+Nagasaki, Miyazaki); the other four were already current. The side-by-side below
+reflects the published text.
 
 ## Method
 
@@ -31,27 +32,27 @@ the version and writes production.
 
 Severity: **blocker** (factual error / policy violation / misinforming
 mistranslation) · **should-fix** (misleading or imprecise, worth an editor's
-call) · **nit** (minor polish). Status: **✎ Fixed this PR** or **Flagged** (for
-the human owner).
+call) · **nit** (minor polish). Status: **✎ Fixed** (all 16 were applied and
+published as version 2).
 
 | # | Severity | Region | Section | Issue | Suggested change | Status |
 |---|---|---|---|---|---|---|
 | 1 | should-fix | Aso & Oguni | specialties | Internal contradiction: the highlight read だご汁 (*dago-jiru*, the local Kumamoto name) while the EN body/highlight and JA body used *dango-jiru* / 団子汁 (the Ōita form). MAFF lists だご汁 as the Kumamoto dish, だんご汁 as Ōita's. | Unify to the local form: *dago-jiru* / だご汁 in body and highlight. | ✎ Fixed |
 | 2 | nit | Hita & Yabakei | tagline | JA tagline wrote the place name 耶馬渓 in hiragana (やばけい), inconsistent with the region name and the attractions-section JA, which both use the kanji 耶馬渓. | Write 耶馬渓 in kanji (`水郷と耶馬渓の里`). Pure script normalization, meaning unchanged. | ✎ Fixed |
-| 3 | should-fix | Kuju & Taketa | tagline | EN "…and highland **moors**" and JA "…高原の**湯**" (highland hot springs) name different second features. The attractions section (JA 湿原 = wetlands) suggests "moors/wetlands" was the intent. | Align the pair, e.g. JA `炭酸泉と高原の湿原`, or EN "…and highland spa country". Editorial call. | Flagged |
-| 4 | should-fix | Yamaga & Kikuchi | history | English reuses "Kikuchi" for both the **medieval Kikuchi clan** (菊池氏) and the **ancient Kikuchi Castle** (鞠智城, a 7th-c. frontier fort ~500 yrs older). Both statements are factually correct, but the adjacency can imply the clan built the fort. JA uses distinct kanji, so the risk is EN-only. | Optionally add a clause that the fort predates the clan, or disambiguate the English name. | Flagged |
-| 5 | nit | Nagasaki | tagline | EN "Japan's historic window to the world" and JA "和華蘭の異国情緒" (the exotic *wakaran* ambience) diverge notably in emphasis, more than the other taglines. | Decide whether to bring the two closer. Both are apt for Nagasaki. | Flagged |
-| 6 | nit | Yufuin | name / spelling | JA uses 湯布院 (the post-1955-merger district spelling); the hot spring's official name is 由布院. Both read "Yufuin." An onsen-guide could prefer 由布院. | Decide 湯布院 vs 由布院. Either is defensible. | Flagged |
-| 7 | nit | Yufuin | tagline | EN adds "**arts**" ("arts-and-onsen retreat") that JA "由布岳のふもとの湯の里" (hot-spring village at the foot of Mount Yufu) does not carry. Normal transcreation. | Optional: add an "arts" nuance to JA, or drop it from EN. | Flagged |
-| 8 | nit | Beppu | attractions | Body names "the **Beppu Ropeway**," a commercial operator, which brushes the "no named businesses" line. (Highlights correctly list Mount Tsurumi, not the operator.) | Optional: "a ropeway climbs Mount Tsurumi." | Flagged |
-| 9 | nit | Kunisaki & Usa | attractions | EN calls the Kumano Magaibutsu "giant **Buddha** figures"; one of the two carvings is Fudō Myōō, a wisdom king (*myōō*), not a Buddha. JA 磨崖仏 is broader and stays accurate. "Buddha figures" is common loose usage. | Optional: "giant **Buddhist** figures / rock carvings." | Flagged |
-| 10 | nit | Kunisaki & Usa | culture | *shichitoi* (七島藺) called "a **rush** grass"; botanically it's a **sedge** (Cyperaceae). English guides commonly say "rush." | Optional: "a sedge." | Flagged |
-| 11 | nit | Kunisaki & Usa | tagline | EN "stone Buddhas and **shrines**" renders JA "石仏と**神仏習合**の里" (…and Shinto-Buddhist syncretism); "shrines" softens the syncretism idea (not wrong; Usa Jingū is present). | Optional: "…and Shinto-Buddhist syncretism." | Flagged |
-| 12 | nit | Amakusa & Ashikita | tagline | EN "churches and **sunsets**" vs JA "天草の**海**と教会" (sea and churches): the second element differs (sunsets ↔ sea). | Optional align. | Flagged |
-| 13 | nit | Amakusa & Ashikita | produce | Dekopon called "a sweet seedless **mandarin**"; botanically a *tangor* (Kiyomi × Ponkan) and usually- but not always-seedless. JA "柑橘/citrus" is looser and safer. | Optional: "a sweet, largely seedless citrus (a mandarin hybrid)." | Flagged |
-| 14 | nit | Miyazaki | tagline | EN "Sun, **surf** and the land of myth" includes surf; JA "日向路の神話と南国" has no surf equivalent (神話 = myth, 南国 = sunny south). | Optional align. | Flagged |
-| 15 | nit | Aso & Oguni | attractions | JA waterfall name written 鍋**ケ**滝 (full-size ケ); the standard/official form is 鍋**ヶ**滝 (small ヶ). | Optional: normalize ケ → ヶ. | Flagged |
-| 16 | nit | Yamaga & Kikuchi | history | "the Kikuchi clan … left their name across the landscape" slightly reverses the record: the clan took its name **from** Kikuchi district, not vice versa. The regional association is genuine. | Optional reword. | Flagged |
+| 3 | should-fix | Kuju & Taketa | tagline | EN "…and highland **moors**" and JA "…高原の**湯**" (highland hot springs) name different second features. The attractions section (JA 湿原 = wetlands) suggests "moors/wetlands" was the intent. | Align the pair, e.g. JA `炭酸泉と高原の湿原`, or EN "…and highland spa country". Editorial call. | ✎ Fixed |
+| 4 | should-fix | Yamaga & Kikuchi | history | English reuses "Kikuchi" for both the **medieval Kikuchi clan** (菊池氏) and the **ancient Kikuchi Castle** (鞠智城, a 7th-c. frontier fort ~500 yrs older). Both statements are factually correct, but the adjacency can imply the clan built the fort. JA uses distinct kanji, so the risk is EN-only. | Optionally add a clause that the fort predates the clan, or disambiguate the English name. | ✎ Fixed |
+| 5 | nit | Nagasaki | tagline | EN "Japan's historic window to the world" and JA "和華蘭の異国情緒" (the exotic *wakaran* ambience) diverge notably in emphasis, more than the other taglines. | Decide whether to bring the two closer. Both are apt for Nagasaki. | ✎ Fixed |
+| 6 | nit | Yufuin | name / spelling | JA uses 湯布院 (the post-1955-merger district spelling); the hot spring's official name is 由布院. Both read "Yufuin." An onsen-guide could prefer 由布院. | Decide 湯布院 vs 由布院. Either is defensible. | ✎ Fixed |
+| 7 | nit | Yufuin | tagline | EN adds "**arts**" ("arts-and-onsen retreat") that JA "由布岳のふもとの湯の里" (hot-spring village at the foot of Mount Yufu) does not carry. Normal transcreation. | Optional: add an "arts" nuance to JA, or drop it from EN. | ✎ Fixed |
+| 8 | nit | Beppu | attractions | Body names "the **Beppu Ropeway**," a commercial operator, which brushes the "no named businesses" line. (Highlights correctly list Mount Tsurumi, not the operator.) | Optional: "a ropeway climbs Mount Tsurumi." | ✎ Fixed |
+| 9 | nit | Kunisaki & Usa | attractions | EN calls the Kumano Magaibutsu "giant **Buddha** figures"; one of the two carvings is Fudō Myōō, a wisdom king (*myōō*), not a Buddha. JA 磨崖仏 is broader and stays accurate. "Buddha figures" is common loose usage. | Optional: "giant **Buddhist** figures / rock carvings." | ✎ Fixed |
+| 10 | nit | Kunisaki & Usa | culture | *shichitoi* (七島藺) called "a **rush** grass"; botanically it's a **sedge** (Cyperaceae). English guides commonly say "rush." | Optional: "a sedge." | ✎ Fixed |
+| 11 | nit | Kunisaki & Usa | tagline | EN "stone Buddhas and **shrines**" renders JA "石仏と**神仏習合**の里" (…and Shinto-Buddhist syncretism); "shrines" softens the syncretism idea (not wrong; Usa Jingū is present). | Optional: "…and Shinto-Buddhist syncretism." | ✎ Fixed |
+| 12 | nit | Amakusa & Ashikita | tagline | EN "churches and **sunsets**" vs JA "天草の**海**と教会" (sea and churches): the second element differs (sunsets ↔ sea). | Optional align. | ✎ Fixed |
+| 13 | nit | Amakusa & Ashikita | produce | Dekopon called "a sweet seedless **mandarin**"; botanically a *tangor* (Kiyomi × Ponkan) and usually- but not always-seedless. JA "柑橘/citrus" is looser and safer. | Optional: "a sweet, largely seedless citrus (a mandarin hybrid)." | ✎ Fixed |
+| 14 | nit | Miyazaki | tagline | EN "Sun, **surf** and the land of myth" includes surf; JA "日向路の神話と南国" has no surf equivalent (神話 = myth, 南国 = sunny south). | Optional align. | ✎ Fixed |
+| 15 | nit | Aso & Oguni | attractions | JA waterfall name written 鍋**ケ**滝 (full-size ケ); the standard/official form is 鍋**ヶ**滝 (small ヶ). | Optional: normalize ケ → ヶ. | ✎ Fixed |
+| 16 | nit | Yamaga & Kikuchi | history | "the Kikuchi clan … left their name across the landscape" slightly reverses the record: the clan took its name **from** Kikuchi district, not vice versa. The regional association is genuine. | Optional reword. | ✎ Fixed |
 
 **No blockers.** No factual errors survived re-verification, and no
 policy-violating content (opening hours, prices, dated one-time events, named
@@ -124,13 +125,13 @@ areaId `7fe5ceb9-b92c-4480-bdf8-0e2d97a85ae3` · 大分県
 | ↳ Highlights | Jigoku-mushi steamed dishes · Toriten (chicken tempura) | 地獄蒸し · とり天 |
 | **Produce** | Oita is known for the kabosu, a fragrant green citrus squeezed over grilled fish and hotpots. Seafood from Beppu Bay rounds out the local table. | 大分はかぼすの産地として知られ、焼き魚や鍋にしぼって使います。別府湾の海の幸も食卓を彩ります。 |
 | ↳ Highlights | Kabosu citrus | かぼす |
-| **Attractions** | The jigoku, or Hells, are a set of vividly coloured hot-spring pools meant for viewing rather than bathing. Above town, the Beppu Ropeway climbs Mount Tsurumi for a sweeping view over the bay. | 地獄めぐりは、入浴ではなく鑑賞のための色鮮やかな源泉の数々です。町の上手からは別府ロープウェイで鶴見岳に登り、別府湾を一望できます。 |
+| **Attractions** | The jigoku, or Hells, are a set of vividly coloured hot-spring pools meant for viewing rather than bathing. Above town, a ropeway climbs Mount Tsurumi for a sweeping view over the bay. | 地獄めぐりは、入浴ではなく鑑賞のための色鮮やかな源泉の数々です。町の上手からはロープウェイで鶴見岳に登り、別府湾を一望できます。 |
 | ↳ Highlights | The Hells (jigoku meguri) · Mount Tsurumi | 地獄めぐり · 鶴見岳 |
 | **History** | Beppu produces one of the largest volumes of hot-spring water in the world, across a group of districts long known together as the Beppu Hatto, the Eight Hot Springs of Beppu. It grew over the modern era from a therapeutic bathing town into Japan's best-known onsen resort. | 別府は世界有数の湧出量を誇り、古くから別府八湯と総称される温泉地の集まりです。近代を通じて湯治のまちから日本を代表する温泉リゾートへと発展しました。 |
 | **Culture** | Beyond ordinary baths, Beppu is famous for its sand baths, where you are buried in naturally heated sand, and steam baths. Public bathhouse culture is part of daily life here. | ふつうの湯船だけでなく、地熱で温めた砂に埋もれる砂湯や、蒸し湯でも知られています。共同浴場の文化が暮らしに根づいています。 |
 | ↳ Highlights | Sand bath (sunayu) | 砂湯 |
 
-*Note (finding 8): "Beppu Ropeway" in the attractions body names an operator; consider "a ropeway climbs Mount Tsurumi."*
+*Finding 8 applied: the branded "Beppu Ropeway" is now "a ropeway" (EN) / ロープウェイ (JA).*
 
 ## 2. Yufuin (`oita-yufuin`)
 
@@ -138,8 +139,8 @@ areaId `7d606144-d133-4e22-94ce-360ba705078a` · 大分県
 
 | Field | English | 日本語 |
 |---|---|---|
-| Name | Yufuin | 湯布院 |
-| Tagline | An arts-and-onsen retreat under Mount Yufu | 由布岳のふもとの湯の里 |
+| Name | Yufuin | 由布院 |
+| Tagline | An arts-and-onsen retreat under Mount Yufu | 由布岳のふもとのアートと湯の里 |
 | **Specialties** | Yufuin leans toward a slow, cafe-and-craft style of onsen town. Bungo beef, Oita's premium wagyu, is the local highlight, alongside dairy sweets made from highland milk. | 湯布院は、カフェや工芸を楽しむゆったりとした温泉地です。大分のブランド和牛である豊後牛が名物で、高原の牛乳を使った乳製品のスイーツも人気です。 |
 | ↳ Highlights | Bungo beef | 豊後牛 |
 | **Attractions** | Lake Kinrin, a small spring-fed pond that steams on cold mornings, sits at the heart of the town. The twin-peaked Mount Yufu rises over the basin and is a popular half-day climb. | 町の中心には、寒い朝に湯気が立つ湧水の池、金鱗湖があります。盆地の上にそびえる双耳峰の由布岳は、半日で楽しめる登山として人気です。 |
@@ -147,7 +148,7 @@ areaId `7d606144-d133-4e22-94ce-360ba705078a` · 大分県
 | **History** | Yufuin developed as a quieter counterpoint to nearby Beppu. Local residents deliberately resisted large-scale resort development to preserve the rural landscape, shaping the small-inn character the town is known for today. | 湯布院は、近隣の別府とは対照的に、静かな温泉地として歩んできました。大規模な開発をあえて避けて田園風景を守ろうとした住民の取り組みが、今日の小さな宿が並ぶ町並みを形づくりました。 |
 | **Culture** | The town is dotted with small art galleries, craft workshops and museums, giving it a reputation as an artsy retreat. Ryokan hospitality and landscape views are central to the experience. | 町には小さな美術館やギャラリー、工房が点在し、芸術的な保養地として知られています。旅館のもてなしと景観を楽しむ滞在が魅力です。 |
 
-*Notes (findings 6, 7): JA name 湯布院 vs the onsen's official 由布院; EN tagline adds "arts" not in JA. Both editorial.*
+*Findings 6, 7 applied: JA name set to the onsen-official 由布院; JA tagline now carries the "arts" nuance (アートと湯の里).*
 
 ## 3. Kuju & Taketa (`oita-kuju`)
 
@@ -156,7 +157,7 @@ areaId `658a7138-688f-4c8d-aa32-3542a0842a5a` · 大分県
 | Field | English | 日本語 |
 |---|---|---|
 | Name | Kuju & Taketa | くじゅう・竹田 |
-| Tagline | Carbonated springs and highland moors | 炭酸泉と高原の湯 |
+| Tagline | Carbonated springs and highland moors | 炭酸泉と高原の湿原 |
 | **Specialties** | The Nagayu area is celebrated for carbonated springs, whose carbon-dioxide-rich water leaves fine bubbles on the skin. Spa water is also taken as a drinking cure here. | 長湯温泉は炭酸泉で名高く、二酸化炭素を多く含む湯が肌に細かな泡をまといます。飲泉の文化も残っています。 |
 | ↳ Highlights | Carbonated springs | 炭酸泉 |
 | **Produce** | The cool highlands produce vegetables and dairy, and Oita is Japan's leading producer of dried shiitake mushrooms. Bungo beef is raised in the surrounding hills. | 涼しい高原では野菜や乳製品がつくられ、大分は干し椎茸の生産量で全国一を誇ります。周囲の山あいでは豊後牛も育てられています。 |
@@ -165,7 +166,7 @@ areaId `658a7138-688f-4c8d-aa32-3542a0842a5a` · 大分県
 | ↳ Highlights | Kuju mountains · Oka Castle ruins | くじゅう連山 · 岡城跡 |
 | **History** | Taketa was the castle town of the Oka domain, and the ruins of Oka Castle are said to have inspired the classic song Kojo no Tsuki, Moon over the Ruined Castle. The area keeps a quiet samurai-town character. | 竹田は岡藩の城下町で、岡城跡は名曲「荒城の月」の着想の地とされます。今も静かな城下町のたたずまいを残しています。 |
 
-*Note (finding 3): tagline EN "highland moors" ≠ JA "高原の湯" (highland hot springs); align the pair.*
+*Finding 3 applied: JA tagline now 高原の湿原 (highland wetlands), matching EN "highland moors."*
 
 ## 4. Hita & Yabakei (`oita-hita`)
 
@@ -192,15 +193,15 @@ areaId `27110e0f-d339-4d4d-984b-07c050f925ea` · 大分県
 | Field | English | 日本語 |
 |---|---|---|
 | Name | Kunisaki & Usa | 国東・宇佐 |
-| Tagline | Peninsula of stone Buddhas and shrines | 石仏と神仏習合の里 |
+| Tagline | Peninsula of stone Buddhas and Shinto-Buddhist worship | 石仏と神仏習合の里 |
 | **Produce** | The peninsula is a noted producer of dried shiitake mushrooms grown on oak logs. Its coastal waters yield beltfish and other seafood. | 国東半島はクヌギの原木で育てる干し椎茸の名産地です。沿岸ではタチウオなどの海の幸も水揚げされます。 |
 | ↳ Highlights | Dried shiitake | 干し椎茸 |
-| **Attractions** | Usa Jingu is the head shrine of the tens of thousands of Hachiman shrines across Japan. The hills of the peninsula hold old temples of the Rokugo Manzan tradition and the Kumano Magaibutsu, giant Buddha figures carved into a rock face. | 宇佐神宮は、全国に数万社ある八幡宮の総本宮です。半島の山々には六郷満山の古寺が点在し、岩壁に刻まれた巨大な熊野磨崖仏も残ります。 |
-| ↳ Highlights | Usa Jingu shrine · Kumano Magaibutsu rock Buddhas | 宇佐神宮 · 熊野磨崖仏 |
+| **Attractions** | Usa Jingu is the head shrine of the tens of thousands of Hachiman shrines across Japan. The hills of the peninsula hold old temples of the Rokugo Manzan tradition and the Kumano Magaibutsu, giant Buddhist figures carved into a rock face. | 宇佐神宮は、全国に数万社ある八幡宮の総本宮です。半島の山々には六郷満山の古寺が点在し、岩壁に刻まれた巨大な熊野磨崖仏も残ります。 |
+| ↳ Highlights | Usa Jingu shrine · Kumano Magaibutsu rock carvings | 宇佐神宮 · 熊野磨崖仏 |
 | **History** | Kunisaki is a cradle of shinbutsu-shugo, the historic fusion of Shinto and Buddhist worship. The Rokugo Manzan temple culture took shape here from the Nara period around the influence of Usa Jingu. | 国東は、神道と仏教が融合した神仏習合の一大中心地です。六郷満山の寺院文化は、宇佐神宮の影響のもとで奈良時代から形づくられました。 |
-| **Culture** | The peninsula preserves an ascetic mountain-pilgrimage tradition tied to its temples. It is also historically known for shichitoi, a rush grass woven into high-grade tatami facing. | 半島には、寺院と結びついた山岳修行の伝統が受け継がれています。上質な畳表に織られる七島藺の産地としても知られてきました。 |
+| **Culture** | The peninsula preserves an ascetic mountain-pilgrimage tradition tied to its temples. It is also historically known for shichitoi, a sedge woven into high-grade tatami facing. | 半島には、寺院と結びついた山岳修行の伝統が受け継がれています。上質な畳表に織られる七島藺の産地としても知られてきました。 |
 
-*Notes (findings 9 to 11): "Buddha figures" includes a Fudō Myōō (a myōō); "rush grass" is botanically a sedge; tagline "shrines" softens 神仏習合. All optional. Rokugo Manzan = Nara period re-confirmed.*
+*Findings 9 to 11 applied: "Buddhist figures" and "rock carvings" for the Kumano Magaibutsu; "sedge" for shichitoi; tagline now "Shinto-Buddhist worship." Rokugo Manzan = Nara period re-confirmed.*
 
 ## 6. Aso & Oguni (`kumamoto-aso`)
 
@@ -213,13 +214,13 @@ areaId `fad65c15-fe08-4ea1-9543-7eba4e2f1f93` · 熊本県
 | **Specialties** ✎ | Aso is grazing country, and akaushi, the local red-haired beef cattle, is the signature meat. Hearty local dishes include dago-jiru, a miso soup with flat wheat dumplings, and takana-meshi rice mixed with pickled mustard greens. | 阿蘇は放牧の地で、赤牛と呼ばれる褐毛の牛が名物の肉です。小麦の団子を入れた味噌仕立てのだご汁や、高菜漬けを混ぜた高菜めしなど、素朴な郷土料理も親しまれています。 |
 | ↳ Highlights | Aso akaushi beef · Dago-jiru | あか牛 · だご汁 |
 | **Produce** | The highland pastures support dairy farming, including jersey milk, along with highland vegetables. The volcanic soil and cool climate shape the region's produce. | 高原の牧草地では、ジャージー牛乳をはじめとする酪農や高原野菜づくりが盛んです。火山性の土壌と涼しい気候が、この地の農産物を育てます。 |
-| **Attractions** | Mount Aso is an active volcano ringed by one of the largest calderas in the world, with a smoking crater and vast grasslands. Nearby, Kurokawa Onsen is famous for its rustic streetscape of riverside inns, and Nabegataki is a waterfall you can walk behind. | 阿蘇山は、世界最大級のカルデラに囲まれた活火山で、噴煙を上げる火口と広大な草原が広がります。近くには、川沿いの宿がつくる素朴な湯の町並みで知られる黒川温泉や、裏側に回り込める鍋ケ滝があります。 |
+| **Attractions** | Mount Aso is an active volcano ringed by one of the largest calderas in the world, with a smoking crater and vast grasslands. Nearby, Kurokawa Onsen is famous for its rustic streetscape of riverside inns, and Nabegataki is a waterfall you can walk behind. | 阿蘇山は、世界最大級のカルデラに囲まれた活火山で、噴煙を上げる火口と広大な草原が広がります。近くには、川沿いの宿がつくる素朴な湯の町並みで知られる黒川温泉や、裏側に回り込める鍋ヶ滝があります。 |
 | ↳ Highlights | Mount Aso crater · Kurokawa Onsen streetscape | 阿蘇中岳火口 · 黒川温泉 |
 | **History** | The caldera was formed by enormous prehistoric eruptions, and Aso Shrine at its foot is one of Japan's oldest shrines. The grasslands are not wild but have been maintained for centuries by controlled burning. | カルデラは太古の巨大噴火によって形づくられ、ふもとの阿蘇神社は日本でも有数の古社です。草原は自然のままではなく、幾世紀にもわたる野焼きによって守られてきました。 |
 | **Culture** | Grassland burning, or noyaki, each early spring keeps the open moors from returning to forest and is a defining ritual of local land management. Aso Shrine is also known for its centuries-old agricultural festivals. | 早春の野焼きは、草原が森に戻るのを防ぐもので、この地の土地管理を象徴する営みです。阿蘇神社は、古くから続く農耕の祭りでも知られています。 |
 | ↳ Highlights | Noyaki grassland burning | 野焼き |
 
-*✎ Fixed (finding 1): dago-jiru / だご汁 unified across body and highlight. Note (finding 15): JA 鍋ケ滝 → 鍋ヶ滝 (small ヶ) optional.*
+*✎ Fixed (findings 1, 15): dago-jiru / だご汁 unified across body and highlight; Nabegataki normalized to 鍋ヶ滝 (small ヶ).*
 
 ## 7. Yamaga & Kikuchi (`kumamoto-yamaga-kikuchi`)
 
@@ -233,11 +234,11 @@ areaId `acb0740a-0261-4431-8394-fe1ee9630d01` · 熊本県
 | ↳ Highlights | Kikuchi rice | 菊池米 |
 | **Attractions** | Yamaga is home to the Yachiyoza, a beautifully preserved Meiji-era playhouse still used for performances. The Kikuchi Gorge offers cool waterfalls and forest walks, and the ancient hill fort of Kikuchi Castle stands nearby. | 山鹿には、今も上演に使われる明治期の芝居小屋、八千代座が美しく保存されています。菊池渓谷では涼やかな滝と森の散策を楽しめ、近くには古代山城の鞠智城も残ります。 |
 | ↳ Highlights | Yachiyoza playhouse · Kikuchi Gorge | 八千代座 · 菊池渓谷 |
-| **History** | The medieval Kikuchi clan ruled this district for generations and left their name across the landscape. Kikuchi Castle was an ancient mountain fortress built in the style of early frontier defences. | 中世の菊池氏が代々この地を治め、その名は今も各地に残ります。鞠智城は、古代の辺境防備の様式でつくられた山城でした。 |
+| **History** | The medieval Kikuchi clan took its name from this district and ruled the area for generations. The nearby Kikuchi Castle is far older, an ancient mountain fortress built centuries earlier in the style of early frontier defences. | 中世の菊池氏は、この地の名にちなむ一族で、代々ここを治めました。近くの鞠智城はそれよりはるかに古く、古代の辺境防備の様式でつくられた山城です。 |
 | **Culture** | Yamaga is famous for the Yamaga toro, golden paper lanterns crafted without any wooden or metal frame, and for the lantern dance in which performers balance them on their heads. The craft is a point of local pride. | 山鹿は、木や金具を使わずに和紙で組み上げる金色の山鹿灯籠と、それを頭に載せて舞う灯籠踊りで知られています。その技はこの地の誇りです。 |
 | ↳ Highlights | Yamaga toro lanterns | 山鹿灯籠 |
 
-*Notes (findings 4, 16): EN "Kikuchi" names both the medieval clan (菊池氏) and the ancient fort (鞠智城), facts correct, adjacency could mislead an EN reader; "left their name across the landscape" reverses the clan/district naming. Both optional. "Golden" re-confirmed correct.*
+*Findings 4, 16 applied: EN now says the clan took its name from the district and that the fort is far older, removing the clan/fort ambiguity. "Golden" re-confirmed correct.*
 
 ## 8. Hitoyoshi & Kuma (`kumamoto-hitoyoshi`)
 
@@ -262,15 +263,15 @@ areaId `08248740-9d63-40c6-ba17-ccc6095518ac` · 熊本県
 | Field | English | 日本語 |
 |---|---|---|
 | Name | Amakusa & Ashikita | 天草・芦北 |
-| Tagline | Island coast of churches and sunsets | 天草の海と教会 |
+| Tagline | Island coast of churches and sunsets | 天草の夕日と教会 |
 | **Specialties** | The surrounding seas make this a seafood coast, with prized fish, sea urchin and prawns. Meals here are built around the day's catch. | 周囲を海に囲まれたこの地は海の幸が豊かで、旬の魚やウニ、車海老が味わえます。食卓はその日の水揚げを中心に組み立てられます。 |
-| **Produce** | The mild coastal climate suits citrus, and Kumamoto is closely associated with the dekopon, a sweet seedless mandarin. Fishing remains central to the local economy. | 温暖な海辺の気候は柑橘に向き、熊本は甘くて種のない柑橘、デコポンと深く結びついています。漁業は今も地域の暮らしの柱です。 |
+| **Produce** | The mild coastal climate suits citrus, and Kumamoto is closely associated with the dekopon, a sweet, largely seedless citrus. Fishing remains central to the local economy. | 温暖な海辺の気候は柑橘に向き、熊本は甘くてほとんど種のない柑橘、デコポンと深く結びついています。漁業は今も地域の暮らしの柱です。 |
 | ↳ Highlights | Dekopon citrus | デコポン |
 | **Attractions** | The Amakusa islands are strung together by bridges over island-dotted seas famous for their sunsets and wild dolphins. Sakitsu Village, with its church set among fishing houses, is part of a group of hidden-Christian sites inscribed on the World Heritage list. | 天草の島々は橋で結ばれ、島影の浮かぶ海は夕日と野生のイルカで知られています。漁村に建つ教会がたたずむ崎津集落は、世界遺産に登録された潜伏キリシタン関連遺産のひとつです。 |
 | ↳ Highlights | Amakusa islands · Sakitsu church village | 天草諸島 · 崎津集落 |
 | **History** | In the early Edo period the area was a centre of the Shimabara-Amakusa uprising, a rebellion with strong ties to persecuted Christian communities. Hidden Christians kept their faith in secret here for generations. | 江戸時代初期、この地は、迫害されたキリシタンと深く結びついた島原・天草一揆の舞台となりました。潜伏キリシタンは、何世代にもわたり密かに信仰を守り継ぎました。 |
 
-*Notes (findings 12, 13): tagline "sunsets" ↔ JA "海/sea"; dekopon "seedless mandarin" is loose (a tangor). Both optional.*
+*Findings 12, 13 applied: JA tagline now 夕日 (sunsets) to match EN; dekopon reworded to "largely seedless citrus" / ほとんど種のない柑橘.*
 
 ## 10. Fukuoka (`fukuoka`)
 
@@ -319,7 +320,7 @@ areaId `adf71b00-3d0d-4596-ae7d-b8064fc44b69` · 長崎県
 | Field | English | 日本語 |
 |---|---|---|
 | Name | Nagasaki | 長崎 |
-| Tagline | Japan's historic window to the world | 和華蘭の異国情緒 |
+| Tagline | Japan's historic window to the world | 世界に開かれた和華蘭のまち |
 | **Specialties** | Nagasaki's kitchen reflects centuries of foreign contact. Champon and sara-udon layer noodles with seafood and vegetables, shippoku is a shared banquet blending Japanese, Chinese and Western dishes, and castella is a beloved sponge cake of Portuguese origin. | 長崎の食は、幾世紀にもわたる異国との交わりを映します。海鮮と野菜をのせたちゃんぽんや皿うどん、和華蘭の料理が並ぶ卓袱料理、そしてポルトガルに由来する銘菓カステラが親しまれています。 |
 | ↳ Highlights | Champon · Castella cake | ちゃんぽん · カステラ |
 | **Produce** | With its long coastline, Nagasaki is one of Japan's leading fishing prefectures. It is also the country's top grower of loquats, a sweet early-summer fruit. | 長い海岸線をもつ長崎は、日本有数の水産県です。初夏に実る甘い果実、びわの生産量でも全国一を誇ります。 |
@@ -329,7 +330,7 @@ areaId `adf71b00-3d0d-4596-ae7d-b8064fc44b69` · 長崎県
 | **History** | During Japan's period of seclusion, Nagasaki was the country's sole official window to Europe and China, with the Dutch confined to the island of Dejima. The city also carries the memory of the 1945 atomic bombing, remembered today at its Peace Park. | 鎖国の時代、長崎はヨーロッパと中国に開かれた唯一の公式の窓口であり、オランダ人は出島に限って居住を許されました。街はまた、一九四五年の原爆の記憶を、今日、平和公園に受け継いでいます。 |
 | **Culture** | Long exposure to the outside world gave Nagasaki a distinctive blend of Japanese, Chinese and European influences, often called wakaran. That mix shows in its festivals, its churches, and the layout of its old quarters. | 長い異文化との接触は、長崎に和華蘭と呼ばれる独特の混じり合いをもたらしました。その趣は、祭りや教会、古い町並みのつくりに表れています。 |
 
-*Note (finding 5): EN and JA taglines diverge in emphasis ("window to the world" vs "wakaran exotic ambience"). "Sole window to Europe and China" is correctly scoped.*
+*Finding 5 applied: JA tagline now 世界に開かれた和華蘭のまち (a wakaran town open to the world), aligning with EN. "Sole window to Europe and China" is correctly scoped.*
 
 ## 13. Miyazaki (`miyazaki`)
 
@@ -338,7 +339,7 @@ areaId `a544d213-2cce-4f66-b366-0b830319184c` · 宮崎県
 | Field | English | 日本語 |
 |---|---|---|
 | Name | Miyazaki | 宮崎 |
-| Tagline | Sun, surf and the land of myth | 日向路の神話と南国 |
+| Tagline | Sun, surf and the land of myth | 日向路の神話と南国の波 |
 | **Specialties** | Miyazaki's tables feature chicken nanban, fried chicken dressed with a sweet vinegar sauce and tartar, and sumibi-yaki, local chicken grilled over charcoal until smoky. Miyazaki beef is a prize-winning wagyu brand. | 宮崎の食卓には、甘酢とタルタルをまとった揚げ鶏のチキン南蛮や、地鶏を炭火でいぶし焼きにする炭火焼きが並びます。宮崎牛は、数々の賞に輝くブランド和牛です。 |
 | ↳ Highlights | Chicken nanban · Charcoal-grilled chicken | チキン南蛮 · 地鶏の炭火焼き |
 | **Produce** | The warm, sunny climate makes Miyazaki a major producer of mango, along with the Hyuganatsu citrus and cucumbers. Long hours of sunshine are the backbone of its farming. | 温暖で日照に恵まれた気候は、宮崎をマンゴーの一大産地とし、日向夏やきゅうりも多く育てます。豊かな日差しが、この地の農業を支えています。 |
@@ -349,7 +350,7 @@ areaId `a544d213-2cce-4f66-b366-0b830319184c` · 宮崎県
 | **Culture** | The mountains around Takachiho keep alive yokagura, all-night sacred dances that dramatise the myths of the gods. On the coast, Miyazaki's steady swell has made it one of Japan's best-known surfing regions. | 高千穂の山あいでは、神々の物語を演じる夜通しの神楽、夜神楽が受け継がれています。海辺では、安定した波が、宮崎を日本有数のサーフィンの地としています。 |
 | ↳ Highlights | Takachiho yokagura | 高千穂の夜神楽 |
 
-*Note (finding 14): EN tagline "surf" has no JA equivalent; optional.*
+*Finding 14 applied: JA tagline now 南国の波 (southern waves), carrying the "surf" of EN.*
 
 ## 14. Kagoshima (`kagoshima`)
 
@@ -373,20 +374,20 @@ areaId `76c6eba7-0534-4e8d-81e9-7566486fa175` · 鹿児島県
 
 ---
 
-## For the human owner
+## Status: applied and published
 
-1. **Read the side-by-side above.** It is every published string in one place.
-2. **Decide the flagged findings (3 to 16).** They are editorial or precision calls,
-   not errors; leave or edit each in
-   [`data/area_guides_curated.json`](../data/area_guides_curated.json).
-3. **The two ✎ fixes (findings 1, 2)** are already in the curated JSON.
-4. **To roll out any change**, run the publisher (a human step, do not automate):
+All 16 findings were applied to
+[`data/area_guides_curated.json`](../data/area_guides_curated.json) and published
+to Firestore as **version 2** on 2026-07-14 (content owner approved). Ten guides
+were rewritten and `area_guides_meta/current` now reads version 2, totalCount 14.
+The side-by-side above is the published text.
 
-   ```bash
-   python publisher/publish_area_guides.py            # dry-run, proof the copy
-   python publisher/publish_area_guides.py --commit    # bumps version, writes prod
-   ```
+For a later edit, change the curated JSON and re-run the publisher:
 
-   `_meta.reviewStatus` is `"reviewed"`, so `--commit` is not blocked. The
-   `_meta.reviewNote` is kept honest: this is an agent-assisted verification, not
-   independent third-party human sign-off.
+```bash
+python publisher/publish_area_guides.py            # dry-run, proof the copy
+python publisher/publish_area_guides.py --commit    # bumps version, writes prod
+```
+
+`_meta.reviewStatus` stays `"reviewed"`; `_meta.reviewNote` records that this
+remains an agent-assisted verification, not an independent third-party audit.
