@@ -117,12 +117,39 @@ jobs:
       - name: Tests
         run: uv run --python 3.12 --with pytest python -m pytest tests/
 
-      # New onsens are baselined by promote but their Firestore doc is NOT created here
-      # (apply.py `add` is not built yet). Surface them so they aren't silently dropped.
-      - name: Flag ADDED onsens (manual doc-creation pending)
+      # New onsens ARE published above by apply.py `add` (Publish fields / fees / retire
+      # step), but only if this decisions.json's hid already had a minted kyuhachiId in
+      # data/onsen-id-map.json going in (catalog-sync Phase 4 mints in the prep PR, before
+      # decisions.json merges); apply.py silently skips any hid still missing one. Surface
+      # every ADDED hid so a missed mint isn't silently dropped, and as a reminder that the
+      # app-repo challenge-pool hand-off is always a separate, manual step regardless.
+      - name: Flag ADDED onsens (challenge-pool hand-off pending)
         run: |
           set -uo pipefail
-          python3 -c "import glob,json; reps=sorted(glob.glob('reports/*/changelog.json')); added=(json.load(open(reps[-1])).get('added',[]) if reps else []); print('::warning::ADDED onsens '+', '.join(str(a['hid']) for a in added)+' are baselined but their Firestore docs need manual creation (apply.py add is not built yet) plus an app-repo challenge-pool hand-off.') if added else print('no ADDED onsens')"
+          python3 - <<'PY'
+          import glob, json
+
+          reports = sorted(glob.glob("reports/*/changelog.json"))
+          added = json.load(open(reports[-1])).get("added", []) if reports else []
+          if not added:
+              print("no ADDED onsens")
+              raise SystemExit(0)
+
+          idmap = json.load(open("data/onsen-id-map.json"))
+          minted = [a["hid"] for a in added if str(a["hid"]) in idmap]
+          unminted = [a["hid"] for a in added if str(a["hid"]) not in idmap]
+
+          if minted:
+              print("::warning::ADDED onsens " + ", ".join(map(str, minted)) +
+                    " were minted going in, so apply.py add published their Firestore docs "
+                    "above (if decisions.json marked them `add`); the app-repo "
+                    "challenge-pool hand-off is still manual.")
+          if unminted:
+              print("::warning::ADDED onsens " + ", ".join(map(str, unminted)) +
+                    " have no kyuhachiId in data/onsen-id-map.json, so apply.py add skipped "
+                    "them this run; mint (catalog_sync.py mint --from-staging --commit), "
+                    "add a decision, and re-run before they can be published.")
+          PY
 
       # Write-back: the only repo mutation. snapshot.db is NOT in the trigger paths, so
       # this push does not re-trigger the workflow.
