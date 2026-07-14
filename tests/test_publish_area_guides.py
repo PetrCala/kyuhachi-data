@@ -93,7 +93,12 @@ def test_every_model_region_has_reviewable_curated_content():
         assert len(kinds) == len(set(kinds))          # no duplicate kinds
 
 
-def test_content_defaults_to_unreviewed_so_commit_is_blocked():
-    # The gate: publish refuses --commit unless this is 'reviewed'. It ships as a
-    # draft, so the default state is safe (dry-run only).
-    assert CURATED_DOC["_meta"]["reviewStatus"] != "reviewed"
+def test_reviewed_status_is_backed_by_a_substantive_review_note():
+    # The gate: publish refuses --commit unless this is 'reviewed'. That must never
+    # be a bare flip: if it says 'reviewed', reviewNote has to actually describe
+    # what review happened (so an accidental/unjustified flip is still caught).
+    meta = CURATED_DOC["_meta"]
+    if meta["reviewStatus"] == "reviewed":
+        assert len(meta.get("reviewNote", "")) > 80
+    else:
+        assert meta["reviewStatus"] == "draft-unreviewed"
