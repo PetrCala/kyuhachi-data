@@ -3,8 +3,8 @@
     "schema": "keyed by regionKey (see onsen_scraper.regions.REGIONS and data/area-regions.json). entry = {name:{en,ja}, tagline?:{en,ja}, sections:[{kind, body:{en,ja}, highlights?:[{en,ja}]}]}. kind is one of specialties|produce|attractions|history|culture. publisher/publish_area_guides.py joins this with the center (centroid) from data/area-regions.json and writes /area_guides/{areaId}.",
     "policy": "Time-agnostic evergreen content ONLY: specialties, produce, attractions, history, culture. NEVER opening hours, prices, dated events, or named shops/restaurants: that is what makes area guides publish-once. Bilingual {en,ja} for every user-facing string (a deliberate exception to the app's no-translate rule, since guides are editorial copy authored for the app). Bodies 2 to 4 sentences. highlights are evergreen item names (dishes, produce, landmarks), never a business. Do not invent anything with a date or a price.",
     "reviewStatus": "reviewed",
-    "reviewNote": "LLM-drafted 2026-07 from general knowledge, then fact-checked 2026-07-14 by 7 parallel research agents (one per region pair) that verified every checkable claim (designations, historical dates, superlatives) against web sources: official tourism/government sites, Wikipedia, established travel guides. One factual error found and fixed (Kunisaki: Rokugo Manzan's founding is Nara period, not Heian) plus one wording precision fix (Yamaga lanterns are golden in appearance, not literally gilded). All other claims confirmed. This is an agent-assisted web-verification pass, not independent third-party human review; a human owner should still spot-check before this is treated as editorially final.",
-    "authoredBy": "claude-opus-4-8 draft; fact-check pass by claude-opus-4-8 research agents, 2026-07-14"
+    "reviewNote": "LLM-drafted 2026-07, then fact-checked and bilingually reviewed 2026-07-14: 7 parallel research agents re-verified every checkable claim (designations, dates, superlatives, place names) against official tourism/government sites, Wikipedia, and established guides, plus a full EN/JA fidelity, tone, and policy pass. Findings are documented side by side in docs/area-guides-content-review.md; no factual errors remained after re-verification (the prior pass's Nara-period Rokugo Manzan and 'golden' Yamaga-lantern corrections were reconfirmed). All 16 review findings were applied to this file: 2 internal-consistency fixes (Aso dago-jiru; Hita tagline kanji) plus, after the content owner approved them on 2026-07-14, 14 further edits (tagline/wording EN-JA alignments across Kuju, Yufuin, Kunisaki, Amakusa, Miyazaki and Nagasaki; Yufuin name 湯布院 to 由布院; Beppu ropeway de-branded; Kunisaki 'Buddhist figures'/'sedge'; Yamaga clan-vs-fort disambiguation; Nabegataki kana). Content-owner-approved and published to Firestore as version 2 on 2026-07-14. Verification is agent-assisted, not an independent third-party audit.",
+    "authoredBy": "claude-opus-4-8 draft; fact-check + bilingual review passes by claude-opus-4-8 research agents, 2026-07-14"
   },
   "regions": {
     "oita-beppu": {
@@ -33,8 +33,8 @@
         {
           "kind": "attractions",
           "body": {
-            "en": "The jigoku, or Hells, are a set of vividly coloured hot-spring pools meant for viewing rather than bathing. Above town, the Beppu Ropeway climbs Mount Tsurumi for a sweeping view over the bay.",
-            "ja": "地獄めぐりは、入浴ではなく鑑賞のための色鮮やかな源泉の数々です。町の上手からは別府ロープウェイで鶴見岳に登り、別府湾を一望できます。"
+            "en": "The jigoku, or Hells, are a set of vividly coloured hot-spring pools meant for viewing rather than bathing. Above town, a ropeway climbs Mount Tsurumi for a sweeping view over the bay.",
+            "ja": "地獄めぐりは、入浴ではなく鑑賞のための色鮮やかな源泉の数々です。町の上手からはロープウェイで鶴見岳に登り、別府湾を一望できます。"
           },
           "highlights": [
             { "en": "The Hells (jigoku meguri)", "ja": "地獄めぐり" },
@@ -59,8 +59,8 @@
       ]
     },
     "oita-yufuin": {
-      "name": { "en": "Yufuin", "ja": "湯布院" },
-      "tagline": { "en": "An arts-and-onsen retreat under Mount Yufu", "ja": "由布岳のふもとの湯の里" },
+      "name": { "en": "Yufuin", "ja": "由布院" },
+      "tagline": { "en": "An arts-and-onsen retreat under Mount Yufu", "ja": "由布岳のふもとのアートと湯の里" },
       "sections": [
         {
           "kind": "specialties",
@@ -99,7 +99,7 @@
     },
     "oita-kuju": {
       "name": { "en": "Kuju & Taketa", "ja": "くじゅう・竹田" },
-      "tagline": { "en": "Carbonated springs and highland moors", "ja": "炭酸泉と高原の湯" },
+      "tagline": { "en": "Carbonated springs and highland moors", "ja": "炭酸泉と高原の湿原" },
       "sections": [
         {
           "kind": "specialties",
@@ -139,7 +139,7 @@
     },
     "oita-hita": {
       "name": { "en": "Hita & Yabakei", "ja": "日田・耶馬渓" },
-      "tagline": { "en": "River town and carved-gorge country", "ja": "水郷とやばけいの里" },
+      "tagline": { "en": "River town and carved-gorge country", "ja": "水郷と耶馬渓の里" },
       "sections": [
         {
           "kind": "produce",
@@ -179,7 +179,7 @@
     },
     "oita-kunisaki": {
       "name": { "en": "Kunisaki & Usa", "ja": "国東・宇佐" },
-      "tagline": { "en": "Peninsula of stone Buddhas and shrines", "ja": "石仏と神仏習合の里" },
+      "tagline": { "en": "Peninsula of stone Buddhas and Shinto-Buddhist worship", "ja": "石仏と神仏習合の里" },
       "sections": [
         {
           "kind": "produce",
@@ -192,12 +192,12 @@
         {
           "kind": "attractions",
           "body": {
-            "en": "Usa Jingu is the head shrine of the tens of thousands of Hachiman shrines across Japan. The hills of the peninsula hold old temples of the Rokugo Manzan tradition and the Kumano Magaibutsu, giant Buddha figures carved into a rock face.",
+            "en": "Usa Jingu is the head shrine of the tens of thousands of Hachiman shrines across Japan. The hills of the peninsula hold old temples of the Rokugo Manzan tradition and the Kumano Magaibutsu, giant Buddhist figures carved into a rock face.",
             "ja": "宇佐神宮は、全国に数万社ある八幡宮の総本宮です。半島の山々には六郷満山の古寺が点在し、岩壁に刻まれた巨大な熊野磨崖仏も残ります。"
           },
           "highlights": [
             { "en": "Usa Jingu shrine", "ja": "宇佐神宮" },
-            { "en": "Kumano Magaibutsu rock Buddhas", "ja": "熊野磨崖仏" }
+            { "en": "Kumano Magaibutsu rock carvings", "ja": "熊野磨崖仏" }
           ]
         },
         {
@@ -210,7 +210,7 @@
         {
           "kind": "culture",
           "body": {
-            "en": "The peninsula preserves an ascetic mountain-pilgrimage tradition tied to its temples. It is also historically known for shichitoi, a rush grass woven into high-grade tatami facing.",
+            "en": "The peninsula preserves an ascetic mountain-pilgrimage tradition tied to its temples. It is also historically known for shichitoi, a sedge woven into high-grade tatami facing.",
             "ja": "半島には、寺院と結びついた山岳修行の伝統が受け継がれています。上質な畳表に織られる七島藺の産地としても知られてきました。"
           }
         }
@@ -223,12 +223,12 @@
         {
           "kind": "specialties",
           "body": {
-            "en": "Aso is grazing country, and akaushi, the local red-haired beef cattle, is the signature meat. Hearty local dishes include dango-jiru, a miso soup with flat wheat dumplings, and takana-meshi rice mixed with pickled mustard greens.",
-            "ja": "阿蘇は放牧の地で、赤牛と呼ばれる褐毛の牛が名物の肉です。小麦の団子を入れた味噌仕立ての団子汁や、高菜漬けを混ぜた高菜めしなど、素朴な郷土料理も親しまれています。"
+            "en": "Aso is grazing country, and akaushi, the local red-haired beef cattle, is the signature meat. Hearty local dishes include dago-jiru, a miso soup with flat wheat dumplings, and takana-meshi rice mixed with pickled mustard greens.",
+            "ja": "阿蘇は放牧の地で、赤牛と呼ばれる褐毛の牛が名物の肉です。小麦の団子を入れた味噌仕立てのだご汁や、高菜漬けを混ぜた高菜めしなど、素朴な郷土料理も親しまれています。"
           },
           "highlights": [
             { "en": "Aso akaushi beef", "ja": "あか牛" },
-            { "en": "Dango-jiru", "ja": "だご汁" }
+            { "en": "Dago-jiru", "ja": "だご汁" }
           ]
         },
         {
@@ -242,7 +242,7 @@
           "kind": "attractions",
           "body": {
             "en": "Mount Aso is an active volcano ringed by one of the largest calderas in the world, with a smoking crater and vast grasslands. Nearby, Kurokawa Onsen is famous for its rustic streetscape of riverside inns, and Nabegataki is a waterfall you can walk behind.",
-            "ja": "阿蘇山は、世界最大級のカルデラに囲まれた活火山で、噴煙を上げる火口と広大な草原が広がります。近くには、川沿いの宿がつくる素朴な湯の町並みで知られる黒川温泉や、裏側に回り込める鍋ケ滝があります。"
+            "ja": "阿蘇山は、世界最大級のカルデラに囲まれた活火山で、噴煙を上げる火口と広大な草原が広がります。近くには、川沿いの宿がつくる素朴な湯の町並みで知られる黒川温泉や、裏側に回り込める鍋ヶ滝があります。"
           },
           "highlights": [
             { "en": "Mount Aso crater", "ja": "阿蘇中岳火口" },
@@ -292,8 +292,8 @@
         {
           "kind": "history",
           "body": {
-            "en": "The medieval Kikuchi clan ruled this district for generations and left their name across the landscape. Kikuchi Castle was an ancient mountain fortress built in the style of early frontier defences.",
-            "ja": "中世の菊池氏が代々この地を治め、その名は今も各地に残ります。鞠智城は、古代の辺境防備の様式でつくられた山城でした。"
+            "en": "The medieval Kikuchi clan took its name from this district and ruled the area for generations. The nearby Kikuchi Castle is far older, an ancient mountain fortress built centuries earlier in the style of early frontier defences.",
+            "ja": "中世の菊池氏は、この地の名にちなむ一族で、代々ここを治めました。近くの鞠智城はそれよりはるかに古く、古代の辺境防備の様式でつくられた山城です。"
           }
         },
         {
@@ -340,7 +340,7 @@
     },
     "kumamoto-amakusa": {
       "name": { "en": "Amakusa & Ashikita", "ja": "天草・芦北" },
-      "tagline": { "en": "Island coast of churches and sunsets", "ja": "天草の海と教会" },
+      "tagline": { "en": "Island coast of churches and sunsets", "ja": "天草の夕日と教会" },
       "sections": [
         {
           "kind": "specialties",
@@ -352,8 +352,8 @@
         {
           "kind": "produce",
           "body": {
-            "en": "The mild coastal climate suits citrus, and Kumamoto is closely associated with the dekopon, a sweet seedless mandarin. Fishing remains central to the local economy.",
-            "ja": "温暖な海辺の気候は柑橘に向き、熊本は甘くて種のない柑橘、デコポンと深く結びついています。漁業は今も地域の暮らしの柱です。"
+            "en": "The mild coastal climate suits citrus, and Kumamoto is closely associated with the dekopon, a sweet, largely seedless citrus. Fishing remains central to the local economy.",
+            "ja": "温暖な海辺の気候は柑橘に向き、熊本は甘くてほとんど種のない柑橘、デコポンと深く結びついています。漁業は今も地域の暮らしの柱です。"
           },
           "highlights": [{ "en": "Dekopon citrus", "ja": "デコポン" }]
         },
@@ -488,7 +488,7 @@
     },
     "nagasaki": {
       "name": { "en": "Nagasaki", "ja": "長崎" },
-      "tagline": { "en": "Japan's historic window to the world", "ja": "和華蘭の異国情緒" },
+      "tagline": { "en": "Japan's historic window to the world", "ja": "世界に開かれた和華蘭のまち" },
       "sections": [
         {
           "kind": "specialties",
@@ -538,7 +538,7 @@
     },
     "miyazaki": {
       "name": { "en": "Miyazaki", "ja": "宮崎" },
-      "tagline": { "en": "Sun, surf and the land of myth", "ja": "日向路の神話と南国" },
+      "tagline": { "en": "Sun, surf and the land of myth", "ja": "日向路の神話と南国の波" },
       "sections": [
         {
           "kind": "specialties",
