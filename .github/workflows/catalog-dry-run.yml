@@ -54,6 +54,11 @@ jobs:
           set -uo pipefail
           uv run --python 3.12 python publisher/backfill_schedule.py --from-curated 2>&1 | tee backfill.out
 
+      - name: backfill_area_id.py dry-run (region join; reads live Firestore)
+        run: |
+          set -uo pipefail
+          uv run --python 3.12 python publisher/backfill_area_id.py 2>&1 | tee areaid.out
+
       # The curated⊇snapshot coverage invariant is a post-promote check (enforced
       # in the catalog-publish job). On a PR that adds new onsens, curated has them
       # before promote advances the snapshot, so deselect it here.
@@ -79,6 +84,14 @@ jobs:
             echo ""
             echo '```'
             cat backfill.out
+            echo '```'
+            echo ""
+            echo "</details>"
+            echo ""
+            echo "<details><summary><code>backfill_area_id.py</code> (region join)</summary>"
+            echo ""
+            echo '```'
+            cat areaid.out
             echo '```'
             echo ""
             echo "</details>"

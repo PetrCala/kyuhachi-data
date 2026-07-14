@@ -54,6 +54,10 @@ jobs:
             echo '```'
             uv run --python 3.12 python publisher/backfill_schedule.py --from-curated 2>&1
             echo '```'
+            echo '### backfill_area_id.py (region join)'
+            echo '```'
+            uv run --python 3.12 python publisher/backfill_area_id.py 2>&1
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
       # Pre-promote: the curated⊇snapshot coverage invariant is enforced in the
       # publish job AFTER promote. When new onsens are pending it legitimately
@@ -113,6 +117,14 @@ jobs:
       # aware with a monotonic guard — never regresses a fresher live value.
       - name: Backfill dataVerifiedAt (freshness cue)
         run: uv run --python 3.12 python publisher/backfill_data_verified_at.py --commit
+
+      # Propagate region rollups: write the stable areaId (the area-guides join)
+      # onto every onsen. apply.py's `add` already sets it on new docs; this covers
+      # the confirmed-unchanged rest plus any taxonomy edit in onsen_scraper/regions.py.
+      # Post-promote (it reads snapshot.db's area names). No-op aware; bumps
+      # catalog_meta only when a value actually changes.
+      - name: Backfill areaId (region join)
+        run: uv run --python 3.12 python publisher/backfill_area_id.py --commit
 
       - name: Tests
         run: uv run --python 3.12 --with pytest python -m pytest tests/

@@ -105,6 +105,8 @@ decide whether to refetch guides.
 python -m onsen_scraper.regions --build
 
 # 2. backfill the areaId join onto /onsens (dry-run, then commit):
+#    (also runs automatically, gated, in the catalog-publish workflow after promote;
+#     this manual commit is only for an out-of-cycle taxonomy or content update)
 python publisher/backfill_area_id.py
 python publisher/backfill_area_id.py --commit
 
