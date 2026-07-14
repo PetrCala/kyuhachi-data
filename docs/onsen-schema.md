@@ -17,6 +17,7 @@ table and that set can't silently drift apart.
 | `nameKana` | string | generated hiragana reading (gojūon sort key) + curated overlay — `onsen_scraper/readings.py`, `data/readings_curated.json` |
 | `nameRomaji` | string | generated Hepburn romaji (display-only) + curated overlay — same module |
 | `areaName` | string | `/map` seed |
+| `areaId` | string \| null | stable id of the coarse tourism region this onsen rolls up into (the app's area guides). Assigned by `onsen_scraper/regions.py`, written by `publisher/backfill_area_id.py` (and set on create by `apply.py`'s `add`). null until published, or when the region model can't place the onsen yet. See [`docs/area-guides-schema.md`](area-guides-schema.md) |
 | `address` | string | live detail scrape (falls back to the seed) |
 | `prefecture` | string | live detail scrape |
 | `lat`, `lng` | double | `/map` seed |
