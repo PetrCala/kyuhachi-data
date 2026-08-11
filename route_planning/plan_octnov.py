@@ -179,7 +179,10 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
     def close_day() -> None:
         nonlocal days, cur
         cur["end_km"] = cum_km
-        cur["km"] = round(cum_km - cur["start_km"], 1)
+        cur["detour_km"] = round(cur.get("detour_km", 0.0), 1)
+        cur["line_km"] = round(cum_km - cur["start_km"], 1)
+        # What the legs actually do today = along the line + in and out of doors.
+        cur["km"] = round(cur["line_km"] + cur["detour_km"], 1)
         cur["ascent_m"] = round(cur["ascent_m"])
         cur["end_clock"] = hhmm(clock)
         for g in gaps_in(cur["start_km"], cum_km, gaps):
@@ -238,9 +241,18 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
         cum_km += leg_left
         cur["ascent_m"] += leg_ascent_left
         clock += walk_min
-        arrive = clock
         leg_left = 0.0
         leg_ascent_left = 0.0
+
+        # The line passes NEAR the onsen, not through its door. 39 of the 119 sit
+        # off the line (up to 1.63 km; PASS_KM caps it at 2). Walking in and back
+        # out is real distance and real time that `line_km` does not contain, so
+        # price the outbound leg into the arrival and the return leg after the
+        # soak. Spurs already have their out-and-back baked into leg_km, so their
+        # offset is ~0 and this adds nothing (no double counting).
+        door_km = s["dist_to_line_km"] if s["dist_to_line_km"] > 0.05 else 0.0
+        door_min = door_km / config.SPEED_KMH * 60.0
+        arrive = clock + door_min
 
         z = crux_for(s["order"])
         if z and z["title"] not in seen_crux:
@@ -287,18 +299,23 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
             clock = cur["_start"]
             continue
         else:
+            clock = arrive
             if too_early:
                 note = f"wait {int(om - arrive)} min for {hhmm(om)} open"
                 clock = float(om)
             visited += 1
             prefs_done.add(s["pref_short"])
             status = "VISIT"
-            clock += config.VISIT_MIN
+            # soak, then walk back out to the line
+            clock += config.VISIT_MIN + door_min
+            cur["detour_km"] = cur.get("detour_km", 0.0) + 2 * door_km
+            day_km += 2 * door_km
 
         cur["events"].append(
             {
                 "order": s["order"],
                 "pref": s["pref_short"],
+                "off_line_km": round(s["dist_to_line_km"], 2),
                 "name": f"{s['area']}：{s['name']}",
                 "at": hhmm(arrive),
                 "km": round(cum_km, 1),
@@ -345,7 +362,10 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
             "walking_days": len(walking),
             "rest_days": len(days) - len(walking),
             "route_km": round(days[-1]["end_km"], 1),
-            "km_per_calendar_day": round(days[-1]["end_km"] / len(days), 1),
+            "door_detour_km": round(sum(d["detour_km"] for d in days), 1),
+            "walked_km": round(days[-1]["end_km"] + sum(d["detour_km"] for d in days), 1),
+            "km_per_calendar_day": round(
+                (days[-1]["end_km"] + sum(d["detour_km"] for d in days)) / len(days), 1),
             "km_per_walking_day": round(sum(km_days) / len(km_days), 1),
             "longest_day_km": max(km_days),
             "total_ascent_m": sum(d["ascent_m"] for d in days),
@@ -381,7 +401,8 @@ def write_md(p: dict, path: Path) -> None:
     )
     L.append("")
     L.append(
-        f"**{t['route_km']} km · {t['calendar_days']} calendar days "
+        f"**{t['walked_km']} km on the legs ({t['route_km']} km of route line + "
+        f"{t['door_detour_km']} km in and out of doors) · {t['calendar_days']} calendar days "
         f"({t['walking_days']} walking, {t['rest_days']} rest) · "
         f"{t['km_per_calendar_day']} km/calendar day · start {t['start']} · "
         f"finish {t['finish']} · {t['slack_days']} days of slack to {t['deadline']}**")
@@ -433,6 +454,24 @@ def write_md(p: dict, path: Path) -> None:
         "~18:00 in early October and ~17:25 by mid-November, so pack the headtorch at the top "
         "of the bag, not the bottom. On 1 Nov 2022 you walked 51 km on ~10.5 h of daylight, so "
         "this is a known quantity, not an experiment.")
+    L.append("")
+    L.append("### This is your line, not a generated one")
+    L.append("")
+    L.append(
+        f"The plan is built on **`{config.HANDDRAWN_GPX.name}`**, the line you drew on "
+        f"plotaroute (22,439 track points, 1,039.3 km raw), with the Nagasaki loop "
+        f"road-corrected onto real highways (+141.6 km of loop) and 4 out-and-back spurs "
+        f"grafted on, giving **{t['route_km']} km**. Every per-day distance below is measured "
+        "**along that line**, not as straight-line hops: all 119 legs match the along-track "
+        "delta exactly. Ascent comes from SRTM sampled along the same line.")
+    L.append("")
+    L.append(
+        f"Added on top: **{t['door_detour_km']} km of door detours**. The line passes near an "
+        "onsen, not through it, and 39 of the 119 sit off it (capped at 2 km by `PASS_KM`, "
+        "worst is 1.63 km). Walking in and back out is real distance and real time, so it is "
+        "priced in per visit. Three onsens carry 8.5 km of that between them: **#2 たまて箱 "
+        "(1.63 km each way), #12 きのこの里 (1.34 km), #81 みはらしの宿ふろんでん (1.29 km)**. "
+        "Each is a ~3 km round trip off the road, so decide at the junction, not at the door.")
     L.append("")
     L.append("### Weekly blocks against the 2022 band")
     L.append("")
@@ -515,6 +554,8 @@ def write_md(p: dict, path: Path) -> None:
         "wait is 220 min on Oct 27.")
     L.append("")
     L.append("## Pace check (carry this: cumulative km by day)")
+    L.append("")
+    L.append("*km = walked (line + door detours). cum km = position along the line.*")
     L.append("")
     L.append("| day | date | km | cum km | onsens | cum onsens |")
     L.append("|---|---|---|---|---|---|")
@@ -599,8 +640,8 @@ def main() -> None:
 
     t = p["totals"]
     print(
-        f"\n{t['route_km']} km · {t['calendar_days']} calendar days "
-        f"({t['walking_days']} walking + {t['rest_days']} rest) · "
+        f"\n{t['walked_km']} km walked ({t['route_km']} line + {t['door_detour_km']} doors) · "
+        f"{t['calendar_days']} calendar days ({t['walking_days']} walking + {t['rest_days']} rest) · "
         f"{t['km_per_calendar_day']} km/cal-day, {t['km_per_walking_day']} km/walking day "
         f"(longest {t['longest_day_km']:.0f})")
     print(f"start {t['start']} · finish {t['finish']} · slack {t['slack_days']} d to {t['deadline']}")
