@@ -174,8 +174,21 @@ def test_single_last_entry_absent_or_complex_is_none():
     assert single_last_entry("内湯10:00～最終受付 20:00（土日祝～14:00）\n露天10:00～最終受付 22:00") is None
 
 
+def test_single_last_entry_accepts_saishu_nyujo():
+    # 88onsen uses 最終入場 as well as 最終受付 (hid 244, 2026-08 cycle). Same fact,
+    # so it is detected; the per-line scan takes the first stated cutoff.
+    hid244 = ("木金曜日15:00～21:30（最終入場21:00）\n"
+              "土日祝日12:00～21:30（最終入場21:00）\n"
+              "月曜、火曜、水曜休　但し祝日の場合は営業")
+    assert single_last_entry(hid244) == "21:00"
+
+
 def test_last_entry_caption_wording():
     # The one canonical wording (docs/hours-schema.md caption table).
     assert last_entry_caption("10:00～21:30（最終受付21:00）") == {
         "en": "Last entry by 21:00", "ja": "最終受付 21:00"}
     assert last_entry_caption("10:00～22:00\n水曜休") is None
+    # 最終入場 in the source still publishes the canonical 最終受付 caption, so the
+    # app's Japanese does not vary with the source's choice of wording.
+    assert last_entry_caption("12:00～21:30（最終入場21:00）") == {
+        "en": "Last entry by 21:00", "ja": "最終受付 21:00"}
