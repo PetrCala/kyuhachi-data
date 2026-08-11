@@ -1,0 +1,284 @@
+{
+  "source": "hike_2022_japan.xlsx",
+  "trip": {
+    "start": "2022-08-19",
+    "end": "2022-11-03",
+    "calendar_days": 77,
+    "walking_days": 74,
+    "rest_days": 3,
+    "rest_day_dates": [
+      "2022-09-03",
+      "2022-09-20",
+      "2022-10-29"
+    ],
+    "total_km": 2634.0,
+    "km_per_calendar_day": 34.21,
+    "km_per_walking_day": 35.59,
+    "total_steps": 3656809
+  },
+  "walking_day_km": {
+    "n": 74,
+    "min": 11.0,
+    "p10": 24.0,
+    "p25": 31.0,
+    "median": 36.0,
+    "mean": 35.6,
+    "p75": 41.0,
+    "p90": 48.0,
+    "max": 55.0,
+    "stdev": 9.1
+  },
+  "rolling_7day_km": {
+    "n": 71,
+    "min": 201.0,
+    "p10": 215.0,
+    "p25": 227.0,
+    "median": 243.0,
+    "mean": 241.7,
+    "p75": 252.0,
+    "p90": 268.0,
+    "max": 293.0,
+    "stdev": 21.0
+  },
+  "adaptation": {
+    "first_14_walking_days_mean_km": 33.5,
+    "last_14_walking_days_mean_km": 36.9,
+    "after_break_in_mean_km": 36.1,
+    "break_in_penalty_km": 2.6
+  },
+  "rest_cadence": {
+    "walking_streaks": [
+      15,
+      16,
+      38,
+      5
+    ],
+    "longest_streak_days": 38,
+    "mean_streak_days": 18.5,
+    "rest_day_every_n_days": 25.7
+  },
+  "onsen_effect": {
+    "onsen_days": 65,
+    "onsen_day_share": 0.844,
+    "mean_km_onsen_day": 36.6,
+    "mean_km_no_onsen_day": 30.0,
+    "onsen_day_km_delta": 6.6
+  },
+  "big_day_recovery": {
+    "big_day_threshold_km": 45.0,
+    "big_days": 10,
+    "mean_km_day_after_big": 34.7,
+    "back_to_back_40km_pairs": 2,
+    "days_over_40km": 23,
+    "days_over_50km": 6
+  },
+  "stride": {
+    "steps_per_km": {
+      "n": 74,
+      "min": 945.7,
+      "p10": 1259.0,
+      "p25": 1333.1,
+      "median": 1408.1,
+      "mean": 1400.4,
+      "p75": 1474.3,
+      "p90": 1545.3,
+      "max": 1738.6,
+      "stdev": 130.2
+    },
+    "mean_steps_per_day": 49416.0
+  },
+  "slices": [
+    {
+      "label": "whole trip",
+      "calendar_days": 77,
+      "rest_days": 3,
+      "total_km": 2634.0,
+      "km_per_calendar_day": 34.2,
+      "km_per_walking_day": 35.6,
+      "walking_day_dist": {
+        "n": 74,
+        "min": 11.0,
+        "p10": 24.0,
+        "p25": 31.0,
+        "median": 36.0,
+        "mean": 35.6,
+        "p75": 41.0,
+        "p90": 48.0,
+        "max": 55.0,
+        "stdev": 9.1
+      },
+      "onsen_days": 65,
+      "onsen_day_share": 0.844
+    },
+    {
+      "label": "Hokkaido (Aug 19 to Sep 6)",
+      "calendar_days": 19,
+      "rest_days": 1,
+      "total_km": 618.0,
+      "km_per_calendar_day": 32.5,
+      "km_per_walking_day": 34.3,
+      "walking_day_dist": {
+        "n": 18,
+        "min": 11.0,
+        "p10": 22.0,
+        "p25": 31.0,
+        "median": 36.5,
+        "mean": 34.3,
+        "p75": 38.0,
+        "p90": 44.0,
+        "max": 51.0,
+        "stdev": 9.5
+      },
+      "onsen_days": 13,
+      "onsen_day_share": 0.684
+    },
+    {
+      "label": "Honshu (Sep 7 to Oct 14)",
+      "calendar_days": 38,
+      "rest_days": 1,
+      "total_km": 1332.0,
+      "km_per_calendar_day": 35.1,
+      "km_per_walking_day": 36.0,
+      "walking_day_dist": {
+        "n": 37,
+        "min": 12.0,
+        "p10": 26.0,
+        "p25": 30.0,
+        "median": 36.0,
+        "mean": 36.0,
+        "p75": 42.0,
+        "p90": 48.0,
+        "max": 55.0,
+        "stdev": 9.5
+      },
+      "onsen_days": 37,
+      "onsen_day_share": 0.974
+    },
+    {
+      "label": "Shikoku (Oct 15 to 23)",
+      "calendar_days": 9,
+      "rest_days": 0,
+      "total_km": 328.0,
+      "km_per_calendar_day": 36.4,
+      "km_per_walking_day": 36.4,
+      "walking_day_dist": {
+        "n": 9,
+        "min": 19.0,
+        "p10": 33.0,
+        "p25": 35.0,
+        "median": 37.0,
+        "mean": 36.4,
+        "p75": 40.0,
+        "p90": 41.0,
+        "max": 50.0,
+        "stdev": 8.2
+      },
+      "onsen_days": 7,
+      "onsen_day_share": 0.778
+    },
+    {
+      "label": "Kyushu (Oct 24 to Nov 3)",
+      "calendar_days": 11,
+      "rest_days": 1,
+      "total_km": 356.0,
+      "km_per_calendar_day": 32.4,
+      "km_per_walking_day": 35.6,
+      "walking_day_dist": {
+        "n": 10,
+        "min": 21.0,
+        "p10": 27.0,
+        "p25": 31.0,
+        "median": 34.5,
+        "mean": 35.6,
+        "p75": 43.0,
+        "p90": 44.0,
+        "max": 51.0,
+        "stdev": 8.9
+      },
+      "onsen_days": 8,
+      "onsen_day_share": 0.727
+    },
+    {
+      "label": "September",
+      "calendar_days": 30,
+      "rest_days": 2,
+      "total_km": 1038.0,
+      "km_per_calendar_day": 34.6,
+      "km_per_walking_day": 37.1,
+      "walking_day_dist": {
+        "n": 28,
+        "min": 24.0,
+        "p10": 27.0,
+        "p25": 32.0,
+        "median": 37.0,
+        "mean": 37.1,
+        "p75": 43.0,
+        "p90": 45.0,
+        "max": 55.0,
+        "stdev": 7.9
+      },
+      "onsen_days": 29,
+      "onsen_day_share": 0.967
+    },
+    {
+      "label": "Oct 1 to Nov 3 (same season as Kyushu-88)",
+      "calendar_days": 34,
+      "rest_days": 1,
+      "total_km": 1164.0,
+      "km_per_calendar_day": 34.2,
+      "km_per_walking_day": 35.3,
+      "walking_day_dist": {
+        "n": 33,
+        "min": 12.0,
+        "p10": 21.0,
+        "p25": 31.0,
+        "median": 36.0,
+        "mean": 35.3,
+        "p75": 41.0,
+        "p90": 49.0,
+        "max": 52.0,
+        "stdev": 9.4
+      },
+      "onsen_days": 28,
+      "onsen_day_share": 0.824
+    }
+  ],
+  "weight": {
+    "start_kg": 69.0,
+    "end_kg": 65.7,
+    "min_kg": 63.7,
+    "change_kg": -3.3,
+    "first_3_weeks_change_kg": -4.3
+  },
+  "day_length": {
+    "strava_moving_kmh": 5.05,
+    "strava_elapsed_kmh": 3.97,
+    "median_day_km": 36.0,
+    "median_day_moving_h": 7.1,
+    "median_day_elapsed_h": 9.1,
+    "p90_day_km": 48.0,
+    "p90_day_elapsed_h": 12.1,
+    "config_speed_kmh": 4.0,
+    "config_window_h": 12.0,
+    "verdict": "A median 36 km day is ~9.1 h door to door (~7.1 h moving). config.SPEED_KMH=4.0 sits between Strava's moving 5.05 and elapsed 3.97, so the 12 h window in config.py is the right shape: it already prices in breaks. The 2022 log confirms the OUTPUT of that model (34 km/day sustained) rather than contradicting it."
+  },
+  "kyuhachi_implications": {
+    "route_km": 1205.0,
+    "route_onsens_on_line": 119,
+    "target_visits": 88,
+    "start": "2026-10-02",
+    "deadline": "2026-12-02",
+    "calendar_days_available": 61,
+    "paces_km_per_calendar_day": {
+      "conservative_octnov_2022": 34.2,
+      "expected_whole_trip_2022": 34.21,
+      "strong_plateau_with_rest_every_10d": 32.5
+    },
+    "walking_days_needed": {
+      "conservative": 35.2,
+      "expected": 35.2,
+      "strong": 37.1
+    },
+    "note": "Kyushu-88 is not a pure distance walk: ~119 onsen stops at ~50 min each is ~99 h, about 8 full walking days of standing still, and opening hours gate the day far more than legs do. Treat these day counts as the distance floor, then add the visit and hours overhead from simulate.py."
+  }
+}
