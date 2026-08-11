@@ -62,6 +62,15 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
 6. **Re-derive the walk model**: `python route_planning/fetch_strava_walks.py`
    refreshes walking speed from Strava (token in the `onsendo` repo). Per-visit
    dwell time comes from `onsendo`'s `onsen_visits.stay_length_minutes` (median 13 min).
+   For **sustained daily output** (the thing day hikes cannot measure) run
+   `python route_planning/analyze_2022_hike.py`, which reads the 2022 walk across
+   Japan (2,634 km / 77 days) from `route_planning/data/hike_2022_japan.xlsx`.
+   **Before touching any pace assumption, read `route_planning/hike_2022_analysis.md`.**
+   Its headline: 34.2 km per calendar day sustained over 77 days, every 7-day block
+   between 210 and 293 km, only 3 zero-km days (recovery comes from 20 km days, not
+   rest days), break-in costs ~2.6 km/day for the first two weeks, and an onsen
+   costs a day nothing. Legs are not the binding constraint on Kyushu-88; opening
+   hours are.
 
 ## Data sources / source-of-truth
 
