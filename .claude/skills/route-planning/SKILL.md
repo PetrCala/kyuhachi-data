@@ -88,6 +88,14 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    onsens on its own, and an **overnight wait only for a prefecture linchpin** (the
    last remaining onsen of an uncollected prefecture, i.e. 波佐見 for 長崎).
 
+8. **Read a report on a phone / show it to the user**:
+   `python route_planning/render_html.py --app Safari --open` renders
+   `plan_octnov.md` and `hike_2022_analysis.md` into `route_planning/html/`
+   (gitignored) and opens them. Deliberately dependency-free: no pandoc, no JS,
+   no external requests, so it works on any machine and the pages open with no
+   signal. Styling is in `report_head.html`; the Markdown subset understood is
+   only what the generators emit, so teach `render_html.py` about anything new.
+
 ## Data sources / source-of-truth
 
 | What | Where |

@@ -67,6 +67,8 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | `fetch_strava_walks.py` | re-derive walking speed from Strava |
 | `analyze_2022_hike.py` | derive the walk model from the 2022 walk across Japan (2,634 km / 77 days): sustained km/day, rest cadence, break-in cost → `hike_2022_summary.json` + `hike_2022_analysis.md` |
 | **`plan_octnov.py`** | **the day-by-day plan to carry**: distance-driven (2022 day profile) instead of clock-driven, scheduled against real hours → `plan_octnov.md` + `plan_octnov.json`. `--sweep` shows what a longer door-wait buys |
+| `render_html.py` | render the reports to standalone offline HTML (`html/`, gitignored). No dependencies, no JS, no network: `--open` opens them, `--app Safari` picks the browser |
+| `report_head.html` | the reports' stylesheet (light/dark/print). Edit this, never the generated HTML |
 | `new_onsens_staged.json` | staged catalog delta (13 added / 1 removed) folded into the overlay |
 | `strava_walk_summary.json` | Strava-derived walk-speed summary (walk-model input) |
 | `hike_2022_summary.json` | 2022-hike-derived sustained-output summary (walk-model input) |

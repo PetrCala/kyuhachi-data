@@ -1,0 +1,123 @@
+<style>
+  /* Styling for the rendered route reports (render_html.py). Edit this file, not
+     the generated HTML. No JS and no external requests: the pages must open from
+     a phone with no signal, and print cleanly. */
+  :root {
+    --bg: #fbfaf7;
+    --fg: #1c1a17;
+    --muted: #6b6560;
+    --rule: #e2ddd4;
+    --card: #ffffff;
+    --accent: #8a5a2b;
+    --visit: #1f6b3a;
+    --visit-bg: #e8f4ec;
+    --skip: #9a3535;
+    --skip-bg: #fbeceb;
+    --warn-bg: #fdf6e3;
+    --warn-edge: #d9a441;
+    --crux-bg: #fbecea;
+    --crux-edge: #c0503f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16150f;
+      --fg: #ece7dd;
+      --muted: #9c948a;
+      --rule: #322e27;
+      --card: #1e1c16;
+      --accent: #d8a76d;
+      --visit: #7fcf9c;
+      --visit-bg: #16301f;
+      --skip: #f0a09a;
+      --skip-bg: #331a19;
+      --warn-bg: #2a2314;
+      --warn-edge: #a37d2f;
+      --crux-bg: #2e1917;
+      --crux-edge: #c0503f;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+    max-width: 60rem;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.65 -apple-system, "SF Pro Text", "Hiragino Sans",
+          "Hiragino Kaku Gothic ProN", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 {
+    font-size: 2.1rem; line-height: 1.2; letter-spacing: -0.02em;
+    margin: 0 0 1.5rem; padding-bottom: 1rem; border-bottom: 3px solid var(--accent);
+  }
+  h2 {
+    font-size: 1.45rem; letter-spacing: -0.01em; margin: 3.5rem 0 1rem;
+    padding-bottom: .4rem; border-bottom: 1px solid var(--rule);
+    scroll-margin-top: 1rem;
+  }
+  h3 { font-size: 1.08rem; margin: 2.5rem 0 .75rem; scroll-margin-top: 1rem; }
+  /* Per-day headings read as cards, since they are the thing you scan on the trail. */
+  h3.day {
+    background: var(--card); border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent); border-radius: 6px;
+    padding: .7rem .9rem; margin-top: 2.75rem; font-variant-numeric: tabular-nums;
+  }
+  h3.day.rest { border-left-color: var(--muted); color: var(--muted); }
+  p, li { margin: .75rem 0; }
+  a { color: var(--accent); }
+  strong { font-weight: 650; }
+  code {
+    font: 0.87em/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 4px; padding: .1em .35em;
+  }
+  /* Wide tables scroll inside their own box; the page never scrolls sideways. */
+  .tbl { overflow-x: auto; margin: 1.25rem 0; border: 1px solid var(--rule); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; background: var(--card); }
+  th, td { text-align: left; padding: .45rem .7rem; border-bottom: 1px solid var(--rule); }
+  th {
+    position: sticky; top: 0; z-index: 1; background: var(--bg);
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); border-bottom: 2px solid var(--rule);
+  }
+  tr:last-child td { border-bottom: 0; }
+  td { font-variant-numeric: tabular-nums; }
+  td.visit { color: var(--visit); background: var(--visit-bg); font-weight: 600; }
+  td.skip { color: var(--skip); background: var(--skip-bg); }
+  blockquote {
+    margin: 1rem 0; padding: .8rem 1rem; border-radius: 6px;
+    background: var(--warn-bg); border-left: 4px solid var(--warn-edge);
+    font-size: .92rem;
+  }
+  blockquote p { margin: 0; }
+  blockquote.crux { background: var(--crux-bg); border-left-color: var(--crux-edge); }
+  blockquote.crux::before {
+    content: "CRUX ZONE"; display: block; font-size: .68rem; letter-spacing: .1em;
+    color: var(--crux-edge); font-weight: 700; margin-bottom: .3rem;
+  }
+  nav.toc {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 1rem 1.25rem; margin: 0 0 2.5rem; font-size: .92rem;
+  }
+  nav.toc ol { margin: 0; padding-left: 1.2rem; }
+  nav.toc .days { margin-top: .6rem; padding: 0; list-style: none;
+    display: flex; flex-wrap: wrap; gap: .3rem; }
+  nav.toc .days li { margin: 0; }
+  nav.toc .days a {
+    display: inline-block; min-width: 2.1rem; text-align: center;
+    padding: .15rem .35rem; border: 1px solid var(--rule); border-radius: 4px;
+    text-decoration: none; font-variant-numeric: tabular-nums;
+  }
+  hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
+  footer { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+    color: var(--muted); font-size: .82rem; }
+  @media print {
+    body { max-width: none; padding: 0; }
+    h3.day { break-inside: avoid; }
+    .tbl, blockquote { break-inside: avoid; }
+    nav.toc { display: none; }
+    th { position: static; }
+  }
+</style>
