@@ -107,6 +107,14 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    signal. Styling is in `report_head.html`; the Markdown subset understood is
    only what the generators emit, so teach `render_html.py` about anything new.
 
+9. **Publish the plans for the trail**: nothing to do by hand. Pushing a route
+   Markdown change to `master` rebuilds
+   [petrcala.github.io/kyuhachi-data](https://petrcala.github.io/kyuhachi-data/)
+   via `.github/workflows/route-plan-site.yml`. `python route_planning/build_site.py`
+   previews the same output locally. Add a document to the site by adding it to
+   `DOCS` in `build_site.py`; the site is public, so do not publish anything you
+   would not put in the repo.
+
 ## Data sources / source-of-truth
 
 | What | Where |

@@ -19,6 +19,10 @@ something new (nested lists, images, fenced code), teach it here.
 
 Output goes to `route_planning/html/` (gitignored: it is a pure rendering of the
 committed Markdown and adds no information of its own).
+
+`build_site.py` reuses `render()` to build the published GitHub Pages site. The
+extra hooks it needs (a different output directory, a back link, a service-worker
+registration) are parameters here; the plain `--open` path stays JS-free.
 """
 from __future__ import annotations
 
@@ -37,6 +41,9 @@ DEFAULT_DOCS = [HERE / "plan_octnov.md", HERE / "hike_2022_analysis.md"]
 # #day-12 rather than a slugified sentence, so links stay stable when the
 # distances change.
 DAY_RE = re.compile(r"^Day (\d+)\b")
+# The simulation report dates its days instead of numbering them
+# ("2026-10-02  (5 stops, 5 visited)"); same treatment, chip reads "10-02".
+DATE_RE = re.compile(r"^(\d{4})-(\d{2}-\d{2})\b")
 
 
 # --- inline -----------------------------------------------------------------
@@ -160,10 +167,15 @@ def convert(md: str) -> tuple[str, list[tuple[str, str]], list[tuple[str, str]]]
             flush_all()
             text = stripped[4:]
             m = DAY_RE.match(text)
+            d = DATE_RE.match(text)
             if m:
                 anchor = f"day-{m.group(1)}"
                 cls = "day rest" if "REST" in text else "day"
                 days.append((anchor, m.group(1)))
+            elif d:
+                anchor = f"day-{d.group(1)}-{d.group(2)}"
+                cls = "day"
+                days.append((anchor, d.group(2)))
             else:
                 anchor, cls = slug(text), ""
             attr = f' class="{cls}"' if cls else ""
@@ -220,10 +232,12 @@ def convert(md: str) -> tuple[str, list[tuple[str, str]], list[tuple[str, str]]]
 
 
 def build_toc(sections, days) -> str:
-    if not sections:
+    if not sections and not days:
         return ""
     items = "".join(f'<li><a href="#{a}">{html.escape(t)}</a></li>' for a, t in sections)
-    out = [f'<nav class="toc"><ol>{items}</ol>']
+    out = ['<nav class="toc">']
+    if items:
+        out.append(f"<ol>{items}</ol>")
     if days:
         chips = "".join(f'<li><a href="#{a}">{n}</a></li>' for a, n in days)
         out.append(f'<ul class="days">{chips}</ul>')
@@ -231,28 +245,60 @@ def build_toc(sections, days) -> str:
     return "".join(out)
 
 
-def render(src: Path) -> Path:
-    md = src.read_text(encoding="utf-8")
-    body, sections, days = convert(md)
-    title = next(
-        (ln[2:].strip() for ln in md.splitlines() if ln.startswith("# ")), src.stem
-    )
-    OUT_DIR.mkdir(exist_ok=True)
-    dest = OUT_DIR / (src.stem + ".html")
-    dest.write_text(
-        "<!doctype html>\n<html lang=\"en\">\n<head>\n"
+def doc_title(md: str, fallback: str) -> str:
+    """The `# ` heading, stripped of Markdown emphasis, for <title>."""
+    raw = next((ln[2:].strip() for ln in md.splitlines() if ln.startswith("# ")), fallback)
+    return re.sub(r"[*`]", "", raw)
+
+
+def page(title: str, body: str, head_extra: str = "", body_extra: str = "") -> str:
+    """Wrap rendered body HTML in the standalone document shell."""
+    return (
+        '<!doctype html>\n<html lang="en">\n<head>\n'
         '<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
-        f"<title>{html.escape(re.sub(r'[*`]', '', title))}</title>\n"
+        f"<title>{html.escape(title)}</title>\n"
         f"{HEAD.read_text(encoding='utf-8')}"
+        f"{head_extra}"
         "</head>\n<body>\n"
-        f"{body.split(chr(10), 1)[0]}\n"          # the <h1> stays above the TOC
-        f"{build_toc(sections, days)}\n"
-        f"{body.split(chr(10), 1)[1] if chr(10) in body else ''}\n"
-        f"<footer>Generated from <code>{src.name}</code> by "
-        "<code>render_html.py</code>. Regenerate with "
-        "<code>python route_planning/render_html.py</code>.</footer>\n"
-        "</body>\n</html>\n",
+        f"{body}\n"
+        f"{body_extra}"
+        "</body>\n</html>\n"
+    )
+
+
+def render_body(md: str) -> str:
+    """Markdown -> body HTML with the table of contents under the <h1>."""
+    body, sections, days = convert(md)
+    head, rest = (body.split("\n", 1) + [""])[:2]  # the <h1> stays above the TOC
+    return f"{head}\n{build_toc(sections, days)}\n{rest}"
+
+
+def render(
+    src: Path,
+    out_dir: Path | None = None,
+    lead: str = "",
+    head_extra: str = "",
+    body_extra: str = "",
+    footer: str | None = None,
+) -> Path:
+    md = src.read_text(encoding="utf-8")
+    out_dir = out_dir or OUT_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    dest = out_dir / (src.stem + ".html")
+    if footer is None:
+        footer = (
+            f"<footer>Generated from <code>{src.name}</code> by "
+            "<code>render_html.py</code>. Regenerate with "
+            "<code>python route_planning/render_html.py</code>.</footer>"
+        )
+    dest.write_text(
+        page(
+            doc_title(md, src.stem),
+            f"{lead}{render_body(md)}\n{footer}",
+            head_extra,
+            body_extra,
+        ),
         encoding="utf-8",
     )
     return dest
