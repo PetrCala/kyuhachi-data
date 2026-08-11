@@ -64,10 +64,12 @@ FLEX_KM = 7.0               # how far past target to push to bag a reachable ons
 # 1 Nov 2022 he walked 51 km on ~10.5 h of daylight.
 DAY_MIN = config.SLEEP_MIN - config.WAKE_MIN
 # How long to wait at a door that opens later today, before writing the onsen off.
-# 240 min looks extravagant until you run `--sweep`: it buys 101 onsens instead of
-# 86, costs 2 calendar days out of 23 of slack, and in the whole 41-day plan only
-# 5 waits actually exceed 90 min (the longest is one 220 min wait on Oct 27).
-# A skipped onsen is gone for good; an afternoon spent waiting is lunch and laundry.
+# 240 min looks extravagant until you run `--sweep`, which prices it: it buys a lot
+# of onsens for a couple of calendar days out of three weeks of slack, and only a
+# handful of waits in the plan get anywhere near the cap. A skipped onsen is gone
+# for good; an afternoon spent waiting is lunch and laundry. The report computes
+# the exact trade-off every time it is generated, so trust that table, not this
+# comment.
 WAIT_TOLERANCE_MIN = 240
 
 # A morning door is not a reason to stand around. If the day's first onsen opens
@@ -118,7 +120,8 @@ def target_km(walking_day: int) -> float:
     return BREAKIN_KM if walking_day <= BREAKIN_WALKING_DAYS else PLATEAU_KM
 
 
-def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
+def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
+         late_start_max_min: int = LATE_START_MAX_MIN) -> dict:
     route = json.loads(ANALYSIS.read_text(encoding="utf-8"))
     stops = route["stops"]
     gaps = json.loads(LOGISTICS.read_text(encoding="utf-8"))["resupply_gaps"]
@@ -159,7 +162,7 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
             arrive = start + leg_left / config.SPEED_KMH * 60.0 + leg_ascent_left * config.CLIMB_MIN_PER_M
             closed = d.weekday() in set(nxt.get("closed_weekdays") or [])
             if not is_always_open(nxt) and om is not None and arrive < om and not closed:
-                shift = min(om - arrive, LATE_START_MAX_MIN)
+                shift = min(om - arrive, late_start_max_min)
                 start += shift
         return {
             "date": d,
@@ -268,6 +271,7 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
         is_linchpin = linchpins.get(s["order"]) == s["pref_short"] and s["pref_short"] not in prefs_done
 
         status = note = ""
+        wait_min = 0
         if closed_today and not is_linchpin:
             skipped_closed += 1
             status = "SKIP closed"
@@ -301,7 +305,8 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
         else:
             clock = arrive
             if too_early:
-                note = f"wait {int(om - arrive)} min for {hhmm(om)} open"
+                wait_min = int(om - arrive)
+                note = f"wait {wait_min} min for {hhmm(om)} open"
                 clock = float(om)
             visited += 1
             prefs_done.add(s["pref_short"])
@@ -316,6 +321,7 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
                 "order": s["order"],
                 "pref": s["pref_short"],
                 "off_line_km": round(s["dist_to_line_km"], 2),
+                "wait_min": wait_min,
                 "name": f"{s['area']}：{s['name']}",
                 "at": hhmm(arrive),
                 "km": round(cum_km, 1),
@@ -354,6 +360,7 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
             "window": f"{hhmm(config.WAKE_MIN)} to {hhmm(config.WAKE_MIN + DAY_MIN)}",
             "policy": "skip-lean, overnight wait only for a prefecture linchpin",
             "wait_tolerance_min": wait_tolerance_min,
+            "late_start_max_min": late_start_max_min,
         },
         "totals": {
             "start": str(config.START_DT.date()),
@@ -381,6 +388,12 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
                 1 for d in days for e in d["events"] if e["status"] == "VISIT" and e["irregular"]
             ),
             "late_start_days": sum(1 for d in days if d.get("late_start_min")),
+            "long_waits": sum(
+                1 for d in days for e in d["events"] if e.get("wait_min", 0) > 90
+            ),
+            "longest_wait_min": max(
+                (e.get("wait_min", 0) for d in days for e in d["events"]), default=0
+            ),
             "days_ending_after_18": sum(1 for d in days if d["end_clock"] > "18:00"),
             "days_ending_after_19": sum(1 for d in days if d["end_clock"] > "19:00"),
             "deadline": str(config.DEADLINE.date()),
@@ -390,7 +403,8 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN) -> dict:
     }
 
 
-def write_md(p: dict, path: Path) -> None:
+def write_md(p: dict, path: Path, sweep_rows: list[tuple[int, dict]],
+             no_late_visits: int) -> None:
     t, m = p["totals"], p["model"]
     L: list[str] = []
     L.append("# 九州八十八湯: the Oct/Nov 2026 day plan")
@@ -444,9 +458,11 @@ def write_md(p: dict, path: Path) -> None:
     L.append(
         f"**Late starts.** On {t['late_start_days']} of the {t['calendar_days']} days the "
         f"first onsen of the day opens after you would reach it, so the plan sleeps in "
-        f"(up to {LATE_START_MAX_MIN} min) instead of standing at the door, and the day "
-        f"ends correspondingly later. Each day still gets its full {DAY_MIN / 60:.0f} h. "
-        f"This one rule is worth 15 onsens on its own.")
+        f"(up to {m['late_start_max_min']} min) instead of standing at the door, and the "
+        f"day ends correspondingly later. Each day still gets its full "
+        f"{DAY_MIN / 60:.0f} h. Switch the rule off and the same plan collects "
+        f"{no_late_visits} onsens instead of {t['visited']}, so it is worth "
+        f"{t['visited'] - no_late_visits} of them on its own.")
     L.append("")
     L.append(
         f"**You will walk in the dark.** {t['days_ending_after_18']} days end after 18:00 and "
@@ -543,15 +559,25 @@ def write_md(p: dict, path: Path) -> None:
     L.append("")
     L.append("| wait tolerance | onsens | days | finish | slack |")
     L.append("|---|---|---|---|---|")
-    L.append("| 0 min (pure skip) | 86 | 39 | Nov 9 | 23 |")
-    L.append("| 90 min | 93 | 39 | Nov 9 | 23 |")
-    L.append("| 180 min | 97 | 40 | Nov 10 | 22 |")
-    L.append(f"| **{m['wait_tolerance_min']} min (this plan)** | **101** | **41** | **Nov 11** | **21** |")
+    for tol, tt in sweep_rows:
+        label = f"{tol} min"
+        if tol == 0:
+            label = "0 min (pure skip)"
+        row = (f"| {label} | {tt['visited']} | {tt['calendar_days']} | "
+               f"{tt['finish'][:10]} | {tt['slack_days']} |")
+        if tol == m["wait_tolerance_min"]:
+            row = (f"| **{label} (this plan)** | **{tt['visited']}** | "
+                   f"**{tt['calendar_days']}** | **{tt['finish'][:10]}** | "
+                   f"**{tt['slack_days']}** |")
+        L.append(row)
     L.append("")
+    base = dict(sweep_rows)[0]
     L.append(
-        "Two calendar days out of 23 buys 15 onsens. That is why the dial sits where it does. "
-        "In the whole 41-day plan only 5 waits actually exceed 90 min, and the longest single "
-        "wait is 220 min on Oct 27.")
+        f"Going from a pure skip to this plan costs "
+        f"{t['calendar_days'] - base['calendar_days']} calendar days and buys "
+        f"{t['visited'] - base['visited']} onsens. That is why the dial sits where it does. "
+        f"Only {t['long_waits']} waits in the whole plan exceed 90 min, and the longest "
+        f"single one is {t['longest_wait_min']} min.")
     L.append("")
     L.append("## Pace check (carry this: cumulative km by day)")
     L.append("")
@@ -625,16 +651,24 @@ def sweep() -> None:
               f"{t['slack_days']:>6} {t['km_per_calendar_day']:>9} {t['skipped_early']:>11}")
 
 
-def main() -> None:
-    if "--sweep" in sys.argv:
+def main(argv: list[str] | None = None) -> None:
+    # Explicit argv so pipeline.py can call this without its own flags leaking in.
+    args = list(sys.argv[1:] if argv is None else argv)
+    if "--sweep" in args:
         sweep()
         return
     tol = WAIT_TOLERANCE_MIN
-    for a in sys.argv[1:]:
+    for a in args:
         if a.startswith("--wait="):
             tol = int(a.split("=", 1)[1])
     p = plan(wait_tolerance_min=tol)
-    write_md(p, OUT_MD)
+    # The trade-off table in the report is computed, never hardcoded: a stale
+    # table is worse than no table.
+    sweep_tols = sorted({0, 90, 180, tol})
+    sweep_rows = [(x, p["totals"] if x == tol else plan(wait_tolerance_min=x)["totals"])
+                  for x in sweep_tols]
+    no_late_visits = plan(wait_tolerance_min=tol, late_start_max_min=0)["totals"]["visited"]
+    write_md(p, OUT_MD, sweep_rows, no_late_visits)
     serial = json.loads(json.dumps(p, default=str))
     OUT_JSON.write_text(json.dumps(serial, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 

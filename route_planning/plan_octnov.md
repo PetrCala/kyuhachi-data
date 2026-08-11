@@ -18,7 +18,7 @@ Skipped: 10 closed (定休日), 8 arrived after last entry, 0 would have meant w
 
 Time model: 4.0 km/h (Strava elapsed, breaks already priced in), 50 min per onsen, 0.10 min per metre climbed, a 12 h day starting 06:00. Policy: skip-lean, overnight wait only for a prefecture linchpin, waiting up to 240 min at a door that opens later today.
 
-**Late starts.** On 16 of the 41 days the first onsen of the day opens after you would reach it, so the plan sleeps in (up to 180 min) instead of standing at the door, and the day ends correspondingly later. Each day still gets its full 12 h. This one rule is worth 15 onsens on its own.
+**Late starts.** On 16 of the 41 days the first onsen of the day opens after you would reach it, so the plan sleeps in (up to 180 min) instead of standing at the door, and the day ends correspondingly later. Each day still gets its full 12 h. Switch the rule off and the same plan collects 95 onsens instead of 101, so it is worth 6 of them on its own.
 
 **You will walk in the dark.** 22 days end after 18:00 and 10 after 19:00, counting the evening soak. Kyushu sunset is ~18:00 in early October and ~17:25 by mid-November, so pack the headtorch at the top of the bag, not the bottom. On 1 Nov 2022 you walked 51 km on ~10.5 h of daylight, so this is a known quantity, not an experiment.
 
@@ -59,12 +59,12 @@ Every full week sits at or under the 2022 band, which is the point. The onsens, 
 
 | wait tolerance | onsens | days | finish | slack |
 |---|---|---|---|---|
-| 0 min (pure skip) | 86 | 39 | Nov 9 | 23 |
-| 90 min | 93 | 39 | Nov 9 | 23 |
-| 180 min | 97 | 40 | Nov 10 | 22 |
-| **240 min (this plan)** | **101** | **41** | **Nov 11** | **21** |
+| 0 min (pure skip) | 86 | 39 | 2026-11-09 | 23 |
+| 90 min | 93 | 40 | 2026-11-10 | 22 |
+| 180 min | 97 | 40 | 2026-11-10 | 22 |
+| **240 min (this plan)** | **101** | **41** | **2026-11-11** | **21** |
 
-Two calendar days out of 23 buys 15 onsens. That is why the dial sits where it does. In the whole 41-day plan only 5 waits actually exceed 90 min, and the longest single wait is 220 min on Oct 27.
+Going from a pure skip to this plan costs 2 calendar days and buys 15 onsens. That is why the dial sits where it does. Only 4 waits in the whole plan exceed 90 min, and the longest single one is 220 min.
 
 ## Pace check (carry this: cumulative km by day)
 

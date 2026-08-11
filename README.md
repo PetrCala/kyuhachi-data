@@ -14,6 +14,7 @@ upstream ids — it only reads the published catalog.
 .
 ├── onsen_scraper/         # detail-page fetcher + parser + fee/hours/reading parsers
 ├── publisher/             # surgical Firestore publisher + derived-field backfills
+├── route_planning/        # ► the WALK: the Oct/Nov 2026 foot route + the day plan you carry
 ├── data/
 │   ├── snapshot.db        # the diff baseline (148 onsens); advanced by `catalog-sync promote`
 │   ├── onsen-id-map.json  # upstream hid → stable kyuhachiId
@@ -47,6 +48,24 @@ Claude session prepares a `catalog-publish` PR, `catalog-dry-run` posts the live
 diff, and merging gates the write behind a `production` environment approval. See
 [`.github/CATALOG_AUTOMATION.md`](.github/CATALOG_AUTOMATION.md) for the wiring and one-time
 setup.
+
+## The walk (route_planning/)
+
+The other half of this repo has nothing to do with the app: it plans the **actual
+walk**, on foot across Kyushu, **2 Oct to 2 Dec 2026**. Two artifacts matter, and
+`route_planning/README.md` is the full map.
+
+```bash
+python route_planning/plan_octnov.py                      # the day plan
+python route_planning/render_html.py --app Safari --open   # read it in a browser
+```
+
+- **[`route_planning/plan_octnov.md`](route_planning/plan_octnov.md)** is the plan you
+  carry: 41 days, 1,221 km, 101 onsens, all 7 prefectures, finish Nov 11. Per-day
+  distance target, onsen door times, crux and resupply warnings, pace check.
+- **[`route_planning/hike_2022_analysis.md`](route_planning/hike_2022_analysis.md)** is
+  why the pace is what it is, derived from the 2022 walk across Japan (2,634 km / 77
+  days). **Read it before changing any pace assumption.**
 
 ## Setup
 

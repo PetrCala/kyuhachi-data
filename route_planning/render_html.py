@@ -258,8 +258,9 @@ def render(src: Path) -> Path:
     return dest
 
 
-def main() -> None:
-    args = [a for a in sys.argv[1:]]
+def main(argv: list[str] | None = None) -> None:
+    # Explicit argv so pipeline.py can call this without its own flags leaking in.
+    args = list(sys.argv[1:] if argv is None else argv)
     do_open = "--open" in args
     app = None
     if "--app" in args:
