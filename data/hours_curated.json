@@ -2890,13 +2890,26 @@
         "tue",
         "wed"
       ],
-      "overrides": {},
+      "overrides": {
+        "sat": [
+          "12:00",
+          "21:30"
+        ],
+        "sun": [
+          "12:00",
+          "21:30"
+        ]
+      },
       "confidence": "high",
-      "note": "水曜休→月火水休; 開店11:00→15:00",
+      "note": "2026-08 再カーブ: 木金15:00～/土日祝12:00～に分割、最終入場21:00 を追加。月火水休(祝日は営業)は据え置き。structured lastEntry は evidence gate が promote 前の snapshot を読むため今回は caption のみ。",
       "exceptions": [
         {
-          "en": "Open on public holidays",
-          "ja": "祝日は営業"
+          "en": "Last entry by 21:00",
+          "ja": "最終受付 21:00"
+        },
+        {
+          "en": "Open on public holidays, from 12:00",
+          "ja": "祝日は営業（12:00～）"
         }
       ]
     },

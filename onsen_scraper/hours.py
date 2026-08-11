@@ -213,7 +213,13 @@ def parsed_hours_doc(raw: str | None) -> dict:
 # actually carry the cutoff, so a future re-curation can't silently re-bury it.
 # Per-bath / per-day cutoffs (multiple times, 大風呂/家族風呂, 土日祝…) return None
 # and are curated by hand.
+#
+# 88onsen states the cutoff with either 最終受付 or 最終入場 (the latter seen first on
+# hid 244 in the 2026-08 cycle): same fact, two wordings, so both are DETECTED. The
+# published caption always uses the canonical 最終受付 wording from docs/hours-schema.md,
+# so the app's Japanese stays uniform regardless of which term the source happened to use.
 _LAST_ENTRY = "最終受付"
+_LAST_ENTRY_RE = re.compile(r"最終受付|最終入場")
 _LE_TIME = re.compile(r"(\d{1,2}):(\d{2})")
 _LE_COMPLEX = re.compile(r"[、，,]|大風呂|家族風呂|内湯|露天|土日祝|平日|但し|ただし|以降|[~〜]\s*\d")
 
@@ -226,10 +232,10 @@ def single_last_entry(raw: str | None) -> str | None:
     are hand-curated). Detection only — never authors the published schedule.
     """
     n = norm(raw)
-    if _LAST_ENTRY not in n:
+    m = _LAST_ENTRY_RE.search(n)
+    if m is None:
         return None
-    m = re.search(_LAST_ENTRY + r"[^\n]*", n)
-    seg = re.split(r"[）)]", m.group(0), 1)[0]
+    seg = re.split(r"[）)]", n[m.start() :].split("\n", 1)[0], 1)[0]
     if _LE_COMPLEX.search(seg):
         return None
     times = _LE_TIME.findall(seg)
