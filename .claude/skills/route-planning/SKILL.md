@@ -22,9 +22,14 @@ scripts sharing one config (`config.py`) and one helper module (`geo.py`).
    We plan *on top of* it; we do not auto-generate the line (OSRM auto-routing
    picks impractical trails — superseded, see `archive/build_route_osrm.py`).
 
-Current best route = the hand-drawn line + a Nagasaki loop edit = **109 onsens,
-all 7 prefectures, ~1161 km, finishes ~Nov 7 (25 days slack)**. Packaged in
-`route_planning/final_route/`.
+Current route = the hand-drawn line + the Nagasaki loop + 4 spurs = **119 onsens on
+the line, all 7 prefectures, ~1205 km**. Packaged in `route_planning/final_route/`.
+
+**The authoritative schedule is `route_planning/plan_octnov.md`**: 41 days, 1,221 km
+walked, 101 onsens, finish Nov 11, 21 days of slack. It is paced on the 2022 walk
+across Japan, not on the walk model alone. `simulate.py`'s output in `final_route/`
+is the **feasibility envelope** (catch-everything upper bound ~50 days / Nov 20), not
+a schedule. Don't try to reconcile the two: they answer different questions.
 
 ## When to use
 
@@ -83,10 +88,16 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    along-track delta), plus the in-and-out-of-the-door detour for each visited
    off-line onsen, which `simulate.py` does not account for.
 
-   Two behaviours worth knowing before you change them: a **late start** (up to 3 h)
-   when the day's first onsen opens after you would reach it, which is worth ~15
-   onsens on its own, and an **overnight wait only for a prefecture linchpin** (the
-   last remaining onsen of an uncollected prefecture, i.e. 波佐見 for 長崎).
+   Two behaviours worth knowing before you change them: a **late start** (sleep in
+   rather than stand at a door that opens after you would reach it) and an
+   **overnight wait only for a prefecture linchpin** (the last remaining onsen of an
+   uncollected prefecture, i.e. 波佐見 for 長崎).
+
+   **Every number in the report is computed at generation time**, including the
+   wait-tolerance trade-off table and the worth of the late-start rule (`plan()`
+   is simply re-run with the dial moved). Don't restate those figures in prose
+   anywhere, here included: they move whenever a dial or the catalog does. Quote
+   the report, or run the script.
 
 8. **Read a report on a phone / show it to the user**:
    `python route_planning/render_html.py --app Safari --open` renders

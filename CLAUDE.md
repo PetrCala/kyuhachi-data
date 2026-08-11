@@ -57,6 +57,12 @@ The GitHub-native automation (operator-as-approver) is documented in
 
 ## Structure
 
+- `route_planning/`: **the walk itself**, not the app. The foot route across Kyushu and
+  the day-by-day plan for **2 Oct to 2 Dec 2026**. Independent of the catalog pipeline
+  (read-only against it). Start at `route_planning/README.md`; the two documents that
+  matter are `plan_octnov.md` (the plan you carry) and `hike_2022_analysis.md` (why the
+  pace is what it is). Operational workflow in the
+  [`route-planning`](.claude/skills/route-planning/SKILL.md) skill.
 - `onsen_scraper/` — fetch + parse 88onsen detail pages and the `/map` seed; derive fees/hours and generated name readings.
 - `publisher/` — surgical, dry-run-by-default Firestore writers. Never a clean-slate wipe.
 - `data/` — the diff baseline, the `hid → kyuhachiId` map, and the curated hours.
