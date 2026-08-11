@@ -20,6 +20,9 @@ reports/
 # Staging scrape written by catalog-sync `detect`, consumed by `promote`
 # (transient; the promoted snapshot.db is the tracked baseline)
 data/snapshot.next.json
-# Rendered HTML reports (render_html.py). A pure rendering of the committed
-# Markdown, so the generator and its stylesheet are tracked, the output is not.
+
+# Rendered HTML reports (render_html.py) and the Pages site built from them
+# (build_site.py). A pure rendering of the committed Markdown, so the generators
+# and the stylesheet are tracked; CI rebuilds the output on every push.
 route_planning/html/
+route_planning/site/

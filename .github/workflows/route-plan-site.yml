@@ -1,0 +1,53 @@
+name: route-plan-site
+
+# Publishes the route plans to GitHub Pages. The rendered HTML is never committed:
+# the Markdown in route_planning/ is the source, and this rebuilds the site from it
+# on every push that touches one. Stdlib Python only, so there is nothing to install.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - route_planning/**/*.md
+      - route_planning/**/*_map.html
+      - route_planning/report_head.html
+      - route_planning/render_html.py
+      - route_planning/build_site.py
+      - .github/workflows/route-plan-site.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never two deploys at once, and never cancel one half-done: the site on the phone
+# is the one you are walking with.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the site
+        run: python route_planning/build_site.py
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: route_planning/site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

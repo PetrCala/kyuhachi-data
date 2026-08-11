@@ -55,9 +55,14 @@ The other half of this repo has nothing to do with the app: it plans the **actua
 walk**, on foot across Kyushu, **2 Oct to 2 Dec 2026**. Two artifacts matter, and
 `route_planning/README.md` is the full map.
 
+On the trail, read it at **[petrcala.github.io/kyuhachi-data](https://petrcala.github.io/kyuhachi-data/)**:
+the same Markdown, published on every push, and it caches itself so it still opens
+where the signal does not.
+
 ```bash
 python route_planning/plan_octnov.py                      # the day plan
 python route_planning/render_html.py --app Safari --open   # read it in a browser
+python route_planning/build_site.py --open                 # build the published site
 ```
 
 - **[`route_planning/plan_octnov.md`](route_planning/plan_octnov.md)** is the plan you
