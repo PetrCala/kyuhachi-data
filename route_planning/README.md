@@ -71,7 +71,7 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | `strava_walk_summary.json` | Strava-derived walk-speed summary (walk-model input) |
 | `hike_2022_summary.json` | 2022-hike-derived sustained-output summary (walk-model input) |
 | `hike_2022_analysis.md` | **read this before changing the pace assumptions**: what 2,634 km over 77 days says about how this hiker actually moves |
-| `plan_octnov.md` | **the carried plan**: 41 days, 1,205 km, 101 onsens, finish Nov 11. Per-day km target, door times, crux and resupply warnings, and a cumulative-km pace check |
+| `plan_octnov.md` | **the carried plan**: 41 days, 1,221 km walked (1,205 of hand-drawn line + 16.5 of door detours), 101 onsens, finish Nov 11. Per-day km target, door times, crux and resupply warnings, and a cumulative-km pace check |
 | `data/hike_2022_japan.xlsx` | the 2022 day log (source for the two files above) |
 | `handdrawn_loop_analysis.json` | snapped onsens + along-track order (the schedule tools' input) |
 | `route_elevation.json` | SRTM per-leg ascent/descent (committed; regenerate with `elevation.py`) |

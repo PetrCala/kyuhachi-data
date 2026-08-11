@@ -78,7 +78,10 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    day profile (29 km break-in, 36 km plateau, 22 km every 7th day, one zero day per
    30), with each day checked against the 12 h window once visits and climbing are
    priced in. `--sweep` shows what a longer door-wait buys; `--wait=N` overrides it.
-   Current output: 41 days, 101 onsens, all 7, finish Nov 11, 21 days of slack.
+   Current output: 41 days, 1,221 km walked, 101 onsens, all 7, finish Nov 11, 21 days of slack.
+   Distances are measured along `config.HANDDRAWN_GPX` (all 119 legs match the
+   along-track delta), plus the in-and-out-of-the-door detour for each visited
+   off-line onsen, which `simulate.py` does not account for.
 
    Two behaviours worth knowing before you change them: a **late start** (up to 3 h)
    when the day's first onsen opens after you would reach it, which is worth ~15
