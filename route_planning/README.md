@@ -66,10 +66,12 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | `build_aso_crater.py` | optional standalone Aso-crater climb-spur GPX |
 | `fetch_strava_walks.py` | re-derive walking speed from Strava |
 | `analyze_2022_hike.py` | derive the walk model from the 2022 walk across Japan (2,634 km / 77 days): sustained km/day, rest cadence, break-in cost → `hike_2022_summary.json` + `hike_2022_analysis.md` |
+| **`plan_octnov.py`** | **the day-by-day plan to carry**: distance-driven (2022 day profile) instead of clock-driven, scheduled against real hours → `plan_octnov.md` + `plan_octnov.json`. `--sweep` shows what a longer door-wait buys |
 | `new_onsens_staged.json` | staged catalog delta (13 added / 1 removed) folded into the overlay |
 | `strava_walk_summary.json` | Strava-derived walk-speed summary (walk-model input) |
 | `hike_2022_summary.json` | 2022-hike-derived sustained-output summary (walk-model input) |
 | `hike_2022_analysis.md` | **read this before changing the pace assumptions**: what 2,634 km over 77 days says about how this hiker actually moves |
+| `plan_octnov.md` | **the carried plan**: 41 days, 1,205 km, 101 onsens, finish Nov 11. Per-day km target, door times, crux and resupply warnings, and a cumulative-km pace check |
 | `data/hike_2022_japan.xlsx` | the 2022 day log (source for the two files above) |
 | `handdrawn_loop_analysis.json` | snapped onsens + along-track order (the schedule tools' input) |
 | `route_elevation.json` | SRTM per-leg ascent/descent (committed; regenerate with `elevation.py`) |

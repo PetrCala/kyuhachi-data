@@ -72,6 +72,19 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    costs a day nothing. Legs are not the binding constraint on Kyushu-88; opening
    hours are.
 
+7. **Regenerate the day-by-day plan**: `python route_planning/plan_octnov.py` writes
+   `plan_octnov.md`, the plan actually carried on the trail. It is the counterpart to
+   `simulate.py` and is driven the other way round: **distance-driven** off the 2022
+   day profile (29 km break-in, 36 km plateau, 22 km every 7th day, one zero day per
+   30), with each day checked against the 12 h window once visits and climbing are
+   priced in. `--sweep` shows what a longer door-wait buys; `--wait=N` overrides it.
+   Current output: 41 days, 101 onsens, all 7, finish Nov 11, 21 days of slack.
+
+   Two behaviours worth knowing before you change them: a **late start** (up to 3 h)
+   when the day's first onsen opens after you would reach it, which is worth ~15
+   onsens on its own, and an **overnight wait only for a prefecture linchpin** (the
+   last remaining onsen of an uncollected prefecture, i.e. 波佐見 for 長崎).
+
 ## Data sources / source-of-truth
 
 | What | Where |
