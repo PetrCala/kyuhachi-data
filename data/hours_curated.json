@@ -2968,24 +2968,6 @@
       "note": "火曜休",
       "exceptions": []
     },
-    "248": {
-      "publish": true,
-      "status": "structured",
-      "window": [
-        "05:00",
-        "21:00"
-      ],
-      "closed": [],
-      "overrides": {},
-      "confidence": "high",
-      "note": "無休（注: カタログ上はisActive:false／retired）",
-      "exceptions": [
-        {
-          "en": "Last entry by 20:30",
-          "ja": "最終受付 20:30"
-        }
-      ]
-    },
     "249": {
       "publish": false,
       "status": "monthly",
