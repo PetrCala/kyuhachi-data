@@ -88,7 +88,7 @@ def test_build_region_model_places_every_onsen():
     assert model["unassigned"] == []
     assert len(model["regions"]) == len(R.REGIONS)
     total = sum(r["memberCount"] for r in model["regions"])
-    assert total == 161  # the whole catalog is placed
+    assert total == 160  # the whole catalog is placed (160 after 248 was pruned)
 
 
 def test_every_region_has_id_center_and_consistent_members():

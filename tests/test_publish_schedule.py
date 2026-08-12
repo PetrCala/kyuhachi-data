@@ -151,7 +151,7 @@ def test_last_entry_promoted_to_caption():
     # 244 states its cutoff as 最終入場 rather than 最終受付 (2026-08 cycle); the caption
     # normalizes to the canonical 最終受付 wording, so it counts here like any other.
     assert CURATED["244"]["exceptions"][0] == {"en": "Last entry by 21:00", "ja": "最終受付 21:00"}
-    # Every last-entry caption is the lead exception and well-formed; 68 single-time + 1 split.
+    # Every last-entry caption is the lead exception and well-formed; 67 single-time + 1 split.
     total = 0
     for hid, e in CURATED.items():
         idxs = [i for i, x in enumerate(e["exceptions"]) if x["ja"].startswith("最終受付")]
@@ -159,7 +159,7 @@ def test_last_entry_promoted_to_caption():
             assert i == 0, hid
             assert e["exceptions"][i]["en"].lower().startswith("last entry"), hid
         total += len(idxs)
-    assert total == 69
+    assert total == 68
 
 
 def test_every_source_last_entry_is_captioned():
