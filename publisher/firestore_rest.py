@@ -180,14 +180,44 @@ def create(collection: str, doc_id: str, fields: dict, tok: str) -> int:
         raise
 
 
+def onsen_counts(tok: str) -> tuple:
+    """(totalCount, activeCount) over the live /onsens collection. Read-only.
+
+    Counted from the live collection, not from the snapshot DB. The snapshot is
+    the diff baseline and retired onsens are pruned out of it, so it cannot see
+    a document that exists in Firestore with isActive:false: counting it would
+    report the active count as the total and understate totalCount by one per
+    retirement. The live collection is the only source that knows both numbers.
+
+    One paginated list read (the whole catalog is a single page at this size).
+    """
+    live = fetch_collection("onsens", tok)
+    active = sum(1 for f in live.values() if field_at(f, "isActive") is True)
+    return len(live), active
+
+
 def bump_catalog_version(now: str, tok: str):
+    """Advance /catalog_meta/current: version, publishedAt, and both counts.
+
+    The counts are refreshed here rather than at each call site because this is
+    the one place every publisher script agrees to touch after writing. They are
+    not currently read by the app (which filters on isActive itself), but they
+    are part of the published CatalogMetaDocument contract, and a stale count is
+    a landmine for the first reader that trusts one: "I expected activeCount
+    docs and got fewer" would fail spuriously against a number frozen at the
+    original seed.
+    """
     fields = get_fields("catalog_meta/current", tok)
     if fields is None:
         print("catalog_meta/current does not exist yet — skipping version bump "
               "(the first full publish will create it).")
         return
     cur = int(fields.get("version", {}).get("integerValue", 0))
+    # After the caller's writes, so an add/retire in this same run is counted.
+    total, active = onsen_counts(tok)
     patch("catalog_meta/current",
-          {"version": {"integerValue": str(cur + 1)}, "publishedAt": {"timestampValue": now}},
-          ["version", "publishedAt"], tok)
-    print(f"catalog_meta/current: version {cur} → {cur + 1}  (bumped)")
+          {"version": {"integerValue": str(cur + 1)}, "publishedAt": {"timestampValue": now},
+           "totalCount": ival(total), "activeCount": ival(active)},
+          ["version", "publishedAt", "totalCount", "activeCount"], tok)
+    print(f"catalog_meta/current: version {cur} → {cur + 1}  (bumped)   "
+          f"totalCount={total}  activeCount={active}")
