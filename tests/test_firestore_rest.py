@@ -126,6 +126,55 @@ def test_fetch_collection_keys_by_doc_id(monkeypatch):
     assert fr.field_at(got["kid-B"], "adultFee") == 350
 
 
+def _onsen_page(*docs):
+    """One list-documents page: (docId, isActive) pairs → the wire shape."""
+    return {"documents": [
+        {"name": f"projects/p/databases/(default)/documents/onsens/{kid}",
+         "fields": {"isActive": fr.bval(active)}}
+        for kid, active in docs
+    ]}
+
+
+def test_onsen_counts_separates_total_from_active(monkeypatch):
+    # A retired onsen is still a document: it counts toward total, not active.
+    _mock_open(monkeypatch, [_onsen_page(("a", True), ("b", True), ("retired", False))])
+    assert fr.onsen_counts("TOK") == (3, 2)
+
+
+def test_bump_catalog_version_refreshes_both_counts(monkeypatch):
+    # get_fields (the current doc) and the counts read are separate calls; patch
+    # both so the test stays offline, and capture what would be written.
+    monkeypatch.setattr(fr, "get_fields", lambda path, tok: {"version": {"integerValue": "22"}})
+    monkeypatch.setattr(fr, "onsen_counts", lambda tok: (161, 160))
+    wrote = {}
+
+    def fake_patch(path, fields, mask, tok):
+        wrote.update(path=path, fields=fields, mask=mask)
+        return 200
+
+    monkeypatch.setattr(fr, "patch", fake_patch)
+    fr.bump_catalog_version("2026-08-31T00:00:00.000000Z", "TOK")
+
+    assert wrote["path"] == "catalog_meta/current"
+    # Every field written is also masked, or the PATCH silently drops it.
+    assert set(wrote["mask"]) == {"version", "publishedAt", "totalCount", "activeCount"}
+    assert set(wrote["fields"]) == set(wrote["mask"])
+    assert wrote["fields"]["version"] == {"integerValue": "23"}
+    assert wrote["fields"]["totalCount"] == fr.ival(161)
+    assert wrote["fields"]["activeCount"] == fr.ival(160)
+
+
+def test_bump_catalog_version_writes_nothing_when_the_doc_is_absent(monkeypatch):
+    monkeypatch.setattr(fr, "get_fields", lambda path, tok: None)
+
+    def unreachable(*a, **k):
+        raise AssertionError("must not count or write when catalog_meta is absent")
+
+    monkeypatch.setattr(fr, "onsen_counts", unreachable)
+    monkeypatch.setattr(fr, "patch", unreachable)
+    fr.bump_catalog_version("2026-08-31T00:00:00.000000Z", "TOK")
+
+
 def test_live_onsens_degrades_on_dry_run_but_raises_on_commit(monkeypatch, capsys):
     def boom():
         raise RuntimeError("no gcloud ADC")

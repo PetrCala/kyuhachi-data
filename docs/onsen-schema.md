@@ -35,6 +35,34 @@ table and that set can't silently drift apart.
 | `updatedAt` | timestamp | last write time (any field) |
 | `dataVerifiedAt` | timestamp \| null | last time this onsen's data was confirmed against the live source — see below |
 
+## Published shape: `/catalog_meta/current`
+
+The one document the app polls to decide whether its cached catalog is stale.
+
+| Field | Type | Source |
+|---|---|---|
+| `version` | integer | incremented by `bump_catalog_version` on every committed publish; the app refetches the whole catalog when this moves past its cached value |
+| `publishedAt` | timestamp | that write's timestamp |
+| `totalCount` | integer | onsen documents, **including** retired (`isActive: false`) ones |
+| `activeCount` | integer | onsen documents with `isActive: true` |
+
+All four are written together by `bump_catalog_version` in
+`publisher/firestore_rest.py`, which every publisher script calls after its
+writes land.
+
+**The counts come from the live collection, not from `data/snapshot.db`.** The
+snapshot is the diff baseline and retired onsens are pruned out of it, so it
+cannot see a document that still exists in Firestore with `isActive: false`.
+Counting the snapshot would report the active count as the total and understate
+`totalCount` by one for every retirement. Only the live collection knows both
+numbers.
+
+The counts are advisory. The app filters on `isActive` itself and does not read
+either field, so they are published for correctness rather than for a consumer.
+Do not make them load-bearing for eligibility: a challenge's pool is the frozen
+snapshot unioned with the live pool, and nothing about that is derived from a
+count.
+
 ## `dataVerifiedAt` — freshness cue
 
 The app displays this as a freshness cue (e.g. "data last verified 2026-06") so
