@@ -52,6 +52,7 @@ sys.path.insert(0, str(REPO / ".claude/skills/catalog-diff"))
 from onsen_scraper import (  # noqa: E402
     fee_for,
     fetch_detail_page,
+    get_detail_url,
     kana_for,
     parse_detail_page,
     romaji_for,
@@ -222,6 +223,12 @@ def build_add(hid: int, tok: str | None):
         "adultFee": ival(adult),
         "springQuality": sval(live.get("spring_quality")),
         "websiteUrl": sval(live.get("website_url")),
+        # The onsen's page on 88onsen.com. Not scraped: it is the template URL the
+        # scrape itself was fetched from, so it is derived from the hid rather than
+        # read out of the page. Published because the app credits each catalog photo
+        # back to its source page (the licence granted by 九州観光機構 on 2026-08-31
+        # was requested on those terms), and the app never sees a hid.
+        "detailPageUrl": sval(get_detail_url(hid)),
         "imageUrl": sval(None),
         "blurhash": sval(None),
         "isActive": bval(True),
@@ -246,8 +253,8 @@ def build_add(hid: int, tok: str | None):
 ONSEN_DOC_KEYS = {
     "name", "nameKana", "nameRomaji", "areaName", "areaId", "address", "prefecture",
     "lat", "lng", "phone", "businessHours", "admissionFee", "adultFee", "springQuality",
-    "websiteUrl", "imageUrl", "blurhash", "isActive", "catalogVersion", "createdAt",
-    "updatedAt", "dataVerifiedAt",
+    "websiteUrl", "detailPageUrl", "imageUrl", "blurhash", "isActive", "catalogVersion",
+    "createdAt", "updatedAt", "dataVerifiedAt",
 }
 
 

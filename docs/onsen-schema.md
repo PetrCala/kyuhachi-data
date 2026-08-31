@@ -27,6 +27,7 @@ table and that set can't silently drift apart.
 | `adultFee` | integer \| null | derived numeric yen, parsed from `admissionFee` — `onsen_scraper/fees.py` |
 | `springQuality` | string | live detail scrape (泉質) |
 | `websiteUrl` | string | live detail scrape |
+| `detailPageUrl` | string | the onsen's page on 88onsen.com, derived from the hid (`onsen_scraper.get_detail_url`), not scraped. The app credits each catalog photo back to this page, per the licence granted 2026-08-31 (see `publisher/backfill_detail_page_url.py`) |
 | `imageUrl`, `blurhash` | string | rehosted Cloud Storage copy of the source photo — `publisher/image_processor.py` |
 | `isActive` | boolean | `true` unless retired; onsen docs are never deleted |
 | `catalogVersion` | integer \| null | the live `catalog_meta/current.version` at create time |
