@@ -63,6 +63,69 @@ Do not make them load-bearing for eligibility: a challenge's pool is the frozen
 snapshot unioned with the live pool, and nothing about that is derived from a
 count.
 
+
+## Published shape: `/catalog_index/current`
+
+A slim, **derived** projection of the catalog for the app repo's public journey
+website. It renders seven values per onsen and used to read all 161 `/onsens`
+documents, 386 KB, to get them; packed into one document that is 24 KB and a
+single document read. Nothing about `/onsens` changes: the app reads it and uses
+nearly every field. The reasoning and the measurements are in the app repo's
+[ADR-012](https://github.com/PetrCala/kyuhachi/blob/master/docs/adr/012-website-catalog-index.md);
+the reader's half of the contract is `CatalogIndexDocument` in its
+`shared/src/types/onsen.ts`.
+
+| Field | Type | Source |
+|---|---|---|
+| `schemaVersion` | integer | `CATALOG_INDEX_SCHEMA_VERSION` in `publisher/firestore_rest.py`; how `entries` is packed |
+| `version` | integer | the `catalog_meta/current.version` this was derived from — mirrored, never independently incremented |
+| `publishedAt` | timestamp | that write's timestamp |
+| `count` | integer | number of entries, for verifying a publish |
+| `entries` | string | `json.dumps` of one positional tuple per onsen, see below |
+
+`entries` is one JSON string per publish, not a Firestore array:
+
+```
+[[kyuhachiId, name, nameRomaji|null, areaName, prefecture, lat, lng], ...]
+```
+
+Four properties of that string are load-bearing, and all four are pinned by
+tests in `tests/test_firestore_rest.py`:
+
+- **A string, not an `arrayValue`.** An array of maps re-incurs the per-value
+  protobuf-JSON envelope this document exists to remove: 54 KB against 24 KB
+  for the same data.
+- **Positional tuples, not objects.** Seven keys repeated 161 times cost more
+  than the values do. The order is therefore the contract: a later schema may
+  **append** a field (readers index by position and ignore extras), but
+  reordering or removing one is breaking and must bump `schemaVersion`.
+- **`ensure_ascii=False`.** Escaping the Japanese names would double the size of
+  the one field the document exists to keep small.
+- **Sorted by `kyuhachiId`.** Republishing an unchanged catalog produces a
+  byte-identical document, so a diff means something.
+
+**Every onsen is indexed, retired ones included.** The website has to be able to
+place a visit to an onsen that was later retired, and a frozen challenge snapshot
+can still name one, so filtering on `isActive` here would lose dots the map has
+to draw. `isActive` itself is not published: nothing on the site branches on it.
+
+Coordinates are rounded to 5 decimal places (~1.1 m), matching how the app repo
+encodes walked tracks. More precision than a map dot can express costs bytes.
+
+**Who writes it.** `bump_catalog_version` in `publisher/firestore_rest.py`
+republishes it after every committed publish, from the same live read that
+produces the counts above and stamped with the same new version — so the website
+can never serve an index derived from a catalog the app has already moved past.
+`publisher/publish_catalog_index.py` is the standalone path for the two cases
+that loop cannot cover: the very first publish (nothing else would call
+`bump_catalog_version`, and publishing an index is not a catalog change, so it
+deliberately leaves `version` alone rather than making every device redownload an
+unchanged catalog), and rebuilding a deleted or suspect index. Both are dry-run
+by default.
+
+The document is 24 KB against Firestore's 1 MiB per-document limit, roughly 40x
+the current catalog's worth of headroom, so it never needs to page.
+
 ## `dataVerifiedAt` — freshness cue
 
 The app displays this as a freshness cue (e.g. "data last verified 2026-06") so

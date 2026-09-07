@@ -141,27 +141,62 @@ def test_onsen_counts_separates_total_from_active(monkeypatch):
     assert fr.onsen_counts("TOK") == (3, 2)
 
 
-def test_bump_catalog_version_refreshes_both_counts(monkeypatch):
-    # get_fields (the current doc) and the counts read are separate calls; patch
-    # both so the test stays offline, and capture what would be written.
-    monkeypatch.setattr(fr, "get_fields", lambda path, tok: {"version": {"integerValue": "22"}})
-    monkeypatch.setattr(fr, "onsen_counts", lambda tok: (161, 160))
+def _onsen_fields(name, romaji, area, pref, lat, lng, active=True):
+    """One /onsens document's `fields`, as the REST API returns it."""
+    return {
+        "name": fr.sval(name), "nameRomaji": fr.sval(romaji),
+        "areaName": fr.sval(area), "prefecture": fr.sval(pref),
+        "lat": fr.dval(lat), "lng": fr.dval(lng), "isActive": fr.bval(active),
+    }
+
+
+def _capture_patches(monkeypatch):
+    """Record every patch() call as {path: (fields, mask)} instead of writing."""
     wrote = {}
 
     def fake_patch(path, fields, mask, tok):
-        wrote.update(path=path, fields=fields, mask=mask)
+        wrote[path] = (fields, mask)
         return 200
 
     monkeypatch.setattr(fr, "patch", fake_patch)
+    return wrote
+
+
+def test_bump_catalog_version_refreshes_both_counts(monkeypatch):
+    # get_fields (the current doc) and the collection read are separate calls;
+    # patch both so the test stays offline, and capture what would be written.
+    monkeypatch.setattr(fr, "get_fields", lambda path, tok: {"version": {"integerValue": "22"}})
+    monkeypatch.setattr(fr, "fetch_collection", lambda coll, tok: {
+        "a": _onsen_fields("竹瓦温泉", "Takegawara Onsen", "別府温泉", "大分県", 33.2, 131.4),
+        "retired": _onsen_fields("旧温泉", None, "別府温泉", "大分県", 33.3, 131.5, active=False),
+    })
+    wrote = _capture_patches(monkeypatch)
     fr.bump_catalog_version("2026-08-31T00:00:00.000000Z", "TOK")
 
-    assert wrote["path"] == "catalog_meta/current"
+    fields, mask = wrote["catalog_meta/current"]
     # Every field written is also masked, or the PATCH silently drops it.
-    assert set(wrote["mask"]) == {"version", "publishedAt", "totalCount", "activeCount"}
-    assert set(wrote["fields"]) == set(wrote["mask"])
-    assert wrote["fields"]["version"] == {"integerValue": "23"}
-    assert wrote["fields"]["totalCount"] == fr.ival(161)
-    assert wrote["fields"]["activeCount"] == fr.ival(160)
+    assert set(mask) == {"version", "publishedAt", "totalCount", "activeCount"}
+    assert set(fields) == set(mask)
+    assert fields["version"] == {"integerValue": "23"}
+    assert fields["totalCount"] == fr.ival(2)
+    assert fields["activeCount"] == fr.ival(1)
+
+
+def test_bump_catalog_version_republishes_the_index_at_the_same_version(monkeypatch):
+    # The index is derived from the same read and stamped with the same version,
+    # so the website can never serve an index older than the published catalog.
+    monkeypatch.setattr(fr, "get_fields", lambda path, tok: {"version": {"integerValue": "22"}})
+    monkeypatch.setattr(fr, "fetch_collection", lambda coll, tok: {
+        "a": _onsen_fields("竹瓦温泉", "Takegawara Onsen", "別府温泉", "大分県", 33.2, 131.4),
+    })
+    wrote = _capture_patches(monkeypatch)
+    fr.bump_catalog_version("2026-08-31T00:00:00.000000Z", "TOK")
+
+    assert set(wrote) == {"catalog_meta/current", "catalog_index/current"}
+    index, mask = wrote["catalog_index/current"]
+    assert set(index) == set(mask)          # a masked-out field is silently dropped
+    assert index["version"] == fr.ival(23)  # the NEW catalog version, not 22
+    assert index["version"] == wrote["catalog_meta/current"][0]["version"]
 
 
 def test_bump_catalog_version_writes_nothing_when_the_doc_is_absent(monkeypatch):
@@ -170,9 +205,70 @@ def test_bump_catalog_version_writes_nothing_when_the_doc_is_absent(monkeypatch)
     def unreachable(*a, **k):
         raise AssertionError("must not count or write when catalog_meta is absent")
 
-    monkeypatch.setattr(fr, "onsen_counts", unreachable)
+    monkeypatch.setattr(fr, "fetch_collection", unreachable)
     monkeypatch.setattr(fr, "patch", unreachable)
     fr.bump_catalog_version("2026-08-31T00:00:00.000000Z", "TOK")
+
+
+# --- /catalog_index/current -------------------------------------------------
+
+
+def test_index_entries_are_positional_sorted_and_include_retired_onsens():
+    live = {
+        "b-kid": _onsen_fields("湯乃屋", "Yunoya", "由布院", "大分県", 33.26, 131.36),
+        "a-kid": _onsen_fields("竹瓦温泉", "Takegawara Onsen", "別府温泉", "大分県",
+                               33.2, 131.4),
+        "z-retired": _onsen_fields("旧温泉", None, "別府温泉", "大分県", 33.3, 131.5,
+                                   active=False),
+    }
+    rows = fr.index_entries(live)
+
+    # Ordered by kyuhachiId, so an unchanged catalog republishes byte-identically.
+    assert [r[0] for r in rows] == ["a-kid", "b-kid", "z-retired"]
+    # The tuple order IS the contract the website reads by position.
+    assert rows[0] == ["a-kid", "竹瓦温泉", "Takegawara Onsen", "別府温泉", "大分県",
+                       33.2, 131.4]
+    # A retired onsen is still indexed: the site has to place a visit to one.
+    assert rows[2][0] == "z-retired"
+    # An onsen without a romaji reading carries null, not a fallback to the kanji.
+    assert rows[2][2] is None
+
+
+def test_index_entries_round_coordinates_to_five_places():
+    live = {"k": _onsen_fields("温泉", "Onsen", "別府温泉", "大分県",
+                               33.2841234567, 131.4919876543)}
+    assert fr.index_entries(live)[0][5:] == [33.28412, 131.49199]
+
+
+def test_catalog_index_fields_pack_entries_as_one_utf8_json_string():
+    live = {"k": _onsen_fields("竹瓦温泉", "Takegawara Onsen", "別府温泉", "大分県",
+                               33.2, 131.4)}
+    fields = fr.catalog_index_fields(7, "2026-08-31T00:00:00.000000Z", live)
+
+    assert fields["schemaVersion"] == fr.ival(fr.CATALOG_INDEX_SCHEMA_VERSION)
+    assert fields["version"] == fr.ival(7)
+    assert fields["count"] == fr.ival(1)
+    packed = fields["entries"]["stringValue"]
+    # A string, not an arrayValue: the array shape is what this document exists
+    # to avoid, and it would silently more than double the payload.
+    assert set(fields["entries"]) == {"stringValue"}
+    assert json.loads(packed) == fr.index_entries(live)
+    # Raw UTF-8, not \uXXXX escapes, and no whitespace between values: both
+    # would inflate the one field the whole document exists to keep small.
+    assert "竹瓦温泉" in packed
+    assert "\\u" not in packed
+    assert ", " not in packed
+
+
+def test_publish_catalog_index_masks_every_field_it_writes(monkeypatch):
+    wrote = _capture_patches(monkeypatch)
+    live = {"k": _onsen_fields("竹瓦温泉", "Takegawara Onsen", "別府温泉", "大分県",
+                               33.2, 131.4)}
+    fr.publish_catalog_index(7, "2026-08-31T00:00:00.000000Z", live, "TOK")
+
+    fields, mask = wrote["catalog_index/current"]
+    assert set(mask) == set(fields)
+    assert set(mask) == {"schemaVersion", "version", "publishedAt", "count", "entries"}
 
 
 def test_live_onsens_degrades_on_dry_run_but_raises_on_commit(monkeypatch, capsys):
