@@ -191,9 +191,90 @@ def onsen_counts(tok: str) -> tuple:
 
     One paginated list read (the whole catalog is a single page at this size).
     """
-    live = fetch_collection("onsens", tok)
-    active = sum(1 for f in live.values() if field_at(f, "isActive") is True)
-    return len(live), active
+    return counts_of(fetch_collection("onsens", tok))
+
+
+def counts_of(live: dict) -> tuple:
+    """(totalCount, activeCount) from an already-fetched {kid: fields}. Pure."""
+    return len(live), sum(1 for f in live.values() if field_at(f, "isActive") is True)
+
+
+# --- /catalog_index/current -------------------------------------------------
+#
+# A slim, derived projection of the catalog for the app repo's public journey
+# website, which renders seven values per onsen and used to read all 161
+# documents (386 KB) to get them. Packed into one document it is 24 KB and one
+# read. The website never reads /onsens again; the app still does, unchanged.
+#
+# The contract is owned jointly with the app repo: CatalogIndexDocument in
+# kyuhachi's shared/src/types/onsen.ts, and ADR-012 there for why it is packed
+# into a string rather than stored as a Firestore array of maps (the array
+# re-incurs the per-value envelope the document exists to remove: 54 KB against
+# this shape's 24 KB). See docs/onsen-schema.md.
+
+CATALOG_INDEX_SCHEMA_VERSION = 1
+
+#: Decimal places for published coordinates (~1.1 m), matching how the app repo
+#: encodes walked tracks. More precision than a map dot can express costs bytes.
+INDEX_COORD_PRECISION = 5
+
+
+def index_entries(live: dict) -> list:
+    """The packed index rows for an already-fetched {kid: fields}. Pure.
+
+    One positional tuple per onsen, ordered by kyuhachiId so republishing an
+    unchanged catalog produces a byte-identical document and a diff means
+    something. EVERY onsen goes in, retired ones included: the website has to
+    place a visit to an onsen that was later retired, and a frozen challenge
+    snapshot can still name one, so filtering on isActive here would lose dots
+    the map has to draw.
+    """
+    return [
+        [
+            kid,
+            field_at(f, "name"),
+            field_at(f, "nameRomaji"),
+            field_at(f, "areaName"),
+            field_at(f, "prefecture"),
+            round(field_at(f, "lat"), INDEX_COORD_PRECISION),
+            round(field_at(f, "lng"), INDEX_COORD_PRECISION),
+        ]
+        for kid, f in sorted(live.items())
+    ]
+
+
+def catalog_index_fields(version: int, now: str, live: dict) -> dict:
+    """The full /catalog_index/current field set. Pure - no auth, no writes.
+
+    `ensure_ascii=False` is load-bearing, not cosmetic: escaping the Japanese
+    names would double the size of the one field this document exists to keep
+    small (3 UTF-8 bytes per kanji becoming 6 ASCII ones).
+    """
+    entries = index_entries(live)
+    packed = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
+    return {
+        "schemaVersion": ival(CATALOG_INDEX_SCHEMA_VERSION),
+        "version": ival(version),
+        "publishedAt": {"timestampValue": now},
+        "count": ival(len(entries)),
+        "entries": {"stringValue": packed},
+    }
+
+
+def publish_catalog_index(version: int, now: str, live: dict, tok: str):
+    """Rewrite /catalog_index/current from the live catalog.
+
+    A full-field PATCH, which creates the document when it is absent, so the
+    first publish needs no separate create path. The whole document is replaced
+    every time: it is derived, holds nothing /onsens does not, and a partially
+    updated index is worse than a rebuilt one.
+    """
+    fields = catalog_index_fields(version, now, live)
+    patch("catalog_index/current", fields, list(fields), tok)
+    size = len(fields["entries"]["stringValue"].encode())
+    print(f"catalog_index/current: {field_at(fields, 'count')} entries, "
+          f"{size // 1024} KB packed  (version {version}, schemaVersion "
+          f"{CATALOG_INDEX_SCHEMA_VERSION})")
 
 
 def bump_catalog_version(now: str, tok: str):
@@ -214,10 +295,17 @@ def bump_catalog_version(now: str, tok: str):
         return
     cur = int(fields.get("version", {}).get("integerValue", 0))
     # After the caller's writes, so an add/retire in this same run is counted.
-    total, active = onsen_counts(tok)
+    # Read once: the counts and the derived catalog index are both projections
+    # of the same live collection, and they must not disagree with each other.
+    live = fetch_collection("onsens", tok)
+    total, active = counts_of(live)
     patch("catalog_meta/current",
           {"version": {"integerValue": str(cur + 1)}, "publishedAt": {"timestampValue": now},
            "totalCount": ival(total), "activeCount": ival(active)},
           ["version", "publishedAt", "totalCount", "activeCount"], tok)
     print(f"catalog_meta/current: version {cur} → {cur + 1}  (bumped)   "
           f"totalCount={total}  activeCount={active}")
+    # Republished from the same read and stamped with the same version, so the
+    # website can never serve an index derived from a catalog the app has
+    # already moved past.
+    publish_catalog_index(cur + 1, now, live, tok)
