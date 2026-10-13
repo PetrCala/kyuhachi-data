@@ -122,6 +122,16 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    `DOCS` in `build_site.py`; the site is public, so do not publish anything you
    would not put in the repo.
 
+10. **On the trail: where am I, what can I still skip, what does the rest look like**:
+    `python route_planning/progress.py --replan`. Snaps the end of the last published
+    walked day onto the line, joins the visits recorded in the app onto the stops, and
+    prints the position, the stops behind (entered / walked past), the stops ahead, the
+    entries still needed for 88, the skip budget and hit rate that leaves, and any stop
+    ahead the catalog has retired; `--replan` then writes `plan_from_<date>.md` from that
+    position and date. `--entered=N` when the phone has visits not yet synced,
+    `--pos-km=KM` to override the track, `--offline` to reuse `cache/firestore/`. Public
+    reads only; it never writes anything.
+
 ## Data sources / source-of-truth
 
 | What | Where |
@@ -130,6 +140,7 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
 | Opening hours the schedulers use | `data/hours_curated.json` via `route_planning/curated_hours.py` (the snapshot's `business_hours` text is the regex fallback) |
 | The path (hand-drawn line) | `config.HANDDRAWN_GPX` (plotaroute export) |
 | Real per-visit dwell time + walking speed | `~/code/onsendo` (`onsen_visits`, Strava sync) |
+| The walk as it happens (position, visits) | Firestore public reads: `/journey_days`, `/users/<JOURNEY_UID>/challenges/<default>/visits` (`route_planning/progress.py`) |
 | All shared constants | `route_planning/config.py` |
 
 ## Locked decisions (do not re-litigate)

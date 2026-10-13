@@ -17,6 +17,7 @@ Coming back to this cold, in this order:
 | to read either in a browser | `python route_planning/render_html.py --app Safari --open` |
 | to read them **on the trail** | [petrcala.github.io/kyuhachi-data](https://petrcala.github.io/kyuhachi-data/) (published from this Markdown; caches itself for no-signal) |
 | to regenerate the plan | `python route_planning/plan_octnov.py` (no network needed) |
+| where I am on the line, my skip budget, the plan from here | `python route_planning/progress.py --replan` (reads the public journey data; `--entered=N` when the phone has not synced) |
 | to rebuild everything after re-drawing the line | `python route_planning/pipeline.py` (needs network) |
 | the one-page card for a dead phone | `decision_card.md` (print it) |
 
@@ -95,6 +96,7 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 | `fetch_strava_walks.py` | re-derive walking speed from Strava |
 | `analyze_2022_hike.py` | derive the walk model from the 2022 walk across Japan (2,634 km / 77 days): sustained km/day, rest cadence, break-in cost → `hike_2022_summary.json` + `hike_2022_analysis.md` |
 | **`plan_octnov.py`** | **the day-by-day plan to carry**: distance-driven (2022 day profile) instead of clock-driven, scheduled against real hours → `plan_octnov.md` + `plan_octnov.json`. `--sweep` shows what a longer door-wait buys; `--from-km=KM --from-date=YYYY-MM-DD` re-plans the rest from a point on the line into `plan_from_<date>.md` (gitignored; `progress.py --replan` does this from the live journey data); `--raw-hours` ignores the curated schedule |
+| **`progress.py`** | **the walk as it happens**: position along the line from the last published track, stops entered / walked past / ahead, entries still needed, the skip budget and hit rate that leaves, retired onsens ahead; `--replan` continues `plan_octnov` from there. Reads the public Firestore collections only (`--offline` reuses `cache/firestore/`) |
 | `render_html.py` | render the reports to standalone offline HTML (`html/`, gitignored). No dependencies, no JS, no network: `--open` opens them, `--app Safari` picks the browser |
 | `build_site.py` | build the published site (`site/`, gitignored) from the same Markdown: index, per-document pages, a single-file `offline.html`, and a service worker that precaches the lot. `.github/workflows/route-plan-site.yml` runs it on every push to master |
 | `report_head.html` | the reports' stylesheet (light/dark/print). Edit this, never the generated HTML |
@@ -124,7 +126,13 @@ KYUHACHI_SNAPSHOT_DB=route_planning/cache/snapshot_overlay.db python route_plann
 - `cache/snapshot_overlay.db` — route-only overlay (baseline + staged new onsens),
   built by `build_overlay_db.py`, selected via `KYUHACHI_SNAPSHOT_DB`. Never mutates
   the baseline.
-- `config.HANDDRAWN_GPX` — the path (`kyuhachi/local/route_26_02_14/Kyuhachi-3.gpx`).
+- `config.HANDDRAWN_GPX` — the path (`kyuhachi/local/route_26_02_14/Kyuhachi-3.gpx`);
+  `final_route/00_full_route.gpx` is the committed copy `progress.py` snaps the walk onto.
+- The walk as it happens — Firestore, public reads (rules in the kyuhachi repo):
+  `/journey_days` (one walked day per doc, encoded polyline), and this uid's
+  `/users/<uid>/challenges/<default>/visits` (one doc per onsen entered, id = kyuhachiId;
+  `data/onsen-id-map.json` turns it back into a hid). `config.JOURNEY_UID` mirrors
+  `kyuhachi/shared/src/types/journey.ts`.
 - `~/code/onsendo` — real visit time (`onsen_visits`) + Strava walking speed.
 - `data/hike_2022_japan.xlsx`: the 2022 walk across Japan (2,634 km / 77 days), the only
   multi-week ground truth for sustained output. 34.2 km per calendar day, recovery via

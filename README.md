@@ -61,6 +61,7 @@ where the signal does not.
 
 ```bash
 python route_planning/plan_octnov.py                      # the day plan
+python route_planning/progress.py --replan                # where am I, skip budget, the plan from here
 python route_planning/render_html.py --app Safari --open   # read it in a browser
 python route_planning/build_site.py --open                 # build the published site
 ```
