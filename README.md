@@ -66,7 +66,7 @@ python route_planning/build_site.py --open                 # build the published
 ```
 
 - **[`route_planning/plan_octnov.md`](route_planning/plan_octnov.md)** is the plan you
-  carry: 41 days, 1,221 km, 101 onsens, all 7 prefectures, finish Nov 11. Per-day
+  carry: 40 days, 1,222 km, 97 onsens, all 7 prefectures, finish Nov 10. Per-day
   distance target, onsen door times, crux and resupply warnings, pace check.
 - **[`route_planning/hike_2022_analysis.md`](route_planning/hike_2022_analysis.md)** is
   why the pace is what it is, derived from the 2022 walk across Japan (2,634 km / 77

@@ -25,8 +25,8 @@ scripts sharing one config (`config.py`) and one helper module (`geo.py`).
 Current route = the hand-drawn line + the Nagasaki loop + 4 spurs = **119 onsens on
 the line, all 7 prefectures, ~1205 km**. Packaged in `route_planning/final_route/`.
 
-**The authoritative schedule is `route_planning/plan_octnov.md`**: 41 days, 1,221 km
-walked, 101 onsens, finish Nov 11, 21 days of slack. It is paced on the 2022 walk
+**The authoritative schedule is `route_planning/plan_octnov.md`**: 40 days, 1,222 km
+walked, 97 onsens, finish Nov 10, 22 days of slack. It is paced on the 2022 walk
 across Japan, not on the walk model alone. `simulate.py`'s output in `final_route/`
 is the **feasibility envelope** (catch-everything upper bound ~50 days / Nov 20), not
 a schedule. Don't try to reconcile the two: they answer different questions.
@@ -83,7 +83,14 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
    day profile (29 km break-in, 36 km plateau, 22 km every 7th day, one zero day per
    30), with each day checked against the 12 h window once visits and climbing are
    priced in. `--sweep` shows what a longer door-wait buys; `--wait=N` overrides it.
-   Current output: 41 days, 1,221 km walked, 101 onsens, all 7, finish Nov 11, 21 days of slack.
+   Current output: 40 days, 1,222 km walked, 97 onsens, all 7, finish Nov 10, 22 days of slack.
+   Closures and hours come from `data/hours_curated.json` via `curated_hours.py` (per-weekday
+   windows, 最終受付, 第N曜 / 月末 / seasonal / holiday rules against `config.HOLIDAYS`); the
+   snapshot's text is only the regex fallback, and `--raw-hours` shows what it would say.
+   `--from-km=KM --from-date=YYYY-MM-DD [--from-stop=N --walking-day=N --prefs-done=A,B]`
+   re-plans the rest of the line from a point on it into `plan_from_<date>.md` (gitignored),
+   never over the carried plan. 無休 means no closing day, not open around the clock:
+   a 無休 door still has a last entry.
    Distances are measured along `config.HANDDRAWN_GPX` (all 119 legs match the
    along-track delta), plus the in-and-out-of-the-door detour for each visited
    off-line onsen, which `simulate.py` does not account for.
@@ -119,7 +126,8 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
 
 | What | Where |
 |---|---|
-| Onsen catalog + opening hours | `data/snapshot.db` (read-only) |
+| Onsen catalog | `data/snapshot.db` (read-only) |
+| Opening hours the schedulers use | `data/hours_curated.json` via `route_planning/curated_hours.py` (the snapshot's `business_hours` text is the regex fallback) |
 | The path (hand-drawn line) | `config.HANDDRAWN_GPX` (plotaroute export) |
 | Real per-visit dwell time + walking speed | `~/code/onsendo` (`onsen_visits`, Strava sync) |
 | All shared constants | `route_planning/config.py` |

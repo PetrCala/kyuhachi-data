@@ -68,3 +68,25 @@ EAST_MIYAZAKI = {95, 96, 100, 189, 205, 224, 231, 246}  # east of 都城 / Miyaz
 SHIMABARA_IDS = {21, 24, 165, 175}             # Shimabara/Unzen peninsula (land spur via Isahaya)
 
 ALL7 = ["福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島"]
+
+# --- opening hours -----------------------------------------------------------
+# The hand-reviewed schedule the app publishes (data/hours_curated.json), keyed by
+# upstream hid. curated_hours.py overlays it onto every stop; the regex parse in
+# onsen_model.py is only the fallback for an onsen the file does not know.
+CURATED_HOURS = REPO / "data" / "hours_curated.json"
+# Japanese national holidays inside the trip window (START_DT..DEADLINE): 祝日は営業 /
+# 定休日が祝日の場合は翌日休 rules key off these. Extend if the window moves.
+HOLIDAYS = frozenset({
+    datetime(2026, 10, 12).date(),   # スポーツの日
+    datetime(2026, 11, 3).date(),    # 文化の日
+    datetime(2026, 11, 23).date(),   # 勤労感謝の日
+})
+
+# --- the walk as it happens (progress.py) -------------------------------------
+# The app publishes the journey without sign-in (Firestore rules in the kyuhachi
+# repo): walked-day tracks under /journey_days, and this uid's challenges, visits
+# and routes. JOURNEY_UID mirrors kyuhachi/shared/src/types/journey.ts.
+FIREBASE_PROJECT = "kyuhachi-fddcc"
+JOURNEY_UID = "juEfBPJSspS9E2dqMzRac07C1Gs1"
+FULL_ROUTE_GPX = FINAL_DIR / "00_full_route.gpx"   # the committed line, for position
+TARGET_VISITS = 88

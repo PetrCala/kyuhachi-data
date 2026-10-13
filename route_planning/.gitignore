@@ -23,3 +23,7 @@ final_route/README.html
 
 # transient
 _*.json
+
+# re-plans from a position on the trail (plan_octnov.py --from-* / progress.py --replan)
+plan_from_*.md
+plan_from_*.json
