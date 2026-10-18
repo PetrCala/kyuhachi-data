@@ -90,3 +90,27 @@ FIREBASE_PROJECT = "kyuhachi-fddcc"
 JOURNEY_UID = "juEfBPJSspS9E2dqMzRac07C1Gs1"
 FULL_ROUTE_GPX = FINAL_DIR / "00_full_route.gpx"   # the committed line, for position
 TARGET_VISITS = 88
+
+# --- decisions made on the trail (progress.py applies them) -------------------
+# Changes to the drawn line the walker has committed to. Each one names the stops it
+# drops (by hid, so a regenerated analysis keeps them) and how much line it adds or
+# saves; `from_km` is where on the drawn line the change starts, so it stops counting
+# once you are past it. The story behind each lives in route_planning/walk_decisions.md.
+ROUTE_CHANGES = [
+    {"name": "skip the Fukuoka loop (鳥栖 → 朝倉 direct)", "from_km": 869.2,
+     "drop_hids": [1, 9, 8], "line_km": -35.0},
+    {"name": "skip the Oita loop (別府 加賀屋 → 竹瓦 direct)", "from_km": 1175.1,
+     "drop_hids": [259, 258, 66], "line_km": -28.0},
+    {"name": "Aso crater out-and-back from the 垂玉 side (aso_crater_spur.gpx)", "from_km": 533.8,
+     "drop_hids": [], "line_km": +31.0},
+]
+# Zero-km days still intended, as (near line km, label). Kumamoto city is on the line.
+REST_DAYS = [
+    (495.0, "Kumamoto city (Montbell, resupply)"),
+]
+REST_DAYS_MAYBE = [
+    (945.0, "Chikugo river cluster: 吉井 原鶴 とよとみ 筑後川×2 林田"),
+]
+# Overhead of feet over line progress (door detours, town wandering), measured on the
+# walk: ~8% once corner cuts are taken out.
+FEET_OVER_LINE = 1.08

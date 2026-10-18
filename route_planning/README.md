@@ -17,6 +17,7 @@ Coming back to this cold, in this order:
 | to read either in a browser | `python route_planning/render_html.py --app Safari --open` |
 | to read them **on the trail** | [petrcala.github.io/kyuhachi-data](https://petrcala.github.io/kyuhachi-data/) (published from this Markdown; caches itself for no-signal) |
 | to regenerate the plan | `python route_planning/plan_octnov.py` (no network needed) |
+| the changes to the line I've committed to (skipped loops, rest days) | **`walk_decisions.md`**, mirrored in `config.ROUTE_CHANGES` / `REST_DAYS` for `progress.py` |
 | where I am on the line, my skip budget, the plan from here | `python route_planning/progress.py --replan` (reads the public journey data; `--entered=N` when the phone has not synced) |
 | to rebuild everything after re-drawing the line | `python route_planning/pipeline.py` (needs network) |
 | the one-page card for a dead phone | `decision_card.md` (print it) |

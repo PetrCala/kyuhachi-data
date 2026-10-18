@@ -132,6 +132,13 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
     `--pos-km=KM` to override the track, `--offline` to reuse `cache/firestore/`. Public
     reads only; it never writes anything.
 
+11. **Decisions made on the trail** live in `route_planning/walk_decisions.md` and, as
+    data, in `config.ROUTE_CHANGES` (dropped stops by hid, line km saved or added,
+    where on the line it starts) and `config.REST_DAYS`. `progress.py` applies them
+    to the skip budget, the line left, and its pace-based finish projection. The
+    walker does not use the day plan: answer with position, distances, budget and
+    rough dates, never a per-day visit schedule. Append new decisions to both.
+
 ## Data sources / source-of-truth
 
 | What | Where |

@@ -194,6 +194,40 @@ def main(argv: list[str] | None = None) -> None:
     print("retired in the catalog, ahead: "
           + (", ".join(f"#{s['order']} {s['area']}：{s['name']}" for s in retired) or "none"))
 
+    # --- the walker's own changes to the line (config.ROUTE_CHANGES) -----------------
+    changes = [c for c in config.ROUTE_CHANGES if c["from_km"] > pos_km]
+    if changes:
+        dropped = {h for c in changes for h in c["drop_hids"]}
+        ahead_kept = [s for s in ahead if s["id"] not in dropped]
+        line_left = cum[-1] - pos_km + sum(c["line_km"] for c in changes)
+        print("\nwith your route changes: " + "; ".join(
+            f"{c['name']} ({c['line_km']:+.0f} km, -{len(c['drop_hids'])} stops)" for c in changes))
+        print(f"  ahead {len(ahead_kept)} stops · skip budget {len(ahead_kept) - need} · "
+              f"hit rate {need / len(ahead_kept):.1%} · line left {line_left:.0f} km "
+              f"(~{line_left * config.FEET_OVER_LINE:.0f} on your feet)")
+    else:
+        line_left = cum[-1] - pos_km
+
+    # --- finish projection from the recent pace --------------------------------------
+    if len(days) >= 4:
+        recent = days[-7:] if len(days) >= 7 else days
+        first = decode_polyline(recent[0]["polyline"])[0]
+        km0 = nearest_on_track(first[0], first[1], lat, lon, cum)[1]
+        walked = sum(d["distanceMeters"] for d in recent) / 1000
+        span = (date.fromisoformat(recent[-1]["date"]) - date.fromisoformat(recent[0]["date"])).days + 1
+        # Feet, not the marker: corner cuts move the marker faster than you walk.
+        per_day = walked / config.FEET_OVER_LINE / span
+        rests = sum(1 for k, _ in config.REST_DAYS if k > pos_km)
+        maybe = sum(1 for k, _ in config.REST_DAYS_MAYBE if k > pos_km)
+        start_day = date.fromisoformat(days[-1]["date"]) + timedelta(days=1)
+        print(f"\npace, last {span} calendar days: {walked / span:.1f} km/day on your feet "
+              f"≈ {per_day:.1f} km/day of line · {rests} rest day(s) planned, {maybe} maybe")
+        for label, v in (("at this pace", per_day), ("10% slower", per_day * 0.9),
+                         ("20% slower", per_day * 0.8)):
+            n = -(-line_left // v)
+            lo = start_day + timedelta(days=int(n) + rests - 1)
+            print(f"  {label:13s} {v:4.1f} km/day: finish {lo} ({lo + timedelta(days=maybe)} with the maybes)")
+
     if "--replan" not in args:
         return
     start = plan_octnov.Start(
