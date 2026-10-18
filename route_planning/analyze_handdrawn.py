@@ -79,6 +79,7 @@ def main():
             "open_min": o.open_min, "last_min": o.effective_last_min,
             "closed_weekdays": sorted(o.closed_weekdays),
             "never_closes": o.never_closes, "irregular": o.irregular,
+            "wd_hours": o.wd_hours, "closed_rules": o.closed_rules, "hours_source": o.hours_source,
             "in_osrm_108": o.id in osrm_ids,
         })
     result = {

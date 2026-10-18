@@ -61,12 +61,13 @@ where the signal does not.
 
 ```bash
 python route_planning/plan_octnov.py                      # the day plan
+python route_planning/progress.py --replan                # where am I, skip budget, the plan from here
 python route_planning/render_html.py --app Safari --open   # read it in a browser
 python route_planning/build_site.py --open                 # build the published site
 ```
 
 - **[`route_planning/plan_octnov.md`](route_planning/plan_octnov.md)** is the plan you
-  carry: 41 days, 1,221 km, 101 onsens, all 7 prefectures, finish Nov 11. Per-day
+  carry: 40 days, 1,222 km, 97 onsens, all 7 prefectures, finish Nov 10. Per-day
   distance target, onsen door times, crux and resupply warnings, pace check.
 - **[`route_planning/hike_2022_analysis.md`](route_planning/hike_2022_analysis.md)** is
   why the pace is what it is, derived from the 2022 walk across Japan (2,634 km / 77

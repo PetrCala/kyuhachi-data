@@ -35,13 +35,15 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import date as date_t, datetime, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import config  # noqa: E402
+from curated_hours import apply_curated, closed_on, closure_reason, hours_on  # noqa: E402
 from difficulty import CRUX_ZONES  # noqa: E402
 
 ANALYSIS = HERE / "handdrawn_loop_analysis.json"
@@ -83,14 +85,31 @@ DAY_END_HARD_MIN = 20 * 60  # never plan walking past 20:00
 WEEKDAY_JP = "月火水木金土日"
 
 
+@dataclass
+class Start:
+    """Where a plan begins. The default is the trailhead on config.START_DT.
+
+    `progress.py --replan` builds one from the walked tracks and the visits recorded
+    in the app; `--from-km` / `--from-date` / `--from-stop` build one by hand.
+    """
+    date: date_t | None = None   # None = config.START_DT.date()
+    km: float = 0.0              # position along the line
+    next_order: int = 1          # the first stop still ahead (1-based `order`)
+    walking_day: int = 1         # Nth walking day of the trip: sets the km target
+    prefs_done: tuple = ()       # prefectures already collected
+
+
 def hhmm(minutes: float) -> str:
     m = int(round(minutes))
     return f"{m // 60:02d}:{m % 60:02d}"
 
 
-def is_always_open(stop: dict) -> bool:
-    om = stop.get("open_min")
-    return bool(stop.get("never_closes")) or om is None or not (0 <= om < 24 * 60)
+def is_always_open(om: int | None) -> bool:
+    """No usable opening time means you cannot be early or late: a 24 h bath, or hours
+    nobody knows. 無休 is NOT this. It says there is no closing day, and reading it as
+    "open around the clock" (as this did until 2026-10) let the plan count a visit
+    after last entry at any of the 20 無休 stops on the line."""
+    return om is None or not (0 <= om < 24 * 60)
 
 
 def prefecture_linchpin_map(stops: list[dict]) -> dict[int, str]:
@@ -121,30 +140,43 @@ def target_km(walking_day: int) -> float:
 
 
 def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
-         late_start_max_min: int = LATE_START_MAX_MIN) -> dict:
+         late_start_max_min: int = LATE_START_MAX_MIN,
+         start: Start | None = None, curated: bool = True) -> dict:
     route = json.loads(ANALYSIS.read_text(encoding="utf-8"))
     stops = route["stops"]
+    if curated:
+        # The analysis file carries the regex parse of the hours; the curated schedule
+        # (what the app publishes) overrides it. --raw-hours shows the difference.
+        apply_curated(stops)
     gaps = json.loads(LOGISTICS.read_text(encoding="utf-8"))["resupply_gaps"]
     linchpins = prefecture_linchpin_map(stops)
+    start = start or Start()
 
-    date = config.START_DT.date()
+    date = start.date or config.START_DT.date()
+    start_date = date
     clock = float(config.WAKE_MIN)          # minutes since midnight
     day_km = 0.0                            # km walked today
-    cum_km = 0.0                            # km walked in total
-    leg_left = stops[0]["leg_km_gc"]         # km still to walk to reach stops[i]
-    leg_ascent_left = float(stops[0].get("ascent_m", 0))
-    i = 0                                   # index of the next stop on the line
-    walking_day = 1
-    prefs_done: set[str] = set()
+    cum_km = float(start.km)                # position along the line
+    i = start.next_order - 1                # index of the next stop on the line
+    if i == 0 and not start.km:
+        leg_left = stops[0]["leg_km_gc"]     # km still to walk to reach stops[i]
+        leg_ascent_left = float(stops[0].get("ascent_m", 0))
+    else:
+        # Mid-leg start: the rest of this leg, and its ascent pro rata.
+        leg_left = max(0.0, stops[i]["along_km"] - cum_km)
+        full = stops[i]["leg_km_gc"] or 1.0
+        leg_ascent_left = float(stops[i].get("ascent_m", 0)) * min(1.0, leg_left / full)
+    walking_day = start.walking_day
+    prefs_done: set[str] = set(start.prefs_done)
     visited = skipped_closed = skipped_late = skipped_early = 0
     overnight_waits = 0
 
     days: list[dict] = []
     cur = {
         "date": date,
-        "walking_day": 1,
-        "target_km": target_km(1),
-        "start_km": 0.0,
+        "walking_day": walking_day,
+        "target_km": target_km(walking_day),
+        "start_km": cum_km,
         "ascent_m": 0.0,
         "events": [],
         "warnings": [],
@@ -158,10 +190,10 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
         shift = 0.0
         if not is_rest and i < len(stops) and start <= config.WAKE_MIN:
             nxt = stops[i]
-            om = nxt.get("open_min")
+            om, _ = hours_on(nxt, d)
             arrive = start + leg_left / config.SPEED_KMH * 60.0 + leg_ascent_left * config.CLIMB_MIN_PER_M
-            closed = d.weekday() in set(nxt.get("closed_weekdays") or [])
-            if not is_always_open(nxt) and om is not None and arrive < om and not closed:
+            closed = closed_on(nxt, d)
+            if not is_always_open(om) and arrive < om and not closed:
                 shift = min(om - arrive, late_start_max_min)
                 start += shift
         return {
@@ -194,7 +226,7 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
             )
         days.append(cur)
 
-    cur = open_day(date, 1)
+    cur = open_day(date, walking_day)
     clock = cur["_start"]
 
     while i < len(stops):
@@ -262,10 +294,10 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
             seen_crux.add(z["title"])
             cur["warnings"].append("CRUX " + z["title"] + ": " + " ".join(z["lines"]))
 
-        wd = date.weekday()
-        closed_today = wd in set(s.get("closed_weekdays") or [])
-        om, lm = s.get("open_min"), s.get("last_min")
-        always = is_always_open(s)
+        why_closed = closure_reason(s, date)
+        closed_today = why_closed is not None
+        om, lm = hours_on(s, date)
+        always = is_always_open(om)
         too_early = (not always) and om is not None and arrive < om
         too_late = (not always) and lm is not None and arrive > lm
         is_linchpin = linchpins.get(s["order"]) == s["pref_short"] and s["pref_short"] not in prefs_done
@@ -275,7 +307,7 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
         if closed_today and not is_linchpin:
             skipped_closed += 1
             status = "SKIP closed"
-            note = f"定休日 {''.join(WEEKDAY_JP[d] for d in sorted(s['closed_weekdays']))}曜"
+            note = why_closed
         elif too_late and not is_linchpin:
             skipped_late += 1
             status = "SKIP late"
@@ -363,16 +395,20 @@ def plan(wait_tolerance_min: int = WAIT_TOLERANCE_MIN,
             "late_start_max_min": late_start_max_min,
         },
         "totals": {
-            "start": str(config.START_DT.date()),
+            "start": str(start_date),
+            "start_km": round(float(start.km), 1),
+            "start_order": start.next_order,
+            "prefs_done": sorted(start.prefs_done),
+            "hours": "curated" if curated else "regex",
             "finish": finish.strftime("%Y-%m-%d %H:%M"),
             "calendar_days": len(days),
             "walking_days": len(walking),
             "rest_days": len(days) - len(walking),
-            "route_km": round(days[-1]["end_km"], 1),
+            "route_km": round(days[-1]["end_km"] - float(start.km), 1),
             "door_detour_km": round(sum(d["detour_km"] for d in days), 1),
-            "walked_km": round(days[-1]["end_km"] + sum(d["detour_km"] for d in days), 1),
+            "walked_km": round(days[-1]["end_km"] - float(start.km) + sum(d["detour_km"] for d in days), 1),
             "km_per_calendar_day": round(
-                (days[-1]["end_km"] + sum(d["detour_km"] for d in days)) / len(days), 1),
+                (days[-1]["end_km"] - float(start.km) + sum(d["detour_km"] for d in days)) / len(days), 1),
             "km_per_walking_day": round(sum(km_days) / len(km_days), 1),
             "longest_day_km": max(km_days),
             "total_ascent_m": sum(d["ascent_m"] for d in days),
@@ -414,6 +450,12 @@ def write_md(p: dict, path: Path, sweep_rows: list[tuple[int, dict]],
         f"(see `hike_2022_analysis.md`), scheduled against real opening hours.*"
     )
     L.append("")
+    if t.get("start_order", 1) > 1 or t.get("start_km"):
+        L.append(
+            f"*Re-planned from km {t['start_km']:.0f} on {t['start']}: the next stop is "
+            f"#{t['start_order']}; prefectures already collected: "
+            f"{' '.join(t['prefs_done']) or 'none'}.*")
+        L.append("")
     L.append(
         f"**{t['walked_km']} km on the legs ({t['route_km']} km of route line + "
         f"{t['door_detour_km']} km in and out of doors) · {t['calendar_days']} calendar days "
@@ -651,6 +693,48 @@ def sweep() -> None:
               f"{t['slack_days']:>6} {t['km_per_calendar_day']:>9} {t['skipped_early']:>11}")
 
 
+def run_plan(tol: int = WAIT_TOLERANCE_MIN, start: Start | None = None, curated: bool = True,
+             out_md: Path = OUT_MD, out_json: Path = OUT_JSON) -> dict:
+    """plan() plus the report: the Markdown to carry and its JSON twin."""
+    p = plan(wait_tolerance_min=tol, start=start, curated=curated)
+    # The trade-off table in the report is computed, never hardcoded: a stale
+    # table is worse than no table.
+    sweep_tols = sorted({0, 90, 180, tol})
+    sweep_rows = [(x, p["totals"] if x == tol
+                   else plan(wait_tolerance_min=x, start=start, curated=curated)["totals"])
+                  for x in sweep_tols]
+    no_late_visits = plan(wait_tolerance_min=tol, late_start_max_min=0,
+                          start=start, curated=curated)["totals"]["visited"]
+    write_md(p, out_md, sweep_rows, no_late_visits)
+    serial = json.loads(json.dumps(p, default=str))
+    out_json.write_text(json.dumps(serial, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return p
+
+
+def start_from_args(args: list[str]) -> Start | None:
+    """--from-km=KM --from-date=YYYY-MM-DD [--from-stop=N] [--walking-day=N] [--prefs-done=A,B]
+
+    A re-plan from somewhere on the line. The next stop defaults to the first one past
+    the km; the walking day to the first plateau day (the break-in is behind you).
+    """
+    opts = {a.split("=", 1)[0]: a.split("=", 1)[1] for a in args if "=" in a}
+    if not any(k in opts for k in ("--from-km", "--from-date", "--from-stop")):
+        return None
+    km = float(opts.get("--from-km", 0.0))
+    if "--from-stop" in opts:
+        next_order = int(opts["--from-stop"])
+    else:
+        stops = json.loads(ANALYSIS.read_text(encoding="utf-8"))["stops"]
+        next_order = next((s["order"] for s in stops if s["along_km"] > km), len(stops))
+    return Start(
+        date=date_t.fromisoformat(opts["--from-date"]) if "--from-date" in opts else None,
+        km=km,
+        next_order=next_order,
+        walking_day=int(opts.get("--walking-day", BREAKIN_WALKING_DAYS + 1)),
+        prefs_done=tuple(x for x in opts.get("--prefs-done", "").split(",") if x),
+    )
+
+
 def main(argv: list[str] | None = None) -> None:
     # Explicit argv so pipeline.py can call this without its own flags leaking in.
     args = list(sys.argv[1:] if argv is None else argv)
@@ -658,19 +742,20 @@ def main(argv: list[str] | None = None) -> None:
         sweep()
         return
     tol = WAIT_TOLERANCE_MIN
+    out_stem = None
     for a in args:
         if a.startswith("--wait="):
             tol = int(a.split("=", 1)[1])
-    p = plan(wait_tolerance_min=tol)
-    # The trade-off table in the report is computed, never hardcoded: a stale
-    # table is worse than no table.
-    sweep_tols = sorted({0, 90, 180, tol})
-    sweep_rows = [(x, p["totals"] if x == tol else plan(wait_tolerance_min=x)["totals"])
-                  for x in sweep_tols]
-    no_late_visits = plan(wait_tolerance_min=tol, late_start_max_min=0)["totals"]["visited"]
-    write_md(p, OUT_MD, sweep_rows, no_late_visits)
-    serial = json.loads(json.dumps(p, default=str))
-    OUT_JSON.write_text(json.dumps(serial, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if a.startswith("--out="):
+            out_stem = a.split("=", 1)[1]
+    start = start_from_args(args)
+    curated = "--raw-hours" not in args
+    if start is not None and out_stem is None:
+        # Never overwrite the carried plan with a re-plan; plan_from_* is gitignored.
+        out_stem = f"plan_from_{start.date or config.START_DT.date()}"
+    out_md = HERE / f"{out_stem}.md" if out_stem else OUT_MD
+    out_json = HERE / f"{out_stem}.json" if out_stem else OUT_JSON
+    p = run_plan(tol, start=start, curated=curated, out_md=out_md, out_json=out_json)
 
     t = p["totals"]
     print(
@@ -686,7 +771,7 @@ def main(argv: list[str] | None = None) -> None:
         f"skips: {t['skipped_closed']} closed, {t['skipped_late']} late, "
         f"{t['skipped_early']} early · overnight waits {t['overnight_waits']}")
     print(f"ascent {t['total_ascent_m']} m")
-    print(f"\nwrote {OUT_MD.name} + {OUT_JSON.name}")
+    print(f"\nwrote {out_md.name} + {out_json.name}")
 
 
 if __name__ == "__main__":
