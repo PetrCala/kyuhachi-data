@@ -7,6 +7,15 @@ walker has committed to, newest first. The machine-readable copy is
 The day plan (`plan_octnov.md`) is not used on the trail. Answer questions with
 position, distance, skip budget and rough pace estimates, not per-day visit schedules.
 
+## 2026-10-19, arriving in Kumamoto with 33 stamps (40 stops behind, 82% entered)
+
+- **The stamp book holds 88, so slots now bind, not stamps.** At the 82% rate the
+  book fills at 鉄輪 (#110), with only ~3 slots left for Beppu.
+- **Keep 5 slots for Beppu favourites**: arrive at 明礬 (#107) with at most 83.
+- **Decide the trimming late, in Kuju / 長湯 / 由布院 (#92 to #106, 15 stops)**, where
+  the count is known and doors are least certain: reach 筋湯 (#91) with ~72, then
+  take about 10 of those 15. Don't pre-skip earlier; 不定休 closures may do it.
+
 ## 2026-10-18, at km 428 (湯浦温泉), 32 entered, 7 walked past
 
 - **Rest day in Kumamoto city** (on the line at ~km 495): weather, Montbell, resupply.
