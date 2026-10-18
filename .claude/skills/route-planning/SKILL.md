@@ -138,6 +138,9 @@ Run from the **repo root** (each script puts `route_planning/` on `sys.path`):
     to the skip budget, the line left, and its pace-based finish projection. The
     walker does not use the day plan: answer with position, distances, budget and
     rough dates, never a per-day visit schedule. Append new decisions to both.
+    **Closure risk:** treat 不定休 as open (closed ~1 day in 30 to 60), not as a coin
+    flip; only weekly closures cost stamps, and those are known in advance. Don't
+    advise holding stops back against 不定休 closures. See `walk_decisions.md`.
 
 ## Data sources / source-of-truth
 

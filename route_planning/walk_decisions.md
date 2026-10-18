@@ -12,9 +12,27 @@ position, distance, skip budget and rough pace estimates, not per-day visit sche
 - **The stamp book holds 88, so slots now bind, not stamps.** At the 82% rate the
   book fills at 鉄輪 (#110), with only ~3 slots left for Beppu.
 - **Keep 5 slots for Beppu favourites**: arrive at 明礬 (#107) with at most 83.
-- **Decide the trimming late, in Kuju / 長湯 / 由布院 (#92 to #106, 15 stops)**, where
-  the count is known and doors are least certain: reach 筋湯 (#91) with ~72, then
-  take about 10 of those 15. Don't pre-skip earlier; 不定休 closures may do it.
+- ~~Decide the trimming late; 不定休 closures may do it.~~ Superseded below.
+
+## How likely a door is to be shut (agreed 2026-10-19)
+
+- **不定休 is effectively open.** It means no fixed closing day, not frequent closures:
+  a door that shut weekly would list the weekday. Model it as closed roughly 1 day in
+  30 to 60. Observed so far: every 不定休 door open on arrival (one closed for a
+  breakdown, unrelated).
+- **Weekly closures are the only real loss, and they are known in advance.** Arriving
+  on a random day costs closed-days / 7 per stop, and less once you plan around the
+  day (enter the evening before, the morning after).
+- Expected involuntary losses on the 73 stops from Kumamoto: ~4 to weekly closures,
+  ~0.5 to monthly rules, ~0.5 to 不定休, so **~5 of 73**. About 68 doors will be open
+  for 55 needed stamps.
+- So **skips are a choice, not a buffer**: don't hold stops back "in case". Treat the
+  count as deterministic and choose skips by preference and cost (off-line detours,
+  pricey ryokan baths, bad timing).
+- **Beppu reserve, recomputed**: ~60 of the 63 stops before 明礬 will be open; to
+  arrive with 83 and keep 5 slots, take ~50 of them, i.e. **skip ~10 by choice
+  between Kumamoto and Beppu**, starting now, spread wherever a stop is least worth it.
+- Still call ahead to 波佐見 (the only 長崎 stamp): one closure there costs all-7.
 
 ## 2026-10-18, at km 428 (湯浦温泉), 32 entered, 7 walked past
 
