@@ -107,6 +107,7 @@ ROUTE_CHANGES = [
 # Zero-km days still intended, as (near line km, label). Kumamoto city is on the line.
 REST_DAYS = [
     (495.0, "Kumamoto city (Montbell, resupply)"),
+    (812.0, "typhoon, Mon 10-26: north Saga plain (佐賀大和 / 熊の川 / 古湯)"),
 ]
 REST_DAYS_MAYBE = [
     (945.0, "Chikugo river cluster: 吉井 原鶴 とよとみ 筑後川×2 林田"),

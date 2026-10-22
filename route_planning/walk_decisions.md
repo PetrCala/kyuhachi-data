@@ -7,6 +7,22 @@ walker has committed to, newest first. The machine-readable copy is
 The day plan (`plan_octnov.md`) is not used on the trail. Answer questions with
 position, distance, skip budget and rough pace estimates, not per-day visit schedules.
 
+## 2026-10-23, at 菊池 (km 587), 35 entered, 10 walked past
+
+- **Aso done.** Walked the loop, entered only 大阿蘇 火の山; passed 垂玉, 地獄 and 内牧
+  (timing). Not returning on this walk.
+- **Typhoon: rest Mon 10-26**, sleeping Sun to Tue at the north edge of the Saga plain by
+  佐賀大和 / 熊の川 ×2 / 古湯 (#61 to #64). Enter the two 熊の川 on Sun or Mon: both close
+  on Tuesdays.
+- **The Nagasaki loop is walked in reverse**: 久留米 side → north to #61 to #64 → west to
+  武雄, 波佐見, 嬉野 → back east to 久留米 / 鳥栖. Roughly the same distance as drawn (the
+  two loop ends are ~94 km of road against ~102 km of line). `progress.py` snaps to the
+  nearest point of the line, so its position jumps around inside the loop until you
+  are back at 久留米 (#65); read stops behind from the visits, not the km.
+- **Fukuoka loop stays skipped.** Even without it the stops ahead outnumber the free
+  stamp-book slots.
+- Call 波佐見 (0956-76-9008) the day before, more so right after the typhoon.
+
 ## 2026-10-19, arriving in Kumamoto with 33 stamps (40 stops behind, 82% entered)
 
 - **The stamp book holds 88, so slots now bind, not stamps.** At the 82% rate the
